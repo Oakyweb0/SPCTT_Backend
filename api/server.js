@@ -13,10 +13,13 @@ import registrationRoutes from './routes/registrationRoutes.js';
 import abstractRoutes from './routes/abstractRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load .env from api/ directory and parent Backend/ directory
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
