@@ -6,6 +6,14 @@
   },
   "servers": [
     {
+      "url": "https://api.spctt.org",
+      "description": "Live Production API Server (HTTPS)"
+    },
+    {
+      "url": "/",
+      "description": "Current Server (Auto Protocol & Host)"
+    },
+    {
       "url": "http://localhost:5000",
       "description": "Local Development Server"
     }
@@ -23,85 +31,255 @@
       "User": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "title": { "type": "string", "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."], "example": "Mr." },
-          "name": { "type": "string", "example": "Vivek Tiwari" },
-          "email": { "type": "string", "example": "tvivek2021@gmail.com" },
-          "organization": { "type": "string", "example": "Oakyweb" },
-          "phone": { "type": "string", "example": "+91 1234 567 890" },
-          "role": { "type": "string", "enum": ["admin", "user", "manager"], "example": "user" },
-          "address": { "type": "string", "example": "1 Primrose Street" },
-          "city": { "type": "string", "example": "Alloa" },
-          "state": { "type": "string", "example": "Delhi" },
-          "country": { "type": "string", "example": "India" },
-          "pincode": { "type": "string", "example": "110001" },
-          "status": { "type": "string", "enum": ["active", "inactive", "banned"], "example": "active" }
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "enum": [
+              "Mr.",
+              "Ms.",
+              "Mrs.",
+              "Dr.",
+              "Prof."
+            ],
+            "example": "Mr."
+          },
+          "name": {
+            "type": "string",
+            "example": "Vivek Tiwari"
+          },
+          "email": {
+            "type": "string",
+            "example": "tvivek2021@gmail.com"
+          },
+          "organization": {
+            "type": "string",
+            "example": "Oakyweb"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 1234 567 890"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "user",
+              "manager"
+            ],
+            "example": "user"
+          },
+          "address": {
+            "type": "string",
+            "example": "1 Primrose Street"
+          },
+          "city": {
+            "type": "string",
+            "example": "Alloa"
+          },
+          "state": {
+            "type": "string",
+            "example": "Delhi"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "110001"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive",
+              "banned"
+            ],
+            "example": "active"
+          }
         }
       },
       "RegisterRequest": {
         "type": "object",
-        "required": ["title", "fullName", "email", "organization", "password"],
+        "required": [
+          "title",
+          "fullName",
+          "email",
+          "organization",
+          "password"
+        ],
         "properties": {
-          "title": { "type": "string", "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."], "example": "Mr." },
-          "fullName": { "type": "string", "example": "Vivek Tiwari" },
-          "email": { "type": "string", "format": "email", "example": "tvivek2021@gmail.com" },
-          "organization": { "type": "string", "example": "Oakyweb" },
-          "phone": { "type": "string", "example": "+91 1234 567 890" },
-          "password": { "type": "string", "format": "password", "example": "Password@123" },
-          "repeatPassword": { "type": "string", "format": "password", "example": "Password@123" }
+          "title": {
+            "type": "string",
+            "enum": [
+              "Mr.",
+              "Ms.",
+              "Mrs.",
+              "Dr.",
+              "Prof."
+            ],
+            "example": "Mr."
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Vivek Tiwari"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "tvivek2021@gmail.com"
+          },
+          "organization": {
+            "type": "string",
+            "example": "Oakyweb"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 1234 567 890"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Password@123"
+          },
+          "repeatPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "Password@123"
+          }
         }
       },
       "LoginRequest": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "properties": {
-          "email": { "type": "string", "format": "email", "example": "tvivek2021@gmail.com" },
-          "password": { "type": "string", "format": "password", "example": "Password@123" }
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "tvivek2021@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Password@123"
+          }
         }
       },
       "AdminLoginRequest": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "properties": {
-          "email": { "type": "string", "format": "email", "example": "admin@spctt.org" },
-          "password": { "type": "string", "format": "password", "example": "Admin@123" }
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@spctt.org"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Admin@123"
+          }
         }
       },
       "Step1CategoryRequest": {
         "type": "object",
         "properties": {
-          "categoryId": { "type": "integer", "example": 2 },
-          "categoryCode": { "type": "string", "example": "NON_MEMBERS" }
+          "categoryId": {
+            "type": "integer",
+            "example": 2
+          },
+          "categoryCode": {
+            "type": "string",
+            "example": "NON_MEMBERS"
+          }
         }
       },
       "Step2AttendeeRequest": {
         "type": "object",
-        "required": ["fullName", "email", "organization", "address", "city", "state", "country"],
+        "required": [
+          "fullName",
+          "email",
+          "organization",
+          "address",
+          "city",
+          "state",
+          "country"
+        ],
         "properties": {
-          "title": { "type": "string", "example": "Mr." },
-          "fullName": { "type": "string", "example": "Vivek Tiwari" },
-          "email": { "type": "string", "example": "tvivek2021@gmail.com" },
-          "organization": { "type": "string", "example": "Oakyweb" },
-          "phone": { "type": "string", "example": "+91 1234 567 890" },
-          "address": { "type": "string", "example": "1 Primrose Street, Street Address Line 2" },
-          "city": { "type": "string", "example": "Alloa" },
-          "state": { "type": "string", "example": "Delhi" },
-          "country": { "type": "string", "example": "United Kingdom" },
-          "pincode": { "type": "string", "example": "FK10 1JJ" }
+          "title": {
+            "type": "string",
+            "example": "Mr."
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Vivek Tiwari"
+          },
+          "email": {
+            "type": "string",
+            "example": "tvivek2021@gmail.com"
+          },
+          "organization": {
+            "type": "string",
+            "example": "Oakyweb"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 1234 567 890"
+          },
+          "address": {
+            "type": "string",
+            "example": "1 Primrose Street, Street Address Line 2"
+          },
+          "city": {
+            "type": "string",
+            "example": "Alloa"
+          },
+          "state": {
+            "type": "string",
+            "example": "Delhi"
+          },
+          "country": {
+            "type": "string",
+            "example": "United Kingdom"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "FK10 1JJ"
+          }
         }
       },
       "Step3AccompanyingRequest": {
         "type": "object",
-        "required": ["count"],
+        "required": [
+          "count"
+        ],
         "properties": {
-          "count": { "type": "integer", "example": 1 },
+          "count": {
+            "type": "integer",
+            "example": 1
+          },
           "accompanyingPersons": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "title": { "type": "string", "example": "Mrs." },
-                "fullName": { "type": "string", "example": "Anjali Tiwari" }
+                "title": {
+                  "type": "string",
+                  "example": "Mrs."
+                },
+                "fullName": {
+                  "type": "string",
+                  "example": "Anjali Tiwari"
+                }
               }
             }
           }
@@ -110,36 +288,83 @@
       "Step4BillingRequest": {
         "type": "object",
         "properties": {
-          "entityName": { "type": "string", "example": "Oakyweb Technologies Pvt Ltd" },
-          "entityAddress": { "type": "string", "example": "Level 4, Tech Park, New Delhi" },
-          "gstNumber": { "type": "string", "example": "07AAAAA0000A1Z5" },
-          "panNumber": { "type": "string", "example": "ABCDE1234F" }
+          "entityName": {
+            "type": "string",
+            "example": "Oakyweb Technologies Pvt Ltd"
+          },
+          "entityAddress": {
+            "type": "string",
+            "example": "Level 4, Tech Park, New Delhi"
+          },
+          "gstNumber": {
+            "type": "string",
+            "example": "07AAAAA0000A1Z5"
+          },
+          "panNumber": {
+            "type": "string",
+            "example": "ABCDE1234F"
+          }
         }
       },
       "PaymentRequest": {
         "type": "object",
         "properties": {
-          "registrationId": { "type": "integer", "example": 1 },
-          "paymentMethod": { "type": "string", "example": "Axis Razorpay (Elisyan India)" }
+          "registrationId": {
+            "type": "integer",
+            "example": 1
+          },
+          "paymentMethod": {
+            "type": "string",
+            "example": "Axis Razorpay (Elisyan India)"
+          }
         }
       },
       "AbstractSubmissionRequest": {
         "type": "object",
-        "required": ["title", "authors", "affiliation", "category", "abstractText"],
+        "required": [
+          "title",
+          "authors",
+          "affiliation",
+          "category",
+          "abstractText"
+        ],
         "properties": {
-          "title": { "type": "string", "example": "Advancements in Pediatric Cardiopulmonary Techniques" },
-          "authors": { "type": "string", "example": "Dr. Vivek Tiwari, Dr. Ratan Singh" },
-          "affiliation": { "type": "string", "example": "Department of Cardiology, SPCTT Institute" },
-          "category": { "type": "string", "example": "Cardiothoracic Surgery" },
-          "abstractText": { "type": "string", "example": "Detailed abstract content describing objectives, methodology, results, and conclusions..." }
+          "title": {
+            "type": "string",
+            "example": "Advancements in Pediatric Cardiopulmonary Techniques"
+          },
+          "authors": {
+            "type": "string",
+            "example": "Dr. Vivek Tiwari, Dr. Ratan Singh"
+          },
+          "affiliation": {
+            "type": "string",
+            "example": "Department of Cardiology, SPCTT Institute"
+          },
+          "category": {
+            "type": "string",
+            "example": "Cardiothoracic Surgery"
+          },
+          "abstractText": {
+            "type": "string",
+            "example": "Detailed abstract content describing objectives, methodology, results, and conclusions..."
+          }
         }
       },
       "ApiResponse": {
         "type": "object",
         "properties": {
-          "status": { "type": "boolean", "example": true },
-          "message": { "type": "string", "example": "Operation completed successfully" },
-          "data": { "type": "object" }
+          "status": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully"
+          },
+          "data": {
+            "type": "object"
+          }
         }
       }
     }
@@ -147,227 +372,388 @@
   "paths": {
     "/api/auth/register": {
       "post": {
-        "tags": ["🌐 User Authentication (Website)"],
+        "tags": [
+          "🌐 User Authentication (Website)"
+        ],
         "summary": "User Registration / Create an Account",
         "description": "Register a new user account with title, full name, email, organization, mobile number, and password.",
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/RegisterRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Account created successfully" },
-          "409": { "description": "Email already registered" },
-          "422": { "description": "Validation error" }
+          "201": {
+            "description": "Account created successfully"
+          },
+          "409": {
+            "description": "Email already registered"
+          },
+          "422": {
+            "description": "Validation error"
+          }
         }
       }
     },
     "/api/auth/login": {
       "post": {
-        "tags": ["🌐 User Authentication (Website)"],
+        "tags": [
+          "🌐 User Authentication (Website)"
+        ],
         "summary": "User Sign In",
         "description": "Sign in user with email and password to receive JWT bearer token.",
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Login successful" },
-          "401": { "description": "Invalid credentials" }
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
         }
       }
     },
     "/api/auth/admin/login": {
       "post": {
-        "tags": ["🛡️ Admin Authentication"],
+        "tags": [
+          "🛡️ Admin Authentication"
+        ],
         "summary": "Admin Sign In",
         "description": "Authenticate administrator to access Admin Management Portal.",
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AdminLoginRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Admin login successful" },
-          "403": { "description": "Access denied" }
+          "200": {
+            "description": "Admin login successful"
+          },
+          "403": {
+            "description": "Access denied"
+          }
         }
       }
     },
     "/api/registration/categories": {
       "get": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Get Registration Categories & Fees",
         "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates).",
         "responses": {
-          "200": { "description": "List of categories retrieved" }
+          "200": {
+            "description": "List of categories retrieved"
+          }
         }
       }
     },
     "/api/registration/current": {
       "get": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Get Current User Registration Status",
         "description": "Get draft or submitted registration details of the logged-in user.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "User registration fetched successfully" }
+          "200": {
+            "description": "User registration fetched successfully"
+          }
         }
       }
     },
     "/api/registration/step1-category": {
       "post": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Step 1: Select Category",
         "description": "Save selected category for conference registration.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Step1CategoryRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Step1CategoryRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Category saved successfully" }
+          "200": {
+            "description": "Category saved successfully"
+          }
         }
       }
     },
     "/api/registration/step2-attendee": {
       "post": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Step 2: Save Attendee Details & Contact Information",
         "description": "Save attendee profile, organization, phone, address, city, state, country, and pincode.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Step2AttendeeRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Step2AttendeeRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Attendee details saved successfully" }
+          "200": {
+            "description": "Attendee details saved successfully"
+          }
         }
       }
     },
     "/api/registration/step3-accompanying": {
       "post": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Step 3: Optional Item(s) Registration (Accompanying Persons)",
         "description": "Register accompanying persons (1, 2, or 0) with their titles and names at ₹3,500 each.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Step3AccompanyingRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Step3AccompanyingRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Accompanying persons saved successfully" }
+          "200": {
+            "description": "Accompanying persons saved successfully"
+          }
         }
       }
     },
     "/api/registration/step4-billing": {
       "post": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Step 4: Save Billing Details & Generate Proforma Invoice",
         "description": "Save billing entity name, entity address, GST & PAN numbers, and calculate 18% GST Proforma Invoice.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/Step4BillingRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Step4BillingRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Billing details saved and proforma invoice generated" }
+          "200": {
+            "description": "Billing details saved and proforma invoice generated"
+          }
         }
       }
     },
     "/api/registration/payment": {
       "post": {
-        "tags": ["👤 User Portal - Registration Flow (Website)"],
+        "tags": [
+          "👤 User Portal - Registration Flow (Website)"
+        ],
         "summary": "Make Payment (Axis Razorpay)",
         "description": "Process conference payment, mark registration as confirmed, and generate official tax invoice and receipt.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": false,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/PaymentRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentRequest"
+              }
+            }
           }
         },
         "responses": {
-          "200": { "description": "Payment successful and registration confirmed" }
+          "200": {
+            "description": "Payment successful and registration confirmed"
+          }
         }
       }
     },
     "/api/registration/invoices": {
       "get": {
-        "tags": ["📑 User Portal - Invoices & Receipts (Website)"],
+        "tags": [
+          "📑 User Portal - Invoices & Receipts (Website)"
+        ],
         "summary": "Get User Invoices & Receipts",
         "description": "Retrieve all proforma invoices, tax invoices, and payment receipts of current user.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "List of invoices retrieved" }
+          "200": {
+            "description": "List of invoices retrieved"
+          }
         }
       }
     },
     "/api/registration/invoices/{id}": {
       "get": {
-        "tags": ["📑 User Portal - Invoices & Receipts (Website)"],
+        "tags": [
+          "📑 User Portal - Invoices & Receipts (Website)"
+        ],
         "summary": "Get Single Invoice / Receipt By ID",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "Invoice details retrieved" }
+          "200": {
+            "description": "Invoice details retrieved"
+          }
         }
       }
     },
     "/api/abstracts": {
       "post": {
-        "tags": ["📝 User Portal - Abstract Submission (Website)"],
+        "tags": [
+          "📝 User Portal - Abstract Submission (Website)"
+        ],
         "summary": "Submit Abstract",
         "description": "Submit a research abstract for SPCTT 2026 conference presentation.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/AbstractSubmissionRequest" } }
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbstractSubmissionRequest"
+              }
+            }
           }
         },
         "responses": {
-          "201": { "description": "Abstract submitted successfully" }
+          "201": {
+            "description": "Abstract submitted successfully"
+          }
         }
       }
     },
     "/api/abstracts/my": {
       "get": {
-        "tags": ["📝 User Portal - Abstract Submission (Website)"],
+        "tags": [
+          "📝 User Portal - Abstract Submission (Website)"
+        ],
         "summary": "View My Submitted Abstracts",
         "description": "Retrieve list of all abstracts submitted by the current user.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Abstracts list retrieved" }
+          "200": {
+            "description": "Abstracts list retrieved"
+          }
         }
       }
     },
     "/api/user/profile": {
       "get": {
-        "tags": ["👤 User Portal - Profile (Website)"],
+        "tags": [
+          "👤 User Portal - Profile (Website)"
+        ],
         "summary": "Get User Profile",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "User profile data" }
+          "200": {
+            "description": "User profile data"
+          }
         }
       },
       "put": {
-        "tags": ["👤 User Portal - Profile (Website)"],
+        "tags": [
+          "👤 User Portal - Profile (Website)"
+        ],
         "summary": "Update User Profile",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -375,59 +761,135 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": { "type": "string", "example": "Dr." },
-                  "name": { "type": "string", "example": "Vivek Tiwari" },
-                  "organization": { "type": "string", "example": "Oakyweb" },
-                  "phone": { "type": "string", "example": "+91 1234 567 890" },
-                  "address": { "type": "string", "example": "1 Primrose Street" },
-                  "city": { "type": "string", "example": "Alloa" },
-                  "state": { "type": "string", "example": "Delhi" },
-                  "country": { "type": "string", "example": "United Kingdom" },
-                  "pincode": { "type": "string", "example": "FK10 1JJ" }
+                  "title": {
+                    "type": "string",
+                    "example": "Dr."
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Vivek Tiwari"
+                  },
+                  "organization": {
+                    "type": "string",
+                    "example": "Oakyweb"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+91 1234 567 890"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "1 Primrose Street"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Alloa"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Delhi"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "United Kingdom"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "example": "FK10 1JJ"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Profile updated successfully" }
+          "200": {
+            "description": "Profile updated successfully"
+          }
         }
       }
     },
     "/api/admin/dashboard-stats": {
       "get": {
-        "tags": ["🛡️ Admin Portal - Dashboard & Analytics"],
+        "tags": [
+          "🛡️ Admin Portal - Dashboard & Analytics"
+        ],
         "summary": "Get Admin Dashboard Overview",
         "description": "Total registrations, total revenue, abstracts count, and recent activity.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Dashboard statistics" }
+          "200": {
+            "description": "Dashboard statistics"
+          }
         }
       }
     },
     "/api/admin/registrations": {
       "get": {
-        "tags": ["🛡️ Admin Portal - Registration Management"],
+        "tags": [
+          "🛡️ Admin Portal - Registration Management"
+        ],
         "summary": "Get All Registrations",
         "description": "Filter registrations by status, payment_status, or search query.",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "status", "in": "query", "schema": { "type": "string" } },
-          { "name": "payment_status", "in": "query", "schema": { "type": "string" } },
-          { "name": "search", "in": "query", "schema": { "type": "string" } }
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payment_status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "Registrations list" }
+          "200": {
+            "description": "Registrations list"
+          }
         }
       }
     },
     "/api/admin/registrations/{id}/status": {
       "put": {
-        "tags": ["🛡️ Admin Portal - Registration Management"],
+        "tags": [
+          "🛡️ Admin Portal - Registration Management"
+        ],
         "summary": "Update Registration & Payment Status",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -436,35 +898,74 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "status": { "type": "string", "enum": ["draft", "submitted", "confirmed", "cancelled"] },
-                  "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed", "refunded"] }
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "submitted",
+                      "confirmed",
+                      "cancelled"
+                    ]
+                  },
+                  "paymentStatus": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "paid",
+                      "failed",
+                      "refunded"
+                    ]
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Registration status updated" }
+          "200": {
+            "description": "Registration status updated"
+          }
         }
       }
     },
     "/api/admin/abstracts": {
       "get": {
-        "tags": ["🛡️ Admin Portal - Abstract Review"],
+        "tags": [
+          "🛡️ Admin Portal - Abstract Review"
+        ],
         "summary": "Get All Submitted Abstracts",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Abstracts list with submitter details" }
+          "200": {
+            "description": "Abstracts list with submitter details"
+          }
         }
       }
     },
     "/api/admin/abstracts/{id}/status": {
       "put": {
-        "tags": ["🛡️ Admin Portal - Abstract Review"],
+        "tags": [
+          "🛡️ Admin Portal - Abstract Review"
+        ],
         "summary": "Review and Update Abstract Status",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -472,37 +973,68 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["status"],
+                "required": [
+                  "status"
+                ],
                 "properties": {
-                  "status": { "type": "string", "enum": ["submitted", "under_review", "accepted", "rejected"] },
-                  "reviewComments": { "type": "string", "example": "Accepted for oral presentation." }
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "submitted",
+                      "under_review",
+                      "accepted",
+                      "rejected"
+                    ]
+                  },
+                  "reviewComments": {
+                    "type": "string",
+                    "example": "Accepted for oral presentation."
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Abstract status updated" }
+          "200": {
+            "description": "Abstract status updated"
+          }
         }
       }
     },
     "/api/admin/invoices": {
       "get": {
-        "tags": ["🛡️ Admin Portal - Invoices & Users"],
+        "tags": [
+          "🛡️ Admin Portal - Invoices & Users"
+        ],
         "summary": "Get All Generated Invoices",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "All invoices retrieved" }
+          "200": {
+            "description": "All invoices retrieved"
+          }
         }
       }
     },
     "/api/admin/users": {
       "get": {
-        "tags": ["🛡️ Admin Portal - Invoices & Users"],
+        "tags": [
+          "🛡️ Admin Portal - Invoices & Users"
+        ],
         "summary": "Get All Users",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "All users list" }
+          "200": {
+            "description": "All users list"
+          }
         }
       }
     }

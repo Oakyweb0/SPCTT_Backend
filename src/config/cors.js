@@ -39,7 +39,12 @@ export const corsOptions = {
       return callback(null, true);
     }
 
-    // Default: allow in dev, restrict in prod if strict
+    // Allow self-origin or any spctt subdomains automatically
+    if (/^https?:\/\/(.+\.)?(spctt\.org|spctt2026\.org)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Default: allow in dev
     if (config.IS_DEVELOPMENT) {
       return callback(null, true);
     }

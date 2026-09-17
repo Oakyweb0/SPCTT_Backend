@@ -17,6 +17,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust reverse proxy (Nginx, Cloudflare, etc.) to get correct https protocol
+app.set('trust proxy', true);
+
 // 1. Security & Core Middleware
 app.use(corsMiddleware);
 app.use(express.json());
@@ -44,26 +47,13 @@ const swaggerUiOptions = {
   customSiteTitle: 'SPCTT 2026 API Documentation'
 };
 
-const serveDynamicSwagger = (req, res, next) => {
-  try {
-    const raw = fs.existsSync(swaggerSpecPath)
-      ? JSON.parse(fs.readFileSync(swaggerSpecPath, 'utf8'))
-      : swaggerSpec;
+// Direct JSON spec endpoint
+app.get('/api-docs/swagger.json', (req, res) => res.json(swaggerSpec));
+app.get('/api/docs/swagger.json', (req, res) => res.json(swaggerSpec));
 
-    // Dynamically set server URL to current host and protocol
-    const hostUrl = config.APP_URL || `${req.protocol}://${req.get('host')}`;
-    raw.servers = [
-      { url: hostUrl, description: `Active Server (${config.NODE_ENV})` }
-    ];
-
-    swaggerUi.setup(raw, swaggerUiOptions)(req, res, next);
-  } catch (err) {
-    swaggerUi.setup(swaggerSpec, swaggerUiOptions)(req, res, next);
-  }
-};
-
-app.use('/api-docs', swaggerUi.serve, serveDynamicSwagger);
-app.use('/api/docs', swaggerUi.serve, serveDynamicSwagger);
+// Swagger UI mount
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // 4. API Routes
 app.use('/api/auth', authRoutes);
