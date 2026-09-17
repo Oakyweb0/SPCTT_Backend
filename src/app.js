@@ -44,7 +44,10 @@ const swaggerUiOptions = {
     .swagger-ui .topbar { display: none }
     .swagger-ui .opblock-tag { font-size: 1.2rem; font-weight: 700; border-bottom: 2px solid #0f4c64; padding-bottom: 5px; margin-top: 25px; }
   `,
-  customSiteTitle: 'SPCTT 2026 API Documentation'
+  customSiteTitle: 'SPCTT 2026 API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true
+  }
 };
 
 // Direct JSON spec endpoint

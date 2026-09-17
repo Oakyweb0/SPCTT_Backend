@@ -6,12 +6,12 @@
   },
   "servers": [
     {
-      "url": "https://api.spctt.org",
-      "description": "Live Production API Server (HTTPS)"
-    },
-    {
       "url": "/",
       "description": "Current Server (Auto Protocol & Host)"
+    },
+    {
+      "url": "https://api.spctt.org",
+      "description": "Live Production API Server (HTTPS)"
     },
     {
       "url": "http://localhost:5000",
