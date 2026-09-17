@@ -1,88 +1,82 @@
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load .env from api/ directory and parent Backend/ directory
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
-dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
-dotenv.config();
-
-const dbConfig = {
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'spctt_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-};
+import bcrypt from 'bcryptjs';
+import { config } from './env.js';
 
 let pool;
 
 /**
- * Helper to get existing tables in the configured database
+ * Get existing tables in the configured database
  */
 async function getExistingTables(connectionOrPool, dbName) {
   try {
     const [rows] = await connectionOrPool.query(
-      "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?",
+      'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?',
       [dbName]
     );
-    return new Set(rows.map(r => r.TABLE_NAME || r.table_name));
+    return new Set(rows.map((r) => r.TABLE_NAME || r.table_name));
   } catch (err) {
     try {
-      const [rows] = await connectionOrPool.query("SHOW TABLES");
-      return new Set(rows.map(r => Object.values(r)[0]));
+      const [rows] = await connectionOrPool.query('SHOW TABLES');
+      return new Set(rows.map((r) => Object.values(r)[0]));
     } catch (fallbackErr) {
-      console.warn("Could not query existing tables list:", fallbackErr.message);
+      console.warn('Could not query existing tables list:', fallbackErr.message);
       return new Set();
     }
   }
 }
 
+/**
+ * Initialize Database Connection and run auto-migrations / seeders
+ */
 export async function initDatabase() {
   try {
-    // 1. Check if Database exists before creating
+    // 1. Attempt database creation if running on standard root/local setup
     try {
       const rootConnection = await mysql.createConnection({
-        host: dbConfig.host,
-        port: dbConfig.port,
-        user: dbConfig.user,
-        password: dbConfig.password
+        host: config.DB.HOST,
+        port: config.DB.PORT,
+        user: config.DB.USER,
+        password: config.DB.PASSWORD
       });
 
       const [dbRows] = await rootConnection.query(
-        "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
-        [dbConfig.database]
+        'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?',
+        [config.DB.NAME]
       );
 
       if (dbRows.length === 0) {
-        console.log(`Database '${dbConfig.database}' does not exist. Creating...`);
+        console.log(`Database '${config.DB.NAME}' does not exist. Creating...`);
         await rootConnection.query(
-          `CREATE DATABASE \`${dbConfig.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+          `CREATE DATABASE \`${config.DB.NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
         );
-        console.log(`Database '${dbConfig.database}' created successfully.`);
-      } else {
-        console.log(`Database '${dbConfig.database}' already exists.`);
+        console.log(`Database '${config.DB.NAME}' created successfully.`);
       }
 
       await rootConnection.end();
     } catch (createDbErr) {
-      console.warn('Note: Database existence check / creation skipped or restricted:', createDbErr.message);
+      // Server environments may not allow create database permissions - ignore and proceed
     }
 
-    // 2. Create pool for database
-    pool = mysql.createPool(dbConfig);
+    // 2. Initialize connection pool
+    pool = mysql.createPool({
+      host: config.DB.HOST,
+      port: config.DB.PORT,
+      user: config.DB.USER,
+      password: config.DB.PASSWORD,
+      database: config.DB.NAME,
+      waitForConnections: true,
+      connectionLimit: config.DB.CONNECTION_LIMIT,
+      queueLimit: 0
+    });
 
-    // 3. Query existing tables in DB
-    const existingTables = await getExistingTables(pool, dbConfig.database);
+    // Test connection
+    const connection = await pool.getConnection();
+    connection.release();
 
-    // 4. Create users table if not exists
+    // 3. Inspect existing tables
+    const existingTables = await getExistingTables(pool, config.DB.NAME);
+
+    // 4. Create Users Table
     if (!existingTables.has('users')) {
       console.log("Table 'users' does not exist. Creating...");
       await pool.query(`
@@ -108,9 +102,9 @@ export async function initDatabase() {
       `);
       console.log("Table 'users' created.");
     } else {
-      // Ensure users table has missing columns if table already existed previously
-      const [userColumns] = await pool.query(`SHOW COLUMNS FROM \`users\``);
-      const existingColNames = userColumns.map(c => c.Field);
+      // Ensure missing columns exist
+      const [userColumns] = await pool.query('SHOW COLUMNS FROM `users`');
+      const existingColNames = userColumns.map((c) => c.Field);
 
       if (!existingColNames.includes('title')) {
         await pool.query("ALTER TABLE `users` ADD COLUMN `title` VARCHAR(20) DEFAULT 'Mr.' AFTER `id`");
@@ -135,7 +129,7 @@ export async function initDatabase() {
       }
     }
 
-    // 5. Create registration_categories table if not exists
+    // 5. Create Registration Categories Table
     if (!existingTables.has('registration_categories')) {
       console.log("Table 'registration_categories' does not exist. Creating...");
       await pool.query(`
@@ -163,16 +157,16 @@ export async function initDatabase() {
     ];
 
     for (const cat of defaultCategories) {
-      const [exists] = await pool.query("SELECT id FROM `registration_categories` WHERE `code` = ? LIMIT 1", [cat.code]);
+      const [exists] = await pool.query('SELECT id FROM `registration_categories` WHERE `code` = ? LIMIT 1', [cat.code]);
       if (exists.length === 0) {
         await pool.query(
-          "INSERT INTO `registration_categories` (`name`, `code`, `price`) VALUES (?, ?, ?)",
+          'INSERT INTO `registration_categories` (`name`, `code`, `price`) VALUES (?, ?, ?)',
           [cat.name, cat.code, cat.price]
         );
       }
     }
 
-    // 6. Create registrations table if not exists
+    // 6. Create Registrations Table
     if (!existingTables.has('registrations')) {
       console.log("Table 'registrations' does not exist. Creating...");
       await pool.query(`
@@ -219,7 +213,7 @@ export async function initDatabase() {
       console.log("Table 'registrations' created.");
     }
 
-    // 7. Create invoices table if not exists
+    // 7. Create Invoices Table
     if (!existingTables.has('invoices')) {
       console.log("Table 'invoices' does not exist. Creating...");
       await pool.query(`
@@ -246,7 +240,7 @@ export async function initDatabase() {
       console.log("Table 'invoices' created.");
     }
 
-    // 8. Create abstracts table if not exists
+    // 8. Create Abstracts Table
     if (!existingTables.has('abstracts')) {
       console.log("Table 'abstracts' does not exist. Creating...");
       await pool.query(`
@@ -270,29 +264,40 @@ export async function initDatabase() {
       console.log("Table 'abstracts' created.");
     }
 
-    // 9. Seed default super admin if none exists
+    // 9. Seed default super admin
     const [existingAdmins] = await pool.query("SELECT id FROM `users` WHERE `role` = 'admin' LIMIT 1");
     if (existingAdmins.length === 0) {
-      const bcrypt = (await import('bcryptjs')).default;
       const defaultHash = await bcrypt.hash('Admin@123', 10);
       await pool.query(
-        "INSERT INTO `users` (`title`, `name`, `email`, `organization`, `phone`, `password`, `role`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        'INSERT INTO `users` (`title`, `name`, `email`, `organization`, `phone`, `password`, `role`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         ['Dr.', 'SPCTT Administrator', 'admin@spctt.org', 'SPCTT Organization', '+91 9876543210', defaultHash, 'admin', 'active']
       );
-      console.log("👤 Default super admin created: admin@spctt.org / Admin@123");
+      console.log('👤 Default super admin created: admin@spctt.org / Admin@123');
     }
 
-    console.log(`✅ MySQL Database '${dbConfig.database}' connected and initialized successfully with all tables.`);
+    console.log(`✅ MySQL Database '${config.DB.NAME}' at ${config.DB.HOST}:${config.DB.PORT} connected and initialized.`);
     return pool;
   } catch (error) {
-    console.error('❌ Database connection/initialization failed:', error.message);
+    console.error('❌ Database initialization error:', error.message);
     throw error;
   }
 }
 
+/**
+ * Get MySQL pool instance
+ */
 export function getPool() {
   if (!pool) {
-    pool = mysql.createPool(dbConfig);
+    pool = mysql.createPool({
+      host: config.DB.HOST,
+      port: config.DB.PORT,
+      user: config.DB.USER,
+      password: config.DB.PASSWORD,
+      database: config.DB.NAME,
+      waitForConnections: true,
+      connectionLimit: config.DB.CONNECTION_LIMIT,
+      queueLimit: 0
+    });
   }
   return pool;
 }
