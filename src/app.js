@@ -22,8 +22,20 @@ const app = express();
 // Trust reverse proxy (Nginx, Cloudflare, etc.) to get correct https protocol
 app.set('trust proxy', true);
 
+// Disable ETag generation to prevent 304 Not Modified caching (forces 200 OK with fresh data)
+app.set('etag', false);
+
 // 1. Security & Core Middleware
 app.use(corsMiddleware);
+app.use((req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store'
+  });
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

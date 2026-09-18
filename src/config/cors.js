@@ -52,7 +52,7 @@ export const corsOptions = {
     return callback(new Error(`CORS origin '${origin}' not allowed by SPCTT CORS Policy`));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires', 'If-None-Match', 'If-Modified-Since'],
   credentials: true,
   optionsSuccessStatus: 200
 };
