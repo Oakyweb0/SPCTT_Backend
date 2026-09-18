@@ -80,6 +80,45 @@ export const User = {
   },
 
   /**
+   * Delete user by ID and cascade delete related records (invoices, registrations, abstracts)
+   */
+  async deleteById(id) {
+    const pool = getPool();
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Find user registrations first to delete any child records
+      const [regs] = await connection.query('SELECT id FROM registrations WHERE user_id = ?', [id]);
+      const regIds = regs.map((r) => r.id);
+
+      // Delete invoices by user_id or registration_id
+      if (regIds.length > 0) {
+        await connection.query('DELETE FROM invoices WHERE user_id = ? OR registration_id IN (?)', [id, regIds]);
+      } else {
+        await connection.query('DELETE FROM invoices WHERE user_id = ?', [id]);
+      }
+
+      // Delete user's registrations
+      await connection.query('DELETE FROM registrations WHERE user_id = ?', [id]);
+
+      // Delete user's abstracts
+      await connection.query('DELETE FROM abstracts WHERE user_id = ?', [id]);
+
+      // Delete user
+      const [result] = await connection.query('DELETE FROM users WHERE id = ?', [id]);
+
+      await connection.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  },
+
+  /**
    * Count users by role
    */
   async count(role = 'user') {

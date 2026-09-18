@@ -1,5 +1,5 @@
 import express from 'express';
-import { getProfile, updateProfile } from '../controllers/user.controller.js';
+import { getProfile, updateProfile, deleteProfile } from '../controllers/user.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -17,5 +17,12 @@ router.get('/profile', authenticateToken, getProfile);
  * @access  Private (Bearer JWT)
  */
 router.put('/profile', authenticateToken, updateProfile);
+
+/**
+ * @route   DELETE /api/user/profile
+ * @desc    Delete current authenticated user account and data
+ * @access  Private (Bearer JWT)
+ */
+router.delete('/profile', authenticateToken, deleteProfile);
 
 export default router;

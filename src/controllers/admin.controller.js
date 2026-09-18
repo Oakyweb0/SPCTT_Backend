@@ -161,6 +161,42 @@ export const adminController = {
       console.error('Error fetching admin users:', error);
       return sendError(res, 'Failed to fetch users.', 500, error);
     }
+  },
+
+  /**
+   * Delete a User by ID
+   * DELETE /api/admin/users/:id
+   */
+  async deleteUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      const targetUserId = parseInt(id, 10);
+
+      if (isNaN(targetUserId)) {
+        return sendError(res, 'Invalid user ID.', 400);
+      }
+
+      const user = await User.findById(targetUserId);
+      if (!user) {
+        return sendError(res, 'User not found.', 404);
+      }
+
+      const deleted = await User.deleteById(targetUserId);
+      if (!deleted) {
+        return sendError(res, 'Failed to delete user.', 500);
+      }
+
+      const isSelf = req.user && req.user.user_id === targetUserId;
+
+      return sendSuccess(
+        res,
+        { id: targetUserId, isSelf },
+        `User '${user.name}' (ID: #${targetUserId}) and all associated records deleted successfully from database.`
+      );
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return sendError(res, error.message || 'Failed to delete user.', 500, error);
+    }
   }
 };
 
