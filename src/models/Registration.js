@@ -177,6 +177,105 @@ export const Registration = {
   async updateInvoicesToPaid(registrationId) {
     const pool = getPool();
     await pool.query('UPDATE invoices SET status = "paid" WHERE registration_id = ?', [registrationId]);
+  },
+
+  /**
+   * Find all registrations with filters (Admin view)
+   */
+  async findAll({ status, payment_status, search } = {}) {
+    const pool = getPool();
+    let query = 'SELECT * FROM registrations WHERE 1=1';
+    const params = [];
+
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    if (payment_status) {
+      query += ' AND payment_status = ?';
+      params.push(payment_status);
+    }
+    if (search) {
+      query += ' AND (registration_code LIKE ? OR full_name LIKE ? OR email LIKE ? OR phone LIKE ? OR organization LIKE ?)';
+      const s = `%${search}%`;
+      params.push(s, s, s, s, s);
+    }
+
+    query += ' ORDER BY id DESC';
+    const [rows] = await pool.query(query, params);
+
+    return rows.map((reg) => {
+      const item = { ...reg };
+      if (typeof item.accompanying_persons === 'string') {
+        try {
+          item.accompanying_persons = JSON.parse(item.accompanying_persons);
+        } catch (e) {
+          item.accompanying_persons = [];
+        }
+      }
+      return item;
+    });
+  },
+
+  /**
+   * Count all registrations
+   */
+  async countTotal() {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM registrations');
+    return rows[0]?.count || 0;
+  },
+
+  /**
+   * Count confirmed / paid registrations
+   */
+  async countPaid() {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM registrations WHERE payment_status = "paid"');
+    return rows[0]?.count || 0;
+  },
+
+  /**
+   * Sum total revenue collected from paid registrations
+   */
+  async sumRevenue() {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT COALESCE(SUM(grand_total), 0) as total FROM registrations WHERE payment_status = "paid"');
+    return parseFloat(rows[0]?.total || 0);
+  },
+
+  /**
+   * Find recent registrations
+   */
+  async findRecent(limit = 5) {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT * FROM registrations ORDER BY id DESC LIMIT ?', [Number(limit)]);
+    return rows.map((reg) => {
+      const item = { ...reg };
+      if (typeof item.accompanying_persons === 'string') {
+        try {
+          item.accompanying_persons = JSON.parse(item.accompanying_persons);
+        } catch (e) {
+          item.accompanying_persons = [];
+        }
+      }
+      return item;
+    });
+  },
+
+  /**
+   * Get all invoices (Admin view)
+   */
+  async getAllInvoices() {
+    const pool = getPool();
+    const [invoices] = await pool.query(
+      `SELECT i.*, r.registration_code, r.full_name, r.category_name, r.payment_status, u.email as user_email 
+       FROM invoices i 
+       JOIN registrations r ON i.registration_id = r.id 
+       LEFT JOIN users u ON i.user_id = u.id 
+       ORDER BY i.id DESC`
+    );
+    return invoices;
   }
 };
 

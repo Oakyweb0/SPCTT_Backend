@@ -1,0 +1,27 @@
+import { Router } from 'express';
+import { adminController } from '../controllers/admin.controller.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.middleware.js';
+
+const router = Router();
+
+// Protect all admin routes with authentication and admin role requirement
+router.use(authenticateToken, requireAdmin);
+
+// 1. Dashboard Overview Stats
+router.get('/dashboard-stats', adminController.getDashboardStats);
+
+// 2. Registrations Management
+router.get('/registrations', adminController.getRegistrations);
+router.put('/registrations/:id/status', adminController.updateRegistrationStatus);
+
+// 3. Abstracts Management
+router.get('/abstracts', adminController.getAbstracts);
+router.put('/abstracts/:id/status', adminController.updateAbstractStatus);
+
+// 4. Invoices Management
+router.get('/invoices', adminController.getInvoices);
+
+// 5. Users Management
+router.get('/users', adminController.getUsers);
+
+export default router;

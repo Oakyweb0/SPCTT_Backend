@@ -11,6 +11,8 @@ import { notFoundHandler, errorHandler } from './middleware/error.middleware.js'
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import registrationRoutes from './routes/registration.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import abstractRoutes from './routes/abstract.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +64,8 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOpti
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/registration', registrationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/abstracts', abstractRoutes);
 
 // 5. Dynamic Root Discovery Endpoint (No hardcoded localhost)
 app.get('/', (req, res) => {
@@ -93,6 +97,18 @@ app.get('/', (req, res) => {
         payment: `POST ${baseUrl}/api/registration/payment`,
         invoices: `GET ${baseUrl}/api/registration/invoices`,
         invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`
+      },
+      admin: {
+        dashboardStats: `GET ${baseUrl}/api/admin/dashboard-stats`,
+        registrations: `GET ${baseUrl}/api/admin/registrations`,
+        abstracts: `GET ${baseUrl}/api/admin/abstracts`,
+        invoices: `GET ${baseUrl}/api/admin/invoices`,
+        users: `GET ${baseUrl}/api/admin/users`
+      },
+      abstracts: {
+        submit: `POST ${baseUrl}/api/abstracts`,
+        myAbstracts: `GET ${baseUrl}/api/abstracts/my`,
+        byId: `GET ${baseUrl}/api/abstracts/:id`
       }
     }
   });
