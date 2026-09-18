@@ -316,6 +316,202 @@
           "paymentMethod": {
             "type": "string",
             "example": "Axis Razorpay (Elisyan India)"
+          },
+          "transactionId": {
+            "type": "string",
+            "example": "PAY_1726650000_1234"
+          }
+        }
+      },
+      "CreateOrderRequest": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "integer",
+            "example": 1,
+            "description": "Optional registration ID (defaults to current user's draft registration)"
+          }
+        }
+      },
+      "PaymentProcessRequest": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "integer",
+            "example": 1
+          },
+          "paymentMethod": {
+            "type": "string",
+            "example": "Axis Razorpay (Elisyan India)"
+          },
+          "transactionId": {
+            "type": "string",
+            "example": "PAY_1726650000_9876"
+          }
+        }
+      },
+      "PaymentVerifyRequest": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "integer",
+            "example": 1
+          },
+          "razorpayPaymentId": {
+            "type": "string",
+            "example": "pay_O7s8xYzAbc123"
+          },
+          "razorpayOrderId": {
+            "type": "string",
+            "example": "order_O7s8xYzAbc123"
+          },
+          "razorpaySignature": {
+            "type": "string",
+            "example": "9ef8...7bc1"
+          },
+          "transactionId": {
+            "type": "string",
+            "example": "PAY_1726650000_9876"
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "tvivek2021@gmail.com"
+          }
+        }
+      },
+      "VerifyResetTokenRequest": {
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["token", "newPassword"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "newStrongPassword123"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "newStrongPassword123"
+          }
+        }
+      },
+      "UserProfileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
+            "example": "Dr."
+          },
+          "name": {
+            "type": "string",
+            "example": "Dr. Vivek Tiwari"
+          },
+          "organization": {
+            "type": "string",
+            "example": "SPCTT Institute of Cardiac Sciences"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 9876543210"
+          },
+          "address": {
+            "type": "string",
+            "example": "Medical Enclave, Block B"
+          },
+          "city": {
+            "type": "string",
+            "example": "New Delhi"
+          },
+          "state": {
+            "type": "string",
+            "example": "Delhi"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "110029"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "https://example.com/avatar.jpg"
+          }
+        }
+      },
+      "AdminUpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
+            "example": "Mr."
+          },
+          "name": {
+            "type": "string",
+            "example": "Vivek Tiwari"
+          },
+          "email": {
+            "type": "string",
+            "example": "tvivek2021@gmail.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 9876543210"
+          },
+          "organization": {
+            "type": "string",
+            "example": "Oakyweb"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "manager", "admin"],
+            "example": "user"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "banned"],
+            "example": "active"
+          },
+          "address": {
+            "type": "string",
+            "example": "Medical Enclave, Block B"
+          },
+          "city": {
+            "type": "string",
+            "example": "New Delhi"
+          },
+          "state": {
+            "type": "string",
+            "example": "Delhi"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "110029"
           }
         }
       },
@@ -450,6 +646,64 @@
           },
           "403": {
             "description": "Access denied"
+          }
+        }
+      }
+    },
+    "/api/user/profile": {
+      "get": {
+        "tags": [
+          "👤 User Portal - Profile & Account (Website)"
+        ],
+        "summary": "Get User Profile",
+        "description": "Retrieve full profile information of the currently authenticated user.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "👤 User Portal - Profile & Account (Website)"
+        ],
+        "summary": "Update User Profile",
+        "description": "Update name, title, organization, phone number, address, city, state, country, pincode, or avatar.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          },
+          "400": {
+            "description": "No fields provided to update"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -807,29 +1061,6 @@
             "description": "Profile updated successfully"
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "👤 User Profile (Website)"
-        ],
-        "summary": "Delete Current User Account",
-        "description": "Permanently deletes the current user profile, registrations, abstracts, and invoices from the database.",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User account deleted successfully"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
       }
     },
     "/api/admin/dashboard-stats": {
@@ -1062,6 +1293,87 @@
       }
     },
     "/api/admin/users/{id}": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Portal - Invoices & Users"
+        ],
+        "summary": "Get Single User by ID",
+        "description": "Fetch user details by ID for administrative review or editing.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "🛡️ Admin Portal - Invoices & Users"
+        ],
+        "summary": "Update User Details (Admin)",
+        "description": "Allows an administrator to edit a user's title, name, email, phone, organization, role (user/manager/admin), status (active/inactive/banned), address, and optionally reset their password.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "User ID to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "400": {
+            "description": "No fields provided to update"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Email address already in use by another account"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
       "delete": {
         "tags": [
           "🛡️ Admin Portal - Invoices & Users"
@@ -1099,6 +1411,179 @@
           },
           "404": {
             "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/payment/create-order": {
+      "post": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Create Payment Order / Intent",
+        "description": "Initializes a payment order with total calculation, breakdown, and unique order ID for gateway checkout.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment order generated successfully"
+          },
+          "400": {
+            "description": "Registration already paid"
+          },
+          "404": {
+            "description": "No active registration found"
+          }
+        }
+      }
+    },
+    "/api/payment/process": {
+      "post": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Process & Confirm Payment",
+        "description": "Completes payment transaction, updates registration status to 'confirmed', marks payment status as 'paid', and generates official tax invoice receipt.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentProcessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment confirmed and receipt generated"
+          },
+          "404": {
+            "description": "Registration record not found"
+          }
+        }
+      }
+    },
+    "/api/payment/verify": {
+      "post": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Verify Gateway Payment Signature",
+        "description": "Verifies payment transaction/signature from gateway (e.g. Razorpay/Axis Bank) and confirms registration.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentVerifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment successfully verified"
+          },
+          "404": {
+            "description": "Registration not found"
+          }
+        }
+      }
+    },
+    "/api/payment/status": {
+      "get": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Get Current User Payment Status",
+        "description": "Returns current delegate's payment status, transaction ID, payment method, and associated invoices/receipts.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment status retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/payment/history": {
+      "get": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Get User Payment & Invoice History",
+        "description": "Retrieves full history of invoices and receipts generated for the logged-in user.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment history retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/payment/details/{registrationId}": {
+      "get": {
+        "tags": [
+          "💳 Payment & Transactions"
+        ],
+        "summary": "Get Payment Breakdown Details",
+        "description": "Retrieves comprehensive fee breakdown (base category, accompanying persons, GST, grand total) and proforma invoices for a registration.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Registration ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details retrieved"
+          },
+          "403": {
+            "description": "Forbidden: Access denied"
+          },
+          "404": {
+            "description": "Registration not found"
           }
         }
       }

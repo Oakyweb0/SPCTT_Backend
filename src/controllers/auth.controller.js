@@ -49,4 +49,61 @@ export async function adminLogin(req, res, next) {
   }
 }
 
-export default { signup, login, adminLogin };
+/**
+ * Forgot Password - Generate Reset Token
+ * POST /api/auth/forgot-password
+ */
+export async function forgotPassword(req, res, next) {
+  try {
+    const { email } = req.body;
+    const result = await authService.forgotPassword(email);
+    return sendSuccess(res, result, result.message, 200);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+/**
+ * Verify Password Reset Token
+ * POST /api/auth/verify-reset-token
+ */
+export async function verifyResetToken(req, res, next) {
+  try {
+    const { token } = req.body;
+    const result = await authService.verifyResetToken(token);
+    return sendSuccess(res, result, 'Password reset token is valid.', 200);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+/**
+ * Reset Password
+ * POST /api/auth/reset-password
+ */
+export async function resetPassword(req, res, next) {
+  try {
+    const result = await authService.resetPassword(req.body);
+    return sendSuccess(res, result, result.message, 200);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+export default {
+  signup,
+  login,
+  adminLogin,
+  forgotPassword,
+  verifyResetToken,
+  resetPassword
+};

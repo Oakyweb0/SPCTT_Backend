@@ -35,21 +35,4 @@ export async function updateProfile(req, res, next) {
   }
 }
 
-/**
- * Delete Authenticated User Profile
- * DELETE /api/user/profile
- */
-export async function deleteProfile(req, res, next) {
-  try {
-    const userId = req.user.user_id;
-    await userService.deleteProfile(userId);
-    return sendSuccess(res, { id: userId }, 'Your account and associated data have been deleted successfully.', 200);
-  } catch (error) {
-    if (error.statusCode) {
-      return sendError(res, error.message, error.statusCode);
-    }
-    next(error);
-  }
-}
-
-export default { getProfile, updateProfile, deleteProfile };
+export default { getProfile, updateProfile };

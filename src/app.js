@@ -11,6 +11,7 @@ import { notFoundHandler, errorHandler } from './middleware/error.middleware.js'
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import registrationRoutes from './routes/registration.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import abstractRoutes from './routes/abstract.routes.js';
 
@@ -76,6 +77,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOpti
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/registration', registrationRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/abstracts', abstractRoutes);
 
@@ -110,12 +112,23 @@ app.get('/', (req, res) => {
         invoices: `GET ${baseUrl}/api/registration/invoices`,
         invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`
       },
+      payment: {
+        createOrder: `POST ${baseUrl}/api/payment/create-order`,
+        processPayment: `POST ${baseUrl}/api/payment/process`,
+        verifyPayment: `POST ${baseUrl}/api/payment/verify`,
+        status: `GET ${baseUrl}/api/payment/status`,
+        history: `GET ${baseUrl}/api/payment/history`,
+        details: `GET ${baseUrl}/api/payment/details/:registrationId`
+      },
       admin: {
         dashboardStats: `GET ${baseUrl}/api/admin/dashboard-stats`,
         registrations: `GET ${baseUrl}/api/admin/registrations`,
         abstracts: `GET ${baseUrl}/api/admin/abstracts`,
         invoices: `GET ${baseUrl}/api/admin/invoices`,
-        users: `GET ${baseUrl}/api/admin/users`
+        users: `GET ${baseUrl}/api/admin/users`,
+        userById: `GET ${baseUrl}/api/admin/users/:id`,
+        updateUser: `PUT ${baseUrl}/api/admin/users/:id`,
+        deleteUser: `DELETE ${baseUrl}/api/admin/users/:id`
       },
       abstracts: {
         submit: `POST ${baseUrl}/api/abstracts`,

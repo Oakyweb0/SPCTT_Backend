@@ -95,6 +95,8 @@ export async function initDatabase() {
           \`country\` VARCHAR(100) DEFAULT 'India',
           \`pincode\` VARCHAR(20) DEFAULT NULL,
           \`avatar\` VARCHAR(255) DEFAULT NULL,
+          \`reset_token\` VARCHAR(255) DEFAULT NULL,
+          \`reset_token_expires\` DATETIME DEFAULT NULL,
           \`status\` ENUM('active', 'inactive', 'banned') DEFAULT 'active',
           \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -126,6 +128,12 @@ export async function initDatabase() {
       }
       if (!existingColNames.includes('pincode')) {
         await pool.query("ALTER TABLE `users` ADD COLUMN `pincode` VARCHAR(20) DEFAULT NULL AFTER `country`");
+      }
+      if (!existingColNames.includes('reset_token')) {
+        await pool.query("ALTER TABLE `users` ADD COLUMN `reset_token` VARCHAR(255) DEFAULT NULL AFTER `avatar`");
+      }
+      if (!existingColNames.includes('reset_token_expires')) {
+        await pool.query("ALTER TABLE `users` ADD COLUMN `reset_token_expires` DATETIME DEFAULT NULL AFTER `reset_token`");
       }
     }
 

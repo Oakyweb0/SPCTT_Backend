@@ -60,19 +60,6 @@ export const userService = {
 
     const updatedUser = await User.updateById(userId, updates);
     return updatedUser;
-  },
-
-  /**
-   * Delete user profile by ID
-   */
-  async deleteProfile(userId) {
-    const user = await User.findById(userId);
-    if (!user) {
-      const error = new Error('User profile not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-    return await User.deleteById(userId);
   }
 };
 

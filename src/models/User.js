@@ -26,6 +26,40 @@ export const User = {
   },
 
   /**
+   * Find a user by reset token
+   */
+  async findByResetToken(token) {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
+      [token]
+    );
+    return rows[0] || null;
+  },
+
+  /**
+   * Set password reset token for a user
+   */
+  async setResetToken(userId, token, expiresAt) {
+    const pool = getPool();
+    await pool.query(
+      'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
+      [token, expiresAt, userId]
+    );
+  },
+
+  /**
+   * Clear password reset token
+   */
+  async clearResetToken(userId) {
+    const pool = getPool();
+    await pool.query(
+      'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
+      [userId]
+    );
+  },
+
+  /**
    * Create a new user
    */
   async create({ title = 'Mr.', name, email, organization = null, phone = null, password, role = 'user', status = 'active' }) {

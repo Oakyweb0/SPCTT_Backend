@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { generateToken } from '../utils/jwt.js';
@@ -149,6 +150,102 @@ export const authService = {
       token,
       token_type: 'Bearer',
       user: safeUser
+    };
+  },
+
+  /**
+   * Request Password Reset (Forgot Password)
+   */
+  async forgotPassword(email) {
+    if (!email || !email.trim()) {
+      const error = new Error('Please provide a valid email address.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const user = await User.findByEmail(email.trim().toLowerCase());
+    if (!user) {
+      const error = new Error('No user account found with this email address.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Generate random 64-character hex token and 1-hour expiration
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await User.setResetToken(user.id, resetToken, expiresAt);
+
+    return {
+      success: true,
+      email: user.email,
+      resetToken,
+      expiresAt,
+      message: 'Password reset token has been generated. Use this token with the reset-password API to set your new password.'
+    };
+  },
+
+  /**
+   * Verify Reset Token
+   */
+  async verifyResetToken(token) {
+    if (!token || !token.trim()) {
+      const error = new Error('Reset token is required.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const user = await User.findByResetToken(token.trim());
+    if (!user) {
+      const error = new Error('Invalid or expired password reset token.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return {
+      valid: true,
+      email: user.email
+    };
+  },
+
+  /**
+   * Reset Password with Token
+   */
+  async resetPassword({ token, newPassword, confirmPassword }) {
+    if (!token || !token.trim()) {
+      const error = new Error('Reset token is required.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      const error = new Error('New password must be at least 6 characters long.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      const error = new Error('New password and confirm password do not match.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const user = await User.findByResetToken(token.trim());
+    if (!user) {
+      const error = new Error('Invalid or expired password reset token. Please request a new one.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.updateById(user.id, { password: hashedPassword });
+    await User.clearResetToken(user.id);
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully! You can now log in with your new password.'
     };
   }
 };

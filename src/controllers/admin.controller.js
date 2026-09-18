@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { Registration } from '../models/Registration.js';
 import { Abstract } from '../models/Abstract.js';
@@ -160,6 +161,130 @@ export const adminController = {
     } catch (error) {
       console.error('Error fetching admin users:', error);
       return sendError(res, 'Failed to fetch users.', 500, error);
+    }
+  },
+
+  /**
+   * Get Single User by ID
+   * GET /api/admin/users/:id
+   */
+  async getUserById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const targetUserId = parseInt(id, 10);
+      if (isNaN(targetUserId)) {
+        return sendError(res, 'Invalid user ID.', 400);
+      }
+
+      const user = await User.findById(targetUserId);
+      if (!user) {
+        return sendError(res, 'User not found.', 404);
+      }
+
+      return sendSuccess(res, user, 'User details retrieved successfully.');
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return sendError(res, error.message || 'Failed to fetch user.', 500, error);
+    }
+  },
+
+  /**
+   * Update User by Admin
+   * PUT /api/admin/users/:id
+   */
+  async updateUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      const targetUserId = parseInt(id, 10);
+      if (isNaN(targetUserId)) {
+        return sendError(res, 'Invalid user ID.', 400);
+      }
+
+      const user = await User.findById(targetUserId);
+      if (!user) {
+        return sendError(res, 'User not found.', 404);
+      }
+
+      const {
+        title,
+        name,
+        fullName,
+        email,
+        organization,
+        phone,
+        role,
+        status,
+        address,
+        city,
+        state,
+        country,
+        pincode,
+        password
+      } = req.body;
+
+      const updates = {};
+      const finalName = fullName || name;
+      if (finalName !== undefined) {
+        if (!finalName.trim()) {
+          return sendError(res, 'Name cannot be empty.', 422);
+        }
+        updates.name = finalName.trim();
+      }
+
+      if (title !== undefined) updates.title = title.trim();
+      if (organization !== undefined) updates.organization = organization.trim();
+      if (phone !== undefined) updates.phone = phone ? phone.trim() : null;
+      if (address !== undefined) updates.address = address.trim();
+      if (city !== undefined) updates.city = city.trim();
+      if (state !== undefined) updates.state = state.trim();
+      if (country !== undefined) updates.country = country.trim();
+      if (pincode !== undefined) updates.pincode = pincode ? pincode.trim() : null;
+
+      if (email !== undefined) {
+        const finalEmail = email.trim().toLowerCase();
+        if (!finalEmail) {
+          return sendError(res, 'Email cannot be empty.', 422);
+        }
+        const existing = await User.findByEmail(finalEmail);
+        if (existing && existing.id !== targetUserId) {
+          return sendError(res, 'This email address is already registered to another user.', 409);
+        }
+        updates.email = finalEmail;
+      }
+
+      if (role !== undefined) {
+        const validRoles = ['admin', 'user', 'manager'];
+        if (!validRoles.includes(role.toLowerCase())) {
+          return sendError(res, 'Invalid role. Must be one of: user, admin, manager.', 422);
+        }
+        updates.role = role.toLowerCase();
+      }
+
+      if (status !== undefined) {
+        const validStatuses = ['active', 'inactive', 'banned'];
+        if (!validStatuses.includes(status.toLowerCase())) {
+          return sendError(res, 'Invalid status. Must be one of: active, inactive, banned.', 422);
+        }
+        updates.status = status.toLowerCase();
+      }
+
+      if (password) {
+        if (password.length < 6) {
+          return sendError(res, 'Password must be at least 6 characters long.', 422);
+        }
+        const salt = await bcrypt.genSalt(10);
+        updates.password = await bcrypt.hash(password, salt);
+      }
+
+      if (Object.keys(updates).length === 0) {
+        return sendError(res, 'No fields provided to update.', 400);
+      }
+
+      const updatedUser = await User.updateById(targetUserId, updates);
+      return sendSuccess(res, updatedUser, `User '${updatedUser.name}' (ID: #${targetUserId}) updated successfully!`);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return sendError(res, error.message || 'Failed to update user.', 500, error);
     }
   },
 
