@@ -714,7 +714,7 @@
           "👤 User Portal - Registration Flow (Website)"
         ],
         "summary": "Get Registration Categories & Fees",
-        "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates).",
+        "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates, Accompanying Persons).",
         "responses": {
           "200": {
             "description": "List of categories retrieved"

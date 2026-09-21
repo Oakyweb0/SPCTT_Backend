@@ -161,7 +161,8 @@ export async function initDatabase() {
           { name: 'Non-Members (Consultants)', code: 'NON_MEMBERS', price: 4000.00 },
           { name: 'Fellows/ Students', code: 'FELLOWS_STUDENTS', price: 2500.00 },
           { name: 'Nurses', code: 'NURSES', price: 2000.00 },
-          { name: 'Industry Delegates', code: 'INDUSTRY_DELEGATES', price: 6000.00 }
+          { name: 'Industry Delegates', code: 'INDUSTRY_DELEGATES', price: 6000.00 },
+          { name: 'Accompanying Persons (including children > 10 yrs old)', code: 'ACCOMPANYING_PERSONS', price: 4000.00 }
         ];
 
         for (const cat of defaultCategories) {
