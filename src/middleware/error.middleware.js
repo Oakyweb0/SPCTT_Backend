@@ -17,6 +17,14 @@ export function notFoundHandler(req, res) {
 export function errorHandler(err, req, res, next) {
   logger.error(`Unhandled Exception at [${req.method} ${req.url}]:`, err.stack || err.message);
 
+  // Handle Multer upload errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      status: false,
+      message: `File upload too large. Maximum allowed size is ${config.UPLOAD.MAX_SIZE_MB}MB per file.`
+    });
+  }
+
   const statusCode = err.statusCode || (res.statusCode >= 400 ? res.statusCode : 500);
 
   const response = {
