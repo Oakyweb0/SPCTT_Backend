@@ -15,6 +15,53 @@ async function getAbstractColumns() {
   }
 }
 
+function buildSelectExpressions(cols) {
+  const nameExpr = cols.has('name') ? 'a.name' : 'NULL';
+  const instituteExpr = cols.has('institute_name') ? 'a.institute_name' : 'NULL';
+  const topicExpr = cols.has('topic') ? 'a.topic' : 'NULL';
+  const emailExpr = cols.has('email') ? 'a.email' : 'NULL';
+  const phoneExpr = cols.has('phone') ? 'a.phone' : 'NULL';
+  const pdfExpr = cols.has('pdf_url') ? 'a.pdf_url' : 'NULL';
+  const imageExpr = cols.has('image_url') ? 'a.image_url' : 'NULL';
+
+  const authorsExpr = cols.has('authors') ? 'a.authors' : 'NULL';
+  const affiliationExpr = cols.has('affiliation') ? 'a.affiliation' : 'NULL';
+  const titleExpr = cols.has('title') ? 'a.title' : 'NULL';
+  const fileExpr = cols.has('file_url') ? 'a.file_url' : 'NULL';
+
+  return `
+    COALESCE(${nameExpr}, ${authorsExpr}, u.name) as display_name, 
+    COALESCE(${nameExpr}, ${authorsExpr}, u.name) as name,
+    COALESCE(${instituteExpr}, ${affiliationExpr}, u.organization) as display_institute,
+    COALESCE(${instituteExpr}, ${affiliationExpr}, u.organization) as institute_name,
+    COALESCE(${topicExpr}, ${titleExpr}) as display_topic,
+    COALESCE(${topicExpr}, ${titleExpr}) as topic,
+    COALESCE(${emailExpr}, u.email) as display_email, 
+    COALESCE(${emailExpr}, u.email) as email,
+    COALESCE(${phoneExpr}, u.phone) as display_phone, 
+    COALESCE(${phoneExpr}, u.phone) as phone,
+    COALESCE(${pdfExpr}, ${fileExpr}) as pdf_url,
+    COALESCE(${imageExpr}, NULL) as image_url
+  `;
+}
+
+function normalizeAbstractRow(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    name: row.name || row.authors || row.submitter_name || '',
+    institute_name: row.institute_name || row.affiliation || row.submitter_org || '',
+    topic: row.topic || row.title || '',
+    email: row.email || row.submitter_email || '',
+    phone: row.phone || row.submitter_phone || '',
+    pdf_url: row.pdf_url || row.file_url || null,
+    image_url: row.image_url || null,
+    display_name: row.display_name || row.name || row.authors || row.submitter_name || '',
+    display_institute: row.display_institute || row.institute_name || row.affiliation || '',
+    display_topic: row.display_topic || row.topic || row.title || ''
+  };
+}
+
 export const Abstract = {
   /**
    * Submit / Create a new abstract
@@ -87,19 +134,12 @@ export const Abstract = {
    */
   async findById(id) {
     const pool = getPool();
+    const cols = await getAbstractColumns();
+    const selectExprs = buildSelectExpressions(cols);
+
     const [rows] = await pool.query(
       `SELECT a.*, 
-              COALESCE(a.name, a.authors, u.name) as display_name, 
-              COALESCE(a.name, a.authors, u.name) as name,
-              COALESCE(a.institute_name, a.affiliation, u.organization) as display_institute,
-              COALESCE(a.institute_name, a.affiliation, u.organization) as institute_name,
-              COALESCE(a.topic, a.title) as display_topic,
-              COALESCE(a.topic, a.title) as topic,
-              COALESCE(a.email, u.email) as display_email, 
-              COALESCE(a.email, u.email) as email,
-              COALESCE(a.phone, u.phone) as display_phone, 
-              COALESCE(a.phone, u.phone) as phone,
-              COALESCE(a.pdf_url, a.file_url) as pdf_url,
+              ${selectExprs},
               u.name as submitter_name, 
               u.email as submitter_email, 
               u.phone as submitter_phone, 
@@ -109,7 +149,7 @@ export const Abstract = {
        WHERE a.id = ? LIMIT 1`,
       [id]
     );
-    return rows[0] || null;
+    return normalizeAbstractRow(rows[0]);
   },
 
   /**
@@ -117,21 +157,23 @@ export const Abstract = {
    */
   async findByUserId(userId) {
     const pool = getPool();
+    const cols = await getAbstractColumns();
+    const selectExprs = buildSelectExpressions(cols);
+
     const [rows] = await pool.query(
       `SELECT a.*, 
-              COALESCE(a.name, a.authors, u.name) as name, 
-              COALESCE(a.institute_name, a.affiliation, u.organization) as institute_name,
-              COALESCE(a.topic, a.title) as topic,
-              COALESCE(a.email, u.email) as email, 
-              COALESCE(a.phone, u.phone) as phone,
-              COALESCE(a.pdf_url, a.file_url) as pdf_url
+              ${selectExprs},
+              u.name as submitter_name, 
+              u.email as submitter_email, 
+              u.phone as submitter_phone, 
+              u.organization as submitter_org 
        FROM abstracts a 
        LEFT JOIN users u ON a.user_id = u.id 
        WHERE a.user_id = ? 
        ORDER BY a.id DESC`,
       [userId]
     );
-    return rows;
+    return rows.map(normalizeAbstractRow);
   },
 
   /**
@@ -139,19 +181,12 @@ export const Abstract = {
    */
   async findAll({ status, category, search } = {}) {
     const pool = getPool();
+    const cols = await getAbstractColumns();
+    const selectExprs = buildSelectExpressions(cols);
+
     let query = `
       SELECT a.*, 
-             COALESCE(a.name, a.authors, u.name) as display_name, 
-             COALESCE(a.name, a.authors, u.name) as name, 
-             COALESCE(a.institute_name, a.affiliation, u.organization) as display_institute,
-             COALESCE(a.institute_name, a.affiliation, u.organization) as institute_name,
-             COALESCE(a.topic, a.title) as display_topic,
-             COALESCE(a.topic, a.title) as topic,
-             COALESCE(a.email, u.email) as display_email, 
-             COALESCE(a.email, u.email) as email, 
-             COALESCE(a.phone, u.phone) as display_phone, 
-             COALESCE(a.phone, u.phone) as phone, 
-             COALESCE(a.pdf_url, a.file_url) as pdf_url,
+             ${selectExprs},
              u.name as submitter_name, 
              u.email as submitter_email, 
              u.phone as submitter_phone, 
@@ -171,14 +206,22 @@ export const Abstract = {
       params.push(category);
     }
     if (search) {
-      query += ' AND (a.title LIKE ? OR a.authors LIKE ? OR a.affiliation LIKE ? OR a.abstract_code LIKE ? OR u.name LIKE ? OR u.email LIKE ?)';
+      const searchConditions = ['u.name LIKE ?', 'u.email LIKE ?'];
+      if (cols.has('title')) searchConditions.push('a.title LIKE ?');
+      if (cols.has('authors')) searchConditions.push('a.authors LIKE ?');
+      if (cols.has('affiliation')) searchConditions.push('a.affiliation LIKE ?');
+      if (cols.has('abstract_code')) searchConditions.push('a.abstract_code LIKE ?');
+      if (cols.has('topic')) searchConditions.push('a.topic LIKE ?');
+      if (cols.has('name')) searchConditions.push('a.name LIKE ?');
+
+      query += ` AND (${searchConditions.join(' OR ')})`;
       const s = `%${search}%`;
-      params.push(s, s, s, s, s, s);
+      searchConditions.forEach(() => params.push(s));
     }
 
     query += ' ORDER BY a.id DESC';
     const [rows] = await pool.query(query, params);
-    return rows;
+    return rows.map(normalizeAbstractRow);
   },
 
   /**
@@ -207,11 +250,12 @@ export const Abstract = {
    */
   async findRecent(limit = 5) {
     const pool = getPool();
+    const cols = await getAbstractColumns();
+    const selectExprs = buildSelectExpressions(cols);
+
     const [rows] = await pool.query(
       `SELECT a.*, 
-              COALESCE(a.name, a.authors, u.name) as display_name, 
-              COALESCE(a.email, u.email) as display_email, 
-              COALESCE(a.topic, a.title) as display_topic,
+              ${selectExprs},
               u.name as submitter_name, 
               u.email as submitter_email 
        FROM abstracts a 
@@ -219,8 +263,9 @@ export const Abstract = {
        ORDER BY a.id DESC LIMIT ?`,
       [Number(limit)]
     );
-    return rows;
+    return rows.map(normalizeAbstractRow);
   }
 };
 
 export default Abstract;
+
