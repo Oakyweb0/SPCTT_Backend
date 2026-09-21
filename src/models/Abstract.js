@@ -47,6 +47,29 @@ function buildSelectExpressions(cols) {
 
 function normalizeAbstractRow(row) {
   if (!row) return null;
+
+  let pdfUrl = row.pdf_url || null;
+  let imageUrl = row.image_url || null;
+
+  if (row.file_url) {
+    if (typeof row.file_url === 'string' && (row.file_url.startsWith('{') || row.file_url.startsWith('{"'))) {
+      try {
+        const parsed = JSON.parse(row.file_url);
+        if (parsed.pdf) pdfUrl = pdfUrl || parsed.pdf;
+        if (parsed.image) imageUrl = imageUrl || parsed.image;
+      } catch (e) {
+        pdfUrl = pdfUrl || row.file_url;
+      }
+    } else if (typeof row.file_url === 'string') {
+      const lower = row.file_url.toLowerCase();
+      if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp')) {
+        imageUrl = imageUrl || row.file_url;
+      } else {
+        pdfUrl = pdfUrl || row.file_url;
+      }
+    }
+  }
+
   return {
     ...row,
     name: row.name || row.authors || row.submitter_name || '',
@@ -54,8 +77,8 @@ function normalizeAbstractRow(row) {
     topic: row.topic || row.title || '',
     email: row.email || row.submitter_email || '',
     phone: row.phone || row.submitter_phone || '',
-    pdf_url: row.pdf_url || row.file_url || null,
-    image_url: row.image_url || null,
+    pdf_url: pdfUrl,
+    image_url: imageUrl,
     display_name: row.display_name || row.name || row.authors || row.submitter_name || '',
     display_institute: row.display_institute || row.institute_name || row.affiliation || '',
     display_topic: row.display_topic || row.topic || row.title || ''
@@ -95,6 +118,13 @@ export const Abstract = {
     const finalPdfUrl = pdfUrl || fileUrl || null;
     const finalImageUrl = imageUrl || null;
 
+    let finalStoredFileUrl = finalPdfUrl;
+    if (finalPdfUrl && finalImageUrl) {
+      finalStoredFileUrl = JSON.stringify({ pdf: finalPdfUrl, image: finalImageUrl });
+    } else if (finalImageUrl && !finalPdfUrl) {
+      finalStoredFileUrl = finalImageUrl;
+    }
+
     const cols = await getAbstractColumns();
 
     const insertData = {
@@ -105,7 +135,7 @@ export const Abstract = {
       affiliation: finalInstitute,
       category: finalCategory,
       abstract_text: finalAbstractText,
-      file_url: finalPdfUrl,
+      file_url: finalStoredFileUrl,
       status: 'submitted'
     };
 
