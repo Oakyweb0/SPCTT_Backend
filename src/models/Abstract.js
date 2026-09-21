@@ -40,7 +40,7 @@ function buildSelectExpressions(cols) {
     COALESCE(${emailExpr}, u.email) as email,
     COALESCE(${phoneExpr}, u.phone) as display_phone, 
     COALESCE(${phoneExpr}, u.phone) as phone,
-    COALESCE(${pdfExpr}, ${fileExpr}) as pdf_url,
+    COALESCE(${pdfExpr}, NULL) as pdf_url,
     COALESCE(${imageExpr}, NULL) as image_url
   `;
 }
@@ -55,8 +55,8 @@ function normalizeAbstractRow(row) {
     if (typeof row.file_url === 'string' && (row.file_url.startsWith('{') || row.file_url.startsWith('{"'))) {
       try {
         const parsed = JSON.parse(row.file_url);
-        if (parsed.pdf) pdfUrl = pdfUrl || parsed.pdf;
-        if (parsed.image) imageUrl = imageUrl || parsed.image;
+        if (parsed.pdf) pdfUrl = parsed.pdf;
+        if (parsed.image) imageUrl = parsed.image;
       } catch (e) {
         pdfUrl = pdfUrl || row.file_url;
       }
