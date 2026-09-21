@@ -136,6 +136,39 @@ export const adminController = {
   },
 
   /**
+   * Delete an Abstract by ID
+   * DELETE /api/admin/abstracts/:id
+   */
+  async deleteAbstract(req, res, next) {
+    try {
+      const { id } = req.params;
+      const targetId = parseInt(id, 10);
+      if (isNaN(targetId)) {
+        return sendError(res, 'Invalid abstract ID.', 400);
+      }
+
+      const existing = await Abstract.findById(targetId);
+      if (!existing) {
+        return sendError(res, 'Abstract not found.', 404);
+      }
+
+      const deleted = await Abstract.deleteById(targetId);
+      if (!deleted) {
+        return sendError(res, 'Failed to delete abstract.', 500);
+      }
+
+      return sendSuccess(
+        res,
+        { id: targetId, abstract_code: existing.abstract_code },
+        `Abstract '${existing.abstract_code}' deleted successfully.`
+      );
+    } catch (error) {
+      console.error('Error deleting abstract:', error);
+      return sendError(res, error.message || 'Failed to delete abstract.', 500, error);
+    }
+  },
+
+  /**
    * Get All Invoices
    * GET /api/admin/invoices
    */

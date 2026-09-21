@@ -19,5 +19,6 @@ router.post(
 );
 router.get('/my', abstractController.getMyAbstracts);
 router.get('/:id', abstractController.getAbstractById);
+router.delete('/:id', abstractController.deleteAbstract);
 
 export default router;
