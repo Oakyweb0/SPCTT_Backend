@@ -53,25 +53,17 @@ export const abstractController = {
         return sendValidationError(res, 'Topic / Abstract title is required.');
       }
 
-      // Handle file uploads (PDF and/or Image)
+      // Handle file upload (PDF only)
       let pdfUrl = req.body.pdfUrl || req.body.pdf_url || req.body.fileUrl || req.body.file_url || null;
-      let imageUrl = req.body.imageUrl || req.body.image_url || null;
 
       if (req.files) {
         if (req.files.pdf && req.files.pdf.length > 0) {
           pdfUrl = `/uploads/${req.files.pdf[0].filename}`;
+        } else if (req.files.file && req.files.file.length > 0) {
+          pdfUrl = `/uploads/${req.files.file[0].filename}`;
         }
-        if (req.files.image && req.files.image.length > 0) {
-          imageUrl = `/uploads/${req.files.image[0].filename}`;
-        }
-        if (req.files.file && req.files.file.length > 0) {
-          const singleFile = req.files.file[0];
-          if (singleFile.mimetype.startsWith('image/')) {
-            imageUrl = imageUrl || `/uploads/${singleFile.filename}`;
-          } else {
-            pdfUrl = pdfUrl || `/uploads/${singleFile.filename}`;
-          }
-        }
+      } else if (req.file) {
+        pdfUrl = `/uploads/${req.file.filename}`;
       }
 
       const created = await Abstract.create({
@@ -87,7 +79,6 @@ export const abstractController = {
         affiliation: finalInstitute,
         abstractText: finalAbstractText,
         pdfUrl,
-        imageUrl,
         fileUrl: pdfUrl
       });
 

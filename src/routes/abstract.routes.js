@@ -12,7 +12,6 @@ router.post(
   '/',
   upload.fields([
     { name: 'pdf', maxCount: 1 },
-    { name: 'image', maxCount: 1 },
     { name: 'file', maxCount: 1 }
   ]),
   abstractController.submitAbstract

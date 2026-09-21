@@ -271,7 +271,6 @@ export async function initDatabase() {
             \`affiliation\` TEXT DEFAULT NULL,
             \`abstract_text\` LONGTEXT DEFAULT NULL,
             \`pdf_url\` VARCHAR(255) DEFAULT NULL,
-            \`image_url\` VARCHAR(255) DEFAULT NULL,
             \`file_url\` VARCHAR(255) DEFAULT NULL,
             \`status\` ENUM('submitted', 'under_review', 'accepted', 'rejected') DEFAULT 'submitted',
             \`review_comments\` TEXT DEFAULT NULL,
@@ -293,8 +292,7 @@ export async function initDatabase() {
             { name: 'email', query: "ALTER TABLE `abstracts` ADD COLUMN `email` VARCHAR(150) DEFAULT NULL AFTER `category`" },
             { name: 'phone', query: "ALTER TABLE `abstracts` ADD COLUMN `phone` VARCHAR(50) DEFAULT NULL AFTER `email`" },
             { name: 'topic', query: "ALTER TABLE `abstracts` ADD COLUMN `topic` VARCHAR(255) DEFAULT NULL AFTER `phone`" },
-            { name: 'pdf_url', query: "ALTER TABLE `abstracts` ADD COLUMN `pdf_url` VARCHAR(255) DEFAULT NULL AFTER `abstract_text`" },
-            { name: 'image_url', query: "ALTER TABLE `abstracts` ADD COLUMN `image_url` VARCHAR(255) DEFAULT NULL AFTER `pdf_url`" }
+            { name: 'pdf_url', query: "ALTER TABLE `abstracts` ADD COLUMN `pdf_url` VARCHAR(255) DEFAULT NULL AFTER `abstract_text`" }
           ];
 
           for (const col of missingAbsColumns) {
@@ -304,6 +302,16 @@ export async function initDatabase() {
               } catch (alterErr) {
                 console.warn(`Could not add column '${col.name}' to abstracts:`, alterErr.message);
               }
+            }
+          }
+
+          // Drop image_url column if it exists in abstracts table
+          if (existingAbsColNames.includes('image_url')) {
+            try {
+              await pool.query('ALTER TABLE `abstracts` DROP COLUMN `image_url`');
+              console.log("Column 'image_url' removed from abstracts table.");
+            } catch (dropErr) {
+              console.warn("Could not drop column 'image_url' from abstracts:", dropErr.message);
             }
           }
         } catch (colCheckErr) {

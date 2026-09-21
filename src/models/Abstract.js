@@ -22,7 +22,6 @@ function buildSelectExpressions(cols) {
   const emailExpr = cols.has('email') ? 'a.email' : 'NULL';
   const phoneExpr = cols.has('phone') ? 'a.phone' : 'NULL';
   const pdfExpr = cols.has('pdf_url') ? 'a.pdf_url' : 'NULL';
-  const imageExpr = cols.has('image_url') ? 'a.image_url' : 'NULL';
 
   const authorsExpr = cols.has('authors') ? 'a.authors' : 'NULL';
   const affiliationExpr = cols.has('affiliation') ? 'a.affiliation' : 'NULL';
@@ -40,8 +39,8 @@ function buildSelectExpressions(cols) {
     COALESCE(${emailExpr}, u.email) as email,
     COALESCE(${phoneExpr}, u.phone) as display_phone, 
     COALESCE(${phoneExpr}, u.phone) as phone,
-    COALESCE(${pdfExpr}, NULL) as pdf_url,
-    COALESCE(${imageExpr}, NULL) as image_url
+    COALESCE(${pdfExpr}, ${fileExpr}, NULL) as pdf_url,
+    COALESCE(${pdfExpr}, ${fileExpr}, NULL) as file_url
   `;
 }
 
@@ -49,24 +48,18 @@ function normalizeAbstractRow(row) {
   if (!row) return null;
 
   let pdfUrl = row.pdf_url || null;
-  let imageUrl = row.image_url || null;
 
   if (row.file_url) {
     if (typeof row.file_url === 'string' && (row.file_url.startsWith('{') || row.file_url.startsWith('{"'))) {
       try {
         const parsed = JSON.parse(row.file_url);
         if (parsed.pdf) pdfUrl = parsed.pdf;
-        if (parsed.image) imageUrl = parsed.image;
+        else if (parsed.file) pdfUrl = parsed.file;
       } catch (e) {
         pdfUrl = pdfUrl || row.file_url;
       }
     } else if (typeof row.file_url === 'string') {
-      const lower = row.file_url.toLowerCase();
-      if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp')) {
-        imageUrl = imageUrl || row.file_url;
-      } else {
-        pdfUrl = pdfUrl || row.file_url;
-      }
+      pdfUrl = pdfUrl || row.file_url;
     }
   }
 
@@ -78,7 +71,7 @@ function normalizeAbstractRow(row) {
     email: row.email || row.submitter_email || '',
     phone: row.phone || row.submitter_phone || '',
     pdf_url: pdfUrl,
-    image_url: imageUrl,
+    file_url: pdfUrl,
     display_name: row.display_name || row.name || row.authors || row.submitter_name || '',
     display_institute: row.display_institute || row.institute_name || row.affiliation || '',
     display_topic: row.display_topic || row.topic || row.title || ''
@@ -102,7 +95,6 @@ export const Abstract = {
     affiliation = '',
     abstractText = '',
     pdfUrl = null,
-    imageUrl = null,
     fileUrl = null
   }) {
     const pool = getPool();
@@ -116,14 +108,6 @@ export const Abstract = {
     const finalPhone = (phone || '').trim();
     const finalAbstractText = (abstractText || '').trim();
     const finalPdfUrl = pdfUrl || fileUrl || null;
-    const finalImageUrl = imageUrl || null;
-
-    let finalStoredFileUrl = finalPdfUrl;
-    if (finalPdfUrl && finalImageUrl) {
-      finalStoredFileUrl = JSON.stringify({ pdf: finalPdfUrl, image: finalImageUrl });
-    } else if (finalImageUrl && !finalPdfUrl) {
-      finalStoredFileUrl = finalImageUrl;
-    }
 
     const cols = await getAbstractColumns();
 
@@ -135,7 +119,7 @@ export const Abstract = {
       affiliation: finalInstitute,
       category: finalCategory,
       abstract_text: finalAbstractText,
-      file_url: finalStoredFileUrl,
+      file_url: finalPdfUrl,
       status: 'submitted'
     };
 
@@ -145,7 +129,6 @@ export const Abstract = {
     if (cols.has('email')) insertData.email = finalEmail;
     if (cols.has('phone')) insertData.phone = finalPhone;
     if (cols.has('pdf_url')) insertData.pdf_url = finalPdfUrl;
-    if (cols.has('image_url')) insertData.image_url = finalImageUrl;
 
     const fields = Object.keys(insertData);
     const placeholders = fields.map(() => '?').join(', ');
