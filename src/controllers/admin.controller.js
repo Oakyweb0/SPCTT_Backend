@@ -183,6 +183,99 @@ export const adminController = {
   },
 
   /**
+   * Create New User by Admin
+   * POST /api/admin/users
+   */
+  async createUser(req, res, next) {
+    try {
+      const {
+        title = 'Mr.',
+        name,
+        fullName,
+        email,
+        organization,
+        phone,
+        role = 'user',
+        status = 'active',
+        password,
+        address,
+        city,
+        state,
+        country,
+        pincode
+      } = req.body;
+
+      const finalName = (fullName || name || '').trim();
+      const finalEmail = (email || '').trim().toLowerCase();
+
+      if (!finalName) {
+        return sendError(res, 'Full name is required.', 422);
+      }
+
+      if (!finalEmail) {
+        return sendError(res, 'Email address is required.', 422);
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(finalEmail)) {
+        return sendError(res, 'Please provide a valid email address.', 422);
+      }
+
+      if (!password || password.length < 6) {
+        return sendError(res, 'Password must be at least 6 characters long.', 422);
+      }
+
+      const existing = await User.findByEmail(finalEmail);
+      if (existing) {
+        return sendError(res, 'A user with this email address already exists.', 409);
+      }
+
+      const validRoles = ['admin', 'user', 'manager'];
+      const finalRole = validRoles.includes((role || '').toLowerCase()) ? role.toLowerCase() : 'user';
+
+      const validStatuses = ['active', 'inactive', 'banned'];
+      const finalStatus = validStatuses.includes((status || '').toLowerCase()) ? status.toLowerCase() : 'active';
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const newUser = await User.create({
+        title: (title || 'Mr.').trim(),
+        name: finalName,
+        email: finalEmail,
+        organization: organization ? organization.trim() : null,
+        phone: phone ? phone.trim() : null,
+        password: hashedPassword,
+        role: finalRole,
+        status: finalStatus
+      });
+
+      // Extra profile fields if provided
+      const extraUpdates = {};
+      if (address) extraUpdates.address = address.trim();
+      if (city) extraUpdates.city = city.trim();
+      if (state) extraUpdates.state = state.trim();
+      if (country) extraUpdates.country = country.trim();
+      if (pincode) extraUpdates.pincode = pincode.trim();
+
+      let finalUser = newUser;
+      if (Object.keys(extraUpdates).length > 0) {
+        finalUser = await User.updateById(newUser.id, extraUpdates);
+      }
+
+      return sendSuccess(
+        res,
+        finalUser,
+        `User '${finalUser.name}' (ID: #${finalUser.id}) created successfully!`,
+        201
+      );
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return sendError(res, error.message || 'Failed to create user.', 500, error);
+    }
+  },
+
+  /**
    * Get All Registered Users
    * GET /api/admin/users
    */
