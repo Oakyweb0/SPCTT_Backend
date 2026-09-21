@@ -377,7 +377,9 @@
       },
       "ForgotPasswordRequest": {
         "type": "object",
-        "required": ["email"],
+        "required": [
+          "email"
+        ],
         "properties": {
           "email": {
             "type": "string",
@@ -387,7 +389,9 @@
       },
       "VerifyResetTokenRequest": {
         "type": "object",
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "properties": {
           "token": {
             "type": "string",
@@ -397,7 +401,10 @@
       },
       "ResetPasswordRequest": {
         "type": "object",
-        "required": ["token", "newPassword"],
+        "required": [
+          "token",
+          "newPassword"
+        ],
         "properties": {
           "token": {
             "type": "string",
@@ -418,7 +425,13 @@
         "properties": {
           "title": {
             "type": "string",
-            "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
+            "enum": [
+              "Mr.",
+              "Ms.",
+              "Mrs.",
+              "Dr.",
+              "Prof."
+            ],
             "example": "Dr."
           },
           "name": {
@@ -464,7 +477,13 @@
         "properties": {
           "title": {
             "type": "string",
-            "enum": ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
+            "enum": [
+              "Mr.",
+              "Ms.",
+              "Mrs.",
+              "Dr.",
+              "Prof."
+            ],
             "example": "Mr."
           },
           "name": {
@@ -485,12 +504,20 @@
           },
           "role": {
             "type": "string",
-            "enum": ["user", "manager", "admin"],
+            "enum": [
+              "user",
+              "manager",
+              "admin"
+            ],
             "example": "user"
           },
           "status": {
             "type": "string",
-            "enum": ["active", "inactive", "banned"],
+            "enum": [
+              "active",
+              "inactive",
+              "banned"
+            ],
             "example": "active"
           },
           "address": {
@@ -536,7 +563,10 @@
           },
           "category": {
             "type": "string",
-            "enum": ["Poster", "Oral"],
+            "enum": [
+              "Poster",
+              "Oral"
+            ],
             "example": "Poster"
           },
           "email": {
