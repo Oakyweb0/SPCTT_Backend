@@ -260,11 +260,18 @@ export async function initDatabase() {
             \`id\` INT AUTO_INCREMENT PRIMARY KEY,
             \`abstract_code\` VARCHAR(50) NOT NULL UNIQUE,
             \`user_id\` INT NOT NULL,
-            \`title\` VARCHAR(255) NOT NULL,
-            \`authors\` TEXT NOT NULL,
-            \`affiliation\` TEXT NOT NULL,
-            \`category\` VARCHAR(100) NOT NULL,
-            \`abstract_text\` LONGTEXT NOT NULL,
+            \`name\` VARCHAR(150) DEFAULT NULL,
+            \`institute_name\` VARCHAR(255) DEFAULT NULL,
+            \`category\` VARCHAR(100) NOT NULL DEFAULT 'Poster',
+            \`email\` VARCHAR(150) DEFAULT NULL,
+            \`phone\` VARCHAR(50) DEFAULT NULL,
+            \`topic\` VARCHAR(255) DEFAULT NULL,
+            \`title\` VARCHAR(255) DEFAULT NULL,
+            \`authors\` TEXT DEFAULT NULL,
+            \`affiliation\` TEXT DEFAULT NULL,
+            \`abstract_text\` LONGTEXT DEFAULT NULL,
+            \`pdf_url\` VARCHAR(255) DEFAULT NULL,
+            \`image_url\` VARCHAR(255) DEFAULT NULL,
             \`file_url\` VARCHAR(255) DEFAULT NULL,
             \`status\` ENUM('submitted', 'under_review', 'accepted', 'rejected') DEFAULT 'submitted',
             \`review_comments\` TEXT DEFAULT NULL,
@@ -274,6 +281,34 @@ export async function initDatabase() {
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
         console.log("Table 'abstracts' created.");
+      } else {
+        // Ensure missing columns exist in existing abstracts table
+        try {
+          const [absColumns] = await pool.query('SHOW COLUMNS FROM `abstracts`');
+          const existingAbsColNames = absColumns.map((c) => c.Field);
+
+          const missingAbsColumns = [
+            { name: 'name', query: "ALTER TABLE `abstracts` ADD COLUMN `name` VARCHAR(150) DEFAULT NULL AFTER `user_id`" },
+            { name: 'institute_name', query: "ALTER TABLE `abstracts` ADD COLUMN `institute_name` VARCHAR(255) DEFAULT NULL AFTER `name`" },
+            { name: 'email', query: "ALTER TABLE `abstracts` ADD COLUMN `email` VARCHAR(150) DEFAULT NULL AFTER `category`" },
+            { name: 'phone', query: "ALTER TABLE `abstracts` ADD COLUMN `phone` VARCHAR(50) DEFAULT NULL AFTER `email`" },
+            { name: 'topic', query: "ALTER TABLE `abstracts` ADD COLUMN `topic` VARCHAR(255) DEFAULT NULL AFTER `phone`" },
+            { name: 'pdf_url', query: "ALTER TABLE `abstracts` ADD COLUMN `pdf_url` VARCHAR(255) DEFAULT NULL AFTER `abstract_text`" },
+            { name: 'image_url', query: "ALTER TABLE `abstracts` ADD COLUMN `image_url` VARCHAR(255) DEFAULT NULL AFTER `pdf_url`" }
+          ];
+
+          for (const col of missingAbsColumns) {
+            if (!existingAbsColNames.includes(col.name)) {
+              try {
+                await pool.query(col.query);
+              } catch (alterErr) {
+                console.warn(`Could not add column '${col.name}' to abstracts:`, alterErr.message);
+              }
+            }
+          }
+        } catch (colCheckErr) {
+          console.warn('Could not inspect abstracts columns:', colCheckErr.message);
+        }
       }
 
       // 9. Seed default super admin

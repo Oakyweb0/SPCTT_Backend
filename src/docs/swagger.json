@@ -518,32 +518,52 @@
       "AbstractSubmissionRequest": {
         "type": "object",
         "required": [
-          "title",
-          "authors",
-          "affiliation",
+          "name",
+          "instituteName",
           "category",
-          "abstractText"
+          "email",
+          "phone",
+          "topic"
         ],
         "properties": {
-          "title": {
+          "name": {
             "type": "string",
-            "example": "Advancements in Pediatric Cardiopulmonary Techniques"
+            "example": "Dr. Vivek Tiwari"
           },
-          "authors": {
+          "instituteName": {
             "type": "string",
-            "example": "Dr. Vivek Tiwari, Dr. Ratan Singh"
-          },
-          "affiliation": {
-            "type": "string",
-            "example": "Department of Cardiology, SPCTT Institute"
+            "example": "All India Institute of Medical Sciences"
           },
           "category": {
             "type": "string",
-            "example": "Cardiothoracic Surgery"
+            "enum": ["Poster", "Oral"],
+            "example": "Poster"
+          },
+          "email": {
+            "type": "string",
+            "example": "vivek@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 9876543210"
+          },
+          "topic": {
+            "type": "string",
+            "example": "Advancements in Pediatric Cardiopulmonary Techniques"
           },
           "abstractText": {
             "type": "string",
             "example": "Detailed abstract content describing objectives, methodology, results, and conclusions..."
+          },
+          "pdf": {
+            "type": "string",
+            "format": "binary",
+            "description": "PDF Document file upload"
+          },
+          "image": {
+            "type": "string",
+            "format": "binary",
+            "description": "Image file upload (JPG, PNG, WEBP)"
           }
         }
       },
@@ -948,6 +968,11 @@
         "requestBody": {
           "required": true,
           "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AbstractSubmissionRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AbstractSubmissionRequest"
