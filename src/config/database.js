@@ -305,13 +305,16 @@ export async function initDatabase() {
             }
           }
 
-          // Drop image_url column if it exists in abstracts table
-          if (existingAbsColNames.includes('image_url')) {
-            try {
-              await pool.query('ALTER TABLE `abstracts` DROP COLUMN `image_url`');
-              console.log("Column 'image_url' removed from abstracts table.");
-            } catch (dropErr) {
-              console.warn("Could not drop column 'image_url' from abstracts:", dropErr.message);
+          // Drop image/image_url related columns if they exist in abstracts table
+          const imageColsToDrop = ['image', 'images', 'image_url', 'img', 'img_url', 'image_path'];
+          for (const imgCol of imageColsToDrop) {
+            if (existingAbsColNames.includes(imgCol)) {
+              try {
+                await pool.query(`ALTER TABLE \`abstracts\` DROP COLUMN \`${imgCol}\``);
+                console.log(`Column '${imgCol}' removed from abstracts table.`);
+              } catch (dropErr) {
+                console.warn(`Could not drop column '${imgCol}' from abstracts:`, dropErr.message);
+              }
             }
           }
         } catch (colCheckErr) {

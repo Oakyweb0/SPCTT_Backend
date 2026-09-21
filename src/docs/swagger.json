@@ -589,11 +589,6 @@
             "type": "string",
             "format": "binary",
             "description": "PDF Document file upload (Max file size: 5MB, .pdf only)"
-          },
-          "image": {
-            "type": "string",
-            "format": "binary",
-            "description": "Image file upload (JPG, PNG, WEBP, Max file size: 5MB)"
           }
         }
       },
@@ -989,7 +984,7 @@
           "📝 User Portal - Abstract Submission (Website)"
         ],
         "summary": "Submit Abstract",
-        "description": "Submit a research abstract for SPCTT 2026 conference presentation. (Maximum file size: 5MB for PDF, 5MB for Image).",
+        "description": "Submit a research abstract for SPCTT 2026 conference presentation. (Maximum file size: 5MB for PDF).",
         "security": [
           {
             "BearerAuth": []
