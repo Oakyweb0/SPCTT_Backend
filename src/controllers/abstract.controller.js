@@ -1,5 +1,7 @@
 import { Abstract } from '../models/Abstract.js';
 import { sendSuccess, sendError, sendValidationError } from '../utils/response.js';
+import { r2Service } from '../services/r2.service.js';
+import { logger } from '../utils/logger.js';
 
 export const abstractController = {
   /**
@@ -53,17 +55,46 @@ export const abstractController = {
         return sendValidationError(res, 'Topic / Abstract title is required.');
       }
 
-      // Handle file upload (PDF only)
+      // Handle PDF file upload (strictly PDF & max 1 MB)
       let pdfUrl = req.body.pdfUrl || req.body.pdf_url || req.body.fileUrl || req.body.file_url || null;
+      let uploadedFileObj = null;
 
       if (req.files) {
         if (req.files.pdf && req.files.pdf.length > 0) {
-          pdfUrl = `/uploads/${req.files.pdf[0].filename}`;
+          uploadedFileObj = req.files.pdf[0];
         } else if (req.files.file && req.files.file.length > 0) {
-          pdfUrl = `/uploads/${req.files.file[0].filename}`;
+          uploadedFileObj = req.files.file[0];
         }
       } else if (req.file) {
-        pdfUrl = `/uploads/${req.file.filename}`;
+        uploadedFileObj = req.file;
+      }
+
+      if (uploadedFileObj) {
+        const MAX_1MB = 1 * 1024 * 1024;
+        if (uploadedFileObj.size && uploadedFileObj.size > MAX_1MB) {
+          return sendValidationError(res, 'PDF file size exceeds 1 MB. Maximum allowed size is 1 MB.');
+        }
+
+        const isPdf = uploadedFileObj.mimetype === 'application/pdf' || 
+                      (uploadedFileObj.originalname && uploadedFileObj.originalname.toLowerCase().endsWith('.pdf'));
+        if (!isPdf) {
+          return sendValidationError(res, 'Only PDF document files (.pdf) are permitted for abstract submissions.');
+        }
+
+        // Upload directly to Cloudflare R2 (folder: Abstract_pdf/)
+        try {
+          const r2UploadResult = await r2Service.uploadAbstractPdf({
+            buffer: uploadedFileObj.buffer,
+            originalName: uploadedFileObj.originalname,
+            mimeType: uploadedFileObj.mimetype || 'application/pdf',
+            filePath: uploadedFileObj.path
+          });
+          pdfUrl = r2UploadResult.url;
+          logger.info(`Abstract PDF stored at: ${pdfUrl} (R2: ${r2UploadResult.isR2})`);
+        } catch (uploadErr) {
+          logger.error('Failed to upload PDF to Cloudflare R2 / storage:', uploadErr.message);
+          return sendError(res, 'Failed to process and store abstract PDF file. Please try again.', 500, uploadErr);
+        }
       }
 
       const created = await Abstract.create({

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { abstractController } from '../controllers/abstract.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
-import { upload } from '../middleware/upload.middleware.js';
+import { uploadAbstractPdfMiddleware } from '../middleware/upload.middleware.js';
 
 const router = Router();
 
@@ -10,10 +10,7 @@ router.use(authenticateToken);
 
 router.post(
   '/',
-  upload.fields([
-    { name: 'pdf', maxCount: 1 },
-    { name: 'file', maxCount: 1 }
-  ]),
+  uploadAbstractPdfMiddleware,
   abstractController.submitAbstract
 );
 router.get('/my', abstractController.getMyAbstracts);

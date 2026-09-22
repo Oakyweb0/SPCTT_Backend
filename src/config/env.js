@@ -66,7 +66,17 @@ export const config = {
 
   UPLOAD: {
     DIR: path.resolve(rootDir, process.env.UPLOAD_DIR || 'uploads'),
-    MAX_SIZE_MB: parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10)
+    MAX_SIZE_MB: parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10),
+    ABSTRACT_MAX_SIZE_MB: parseInt(process.env.ABSTRACT_MAX_FILE_SIZE_MB || '1', 10)
+  },
+
+  R2: {
+    ACCOUNT_ID: process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID || '4605438c0b6120f7fd4e672b18c86d9e',
+    BUCKET_NAME: process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_BUCKET_NAME || 'spctt2027',
+    ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || '',
+    SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || '',
+    PUBLIC_URL: process.env.R2_PUBLIC_URL || process.env.CLOUDFLARE_R2_PUBLIC_URL || '',
+    FOLDER: process.env.R2_FOLDER || process.env.CLOUDFLARE_R2_FOLDER || 'Abstract_pdf'
   },
 
   LOG_LEVEL: process.env.LOG_LEVEL || 'info'

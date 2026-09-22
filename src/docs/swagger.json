@@ -588,7 +588,7 @@
           "pdf": {
             "type": "string",
             "format": "binary",
-            "description": "PDF Document file upload (Max file size: 5MB, .pdf only)"
+            "description": "Abstract PDF document upload (Strictly Maximum 1 MB, .pdf only. Files exceeding 1 MB are not accepted. Saved to Cloudflare R2 object storage)."
           }
         }
       },
@@ -983,8 +983,8 @@
         "tags": [
           "📝 User Portal - Abstract Submission (Website)"
         ],
-        "summary": "Submit Abstract",
-        "description": "Submit a research abstract for SPCTT 2026 conference presentation. (Maximum file size: 5MB for PDF).",
+        "summary": "Submit Research Abstract (PDF Max 1MB - Cloudflare R2)",
+        "description": "Submit a research abstract for SPCTT 2026 conference presentation (Poster or Oral). PDF file upload is strictly limited to 1 MB maximum and stored directly in Cloudflare R2 object storage (spctt2027/Abstract_pdf).",
         "security": [
           {
             "BearerAuth": []
