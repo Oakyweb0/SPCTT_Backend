@@ -1637,6 +1637,744 @@
           }
         }
       }
+    },
+    "/api/admin/registrations/export": {
+      "get": {
+        "tags": [
+          "Admin - Excel Exports & Reports"
+        ],
+        "summary": "Export Registrations to Excel (.xlsx)",
+        "description": "Generates and downloads a styled Microsoft Excel (.xlsx) file containing all registrations with applicant details, category, fees, and payment status.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            },
+            "description": "Filter by registration approval status"
+          },
+          {
+            "name": "payment_status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "paid",
+                "unpaid",
+                "pending",
+                "failed"
+              ]
+            },
+            "description": "Filter by payment status"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword (name, email, registration ID, organization)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel spreadsheet downloaded successfully",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Invalid or missing admin token"
+          },
+          "403": {
+            "description": "Forbidden: Admin role required"
+          },
+          "500": {
+            "description": "Failed to generate or export Excel sheet"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts/export": {
+      "get": {
+        "tags": [
+          "📊 Admin - Excel Exports & Reports"
+        ],
+        "summary": "Export Abstracts to Excel (.xlsx)",
+        "description": "Generates and downloads a styled Microsoft Excel (.xlsx) file containing all submitted abstracts, author names, institutes, topics, review statuses, and Cloudflare R2 PDF links.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "pending",
+                "accepted",
+                "rejected",
+                "revision_required"
+              ]
+            },
+            "description": "Filter by abstract review status"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "Oral",
+                "Poster"
+              ]
+            },
+            "description": "Filter by abstract presentation category"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword (abstract code, author name, email, institute, topic)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel spreadsheet downloaded successfully",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Invalid or missing admin token"
+          },
+          "403": {
+            "description": "Forbidden: Admin role required"
+          },
+          "500": {
+            "description": "Failed to generate or export Excel sheet"
+          }
+        }
+      }
+    },
+    "/api/admin/users/export": {
+      "get": {
+        "tags": [
+          "📊 Admin - Excel Exports & Reports"
+        ],
+        "summary": "Export Users to Excel (.xlsx)",
+        "description": "Generates and downloads a styled Microsoft Excel (.xlsx) file containing all user accounts, contact details, roles, and account statuses.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "admin",
+                "user",
+                "manager"
+              ]
+            },
+            "description": "Filter by user role"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "active",
+                "inactive",
+                "banned"
+              ]
+            },
+            "description": "Filter by user account status"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword (name, email, organization, phone)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel spreadsheet downloaded successfully",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Invalid or missing admin token"
+          },
+          "403": {
+            "description": "Forbidden: Admin role required"
+          },
+          "500": {
+            "description": "Failed to generate or export Excel sheet"
+          }
+        }
+      }
+    },
+    "/api/admin/dashboard-stats": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get Admin Dashboard Overview Stats",
+        "description": "Returns counts for registrations, accepted/pending abstracts, user totals, and revenue metrics.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/registrations": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get All Registrations with Pagination & Filters",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payment_status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registrations list retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/registrations/{id}/status": {
+      "put": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Update Registration Status",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected"
+                    ]
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get All Abstracts with Pagination & Filters",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abstracts list retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts/{id}/status": {
+      "put": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Update Abstract Review Status",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "accepted",
+                      "rejected",
+                      "revision_required"
+                    ]
+                  },
+                  "reviewerNotes": {
+                    "type": "string"
+                  },
+                  "sendEmailNotification": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Abstract status updated"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts/{id}/send-email": {
+      "post": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Resend Abstract Decision Email to Author",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decision email sent successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts/{id}/email-logs": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get Email Logs for an Abstract",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email logs retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/abstracts/{id}": {
+      "delete": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Delete Abstract & Cloudflare R2 File",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abstract deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/invoices": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get All Invoices & Billing Records",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoices retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get All Users with Pagination & Filters",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users list retrieved"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Create New User Account (Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/users/{id}": {
+      "get": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Get Single User by ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Update User Details & Status (Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "🛡️ Admin Management"
+        ],
+        "summary": "Delete User Account & Linked Records",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          }
+        }
+      }
     }
   }
 }
