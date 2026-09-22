@@ -67,8 +67,8 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header with Banner Background and Light Transparent Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(19, 37, 74, 0.28) 0%, rgba(19, 37, 74, 0.14) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+      <!-- Brand Header with Banner Background and Black / 40 Overlay -->
+      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.40) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
         <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
           SPCTT 2027 ANNUAL CONFERENCE
         </span>
@@ -199,8 +199,8 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header with Banner Background and Light Transparent Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(19, 37, 74, 0.28) 0%, rgba(19, 37, 74, 0.14) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+      <!-- Brand Header with Banner Background and Black / 40 Overlay -->
+      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.40) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
         <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
           SPCTT 2027 ANNUAL CONFERENCE
         </span>
