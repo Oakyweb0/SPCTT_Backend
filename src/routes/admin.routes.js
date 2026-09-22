@@ -11,10 +11,12 @@ router.use(authenticateToken, requireAdmin);
 router.get('/dashboard-stats', adminController.getDashboardStats);
 
 // 2. Registrations Management
+router.get('/registrations/export', adminController.exportRegistrations);
 router.get('/registrations', adminController.getRegistrations);
 router.put('/registrations/:id/status', adminController.updateRegistrationStatus);
 
 // 3. Abstracts Management
+router.get('/abstracts/export', adminController.exportAbstracts);
 router.get('/abstracts', adminController.getAbstracts);
 router.put('/abstracts/:id/status', adminController.updateAbstractStatus);
 router.post('/abstracts/:id/send-email', adminController.resendAbstractDecisionEmail);
@@ -25,6 +27,7 @@ router.delete('/abstracts/:id', adminController.deleteAbstract);
 router.get('/invoices', adminController.getInvoices);
 
 // 5. Users Management
+router.get('/users/export', adminController.exportUsers);
 router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserById);
 router.post('/users', adminController.createUser);

@@ -4,6 +4,7 @@ import { Registration } from '../models/Registration.js';
 import { Abstract } from '../models/Abstract.js';
 import { EmailLog } from '../models/EmailLog.js';
 import { emailService } from '../services/email.service.js';
+import { excelService } from '../services/excel.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const adminController = {
@@ -525,6 +526,75 @@ export const adminController = {
     } catch (error) {
       console.error('Error deleting user:', error);
       return sendError(res, error.message || 'Failed to delete user.', 500, error);
+    }
+  },
+
+  /**
+   * Export Abstracts to Excel (.xlsx)
+   * GET /api/admin/abstracts/export
+   */
+  async exportAbstracts(req, res, next) {
+    try {
+      const { status, category, search } = req.query;
+      const abstracts = await Abstract.findAll({ status, category, search });
+      const buffer = await excelService.generateAbstractsExcel(abstracts);
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `SPCTT_Abstracts_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      return res.send(buffer);
+    } catch (error) {
+      console.error('Error exporting abstracts to Excel:', error);
+      return sendError(res, 'Failed to export abstracts to Excel.', 500, error);
+    }
+  },
+
+  /**
+   * Export Registrations to Excel (.xlsx)
+   * GET /api/admin/registrations/export
+   */
+  async exportRegistrations(req, res, next) {
+    try {
+      const { status, payment_status, search } = req.query;
+      const registrations = await Registration.findAll({ status, payment_status, search });
+      const buffer = await excelService.generateRegistrationsExcel(registrations);
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `SPCTT_Registrations_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      return res.send(buffer);
+    } catch (error) {
+      console.error('Error exporting registrations to Excel:', error);
+      return sendError(res, 'Failed to export registrations to Excel.', 500, error);
+    }
+  },
+
+  /**
+   * Export Users to Excel (.xlsx)
+   * GET /api/admin/users/export
+   */
+  async exportUsers(req, res, next) {
+    try {
+      const { role, status, search } = req.query;
+      const users = await User.findAll({ role, status, search });
+      const buffer = await excelService.generateUsersExcel(users);
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `SPCTT_Users_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      return res.send(buffer);
+    } catch (error) {
+      console.error('Error exporting users to Excel:', error);
+      return sendError(res, 'Failed to export users to Excel.', 500, error);
     }
   }
 };
