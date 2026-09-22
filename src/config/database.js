@@ -329,7 +329,32 @@ export async function initDatabase() {
         }
       }
 
-      // 9. Seed default super admin
+      // 9. Create Email Logs Table
+      if (!existingTables.has('email_logs')) {
+        console.log("Table 'email_logs' does not exist. Creating...");
+        await pool.query(`
+          CREATE TABLE \`email_logs\` (
+            \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+            \`abstract_id\` INT DEFAULT NULL,
+            \`user_id\` INT DEFAULT NULL,
+            \`recipient_email\` VARCHAR(150) NOT NULL,
+            \`recipient_name\` VARCHAR(150) DEFAULT NULL,
+            \`cc_email\` VARCHAR(255) DEFAULT NULL,
+            \`from_email\` VARCHAR(150) NOT NULL,
+            \`subject\` VARCHAR(255) NOT NULL,
+            \`email_type\` VARCHAR(100) NOT NULL DEFAULT 'general',
+            \`status\` ENUM('sent', 'failed') NOT NULL DEFAULT 'sent',
+            \`error_message\` TEXT DEFAULT NULL,
+            \`sent_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (\`abstract_id\`),
+            INDEX (\`user_id\`),
+            INDEX (\`recipient_email\`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+        console.log("Table 'email_logs' created.");
+      }
+
+      // 10. Seed default super admin
       try {
         const [existingAdmins] = await pool.query("SELECT id FROM `users` WHERE `role` = 'admin' LIMIT 1");
         if (existingAdmins.length === 0) {

@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { Registration } from '../models/Registration.js';
 import { Abstract } from '../models/Abstract.js';
+import { EmailLog } from '../models/EmailLog.js';
+import { emailService } from '../services/email.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const adminController = {
@@ -111,13 +113,13 @@ export const adminController = {
   },
 
   /**
-   * Review and Update Abstract Status
+   * Review and Update Abstract Status (and trigger email notification)
    * PUT /api/admin/abstracts/:id/status
    */
   async updateAbstractStatus(req, res, next) {
     try {
       const { id } = req.params;
-      const { status, reviewComments } = req.body;
+      const { status, reviewComments, sendEmail = true } = req.body;
 
       if (!status) {
         return sendError(res, 'Status is required.', 422);
@@ -128,10 +130,86 @@ export const adminController = {
         return sendError(res, 'Abstract not found.', 404);
       }
 
-      return sendSuccess(res, updated, 'Abstract status updated successfully.');
+      let emailResult = null;
+      // If status is accepted or rejected and sendEmail is true, dispatch notification email
+      if (sendEmail && (status === 'accepted' || status === 'rejected')) {
+        try {
+          emailResult = await emailService.sendAbstractDecisionEmail({
+            abstract: updated,
+            status,
+            reviewComments
+          });
+        } catch (emailErr) {
+          console.error('Error dispatching abstract decision email:', emailErr);
+          emailResult = { success: false, error: emailErr.message };
+        }
+      }
+
+      const message = emailResult && emailResult.success
+        ? `Abstract status updated to '${status}' and notification email sent to ${emailResult.recipientEmail} (CC: ${emailResult.ccEmail}).`
+        : `Abstract status updated to '${status}' successfully.`;
+
+      return sendSuccess(
+        res,
+        {
+          ...updated,
+          email_delivery: emailResult
+        },
+        message
+      );
     } catch (error) {
       console.error('Error updating abstract status:', error);
       return sendError(res, 'Failed to update abstract status.', 500, error);
+    }
+  },
+
+  /**
+   * Resend Decision Email for Abstract
+   * POST /api/admin/abstracts/:id/send-email
+   */
+  async resendAbstractDecisionEmail(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { customComments } = req.body || {};
+
+      const abstract = await Abstract.findById(id);
+      if (!abstract) {
+        return sendError(res, 'Abstract not found.', 404);
+      }
+
+      if (abstract.status !== 'accepted' && abstract.status !== 'rejected') {
+        return sendError(res, `Cannot send decision email for abstract with status '${abstract.status}'. Status must be 'accepted' or 'rejected'.`, 400);
+      }
+
+      const emailResult = await emailService.sendAbstractDecisionEmail({
+        abstract,
+        status: abstract.status,
+        reviewComments: customComments || abstract.review_comments
+      });
+
+      if (!emailResult.success) {
+        return sendError(res, emailResult.message || 'Failed to send decision email.', 500, emailResult);
+      }
+
+      return sendSuccess(res, emailResult, emailResult.message);
+    } catch (error) {
+      console.error('Error resending abstract decision email:', error);
+      return sendError(res, error.message || 'Failed to resend decision email.', 500, error);
+    }
+  },
+
+  /**
+   * Get Email Logs for an Abstract
+   * GET /api/admin/abstracts/:id/email-logs
+   */
+  async getAbstractEmailLogs(req, res, next) {
+    try {
+      const { id } = req.params;
+      const logs = await EmailLog.findByAbstractId(id);
+      return sendSuccess(res, logs, 'Email logs retrieved successfully.');
+    } catch (error) {
+      console.error('Error fetching email logs:', error);
+      return sendError(res, 'Failed to fetch email logs.', 500, error);
     }
   },
 

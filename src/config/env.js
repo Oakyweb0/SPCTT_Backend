@@ -79,6 +79,18 @@ export const config = {
     FOLDER: process.env.R2_FOLDER || process.env.CLOUDFLARE_R2_FOLDER || 'Abstract_pdf'
   },
 
+  EMAIL: {
+    SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
+    SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
+    SMTP_SECURE: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+    SMTP_USER: process.env.SMTP_USER || 'spctt2027@spctt.org',
+    SMTP_PASS: process.env.SMTP_PASS || '',
+    FROM_NAME: process.env.EMAIL_FROM_NAME || 'SPCTT 2027 Secretariat',
+    FROM_EMAIL: process.env.EMAIL_FROM_ADDRESS || 'spctt2027@spctt.org',
+    DEFAULT_FROM: process.env.SMTP_FROM || '"SPCTT 2027 Secretariat" <spctt2027@spctt.org>',
+    CC_DEFAULT: process.env.EMAIL_CC_DEFAULT || 'tvivek2021@gmail.com'
+  },
+
   LOG_LEVEL: process.env.LOG_LEVEL || 'info'
 };
 

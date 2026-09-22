@@ -3,6 +3,7 @@ import { config } from './config/env.js';
 import { initDatabase } from './config/database.js';
 import { logger } from './utils/logger.js';
 
+// Server instance - live reload
 let server;
 
 async function startServer() {

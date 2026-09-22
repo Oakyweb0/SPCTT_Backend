@@ -17,6 +17,8 @@ router.put('/registrations/:id/status', adminController.updateRegistrationStatus
 // 3. Abstracts Management
 router.get('/abstracts', adminController.getAbstracts);
 router.put('/abstracts/:id/status', adminController.updateAbstractStatus);
+router.post('/abstracts/:id/send-email', adminController.resendAbstractDecisionEmail);
+router.get('/abstracts/:id/email-logs', adminController.getAbstractEmailLogs);
 router.delete('/abstracts/:id', adminController.deleteAbstract);
 
 // 4. Invoices Management
