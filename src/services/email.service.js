@@ -1,12 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/imgi_2_page_header.png';
 
@@ -74,12 +68,12 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
       <!-- Brand Header with Banner Background and Light Transparent Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(135deg, rgba(19, 37, 74, 0.50) 0%, rgba(19, 37, 74, 0.28) 50%, rgba(19, 37, 74, 0.08) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center bottom; background-repeat: no-repeat; padding: 36px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-        <span style="background-color: rgba(19, 37, 74, 0.70); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(19, 37, 74, 0.28) 0%, rgba(19, 37, 74, 0.14) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
           SPCTT 2027 ANNUAL CONFERENCE
         </span>
-        <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.65);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
-        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.65);">March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi</p>
+        <h1 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.3px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.85);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
+        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi</p>
       </div>
 
       <!-- Celebration Banner -->
@@ -206,12 +200,12 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
       <!-- Brand Header with Banner Background and Light Transparent Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(135deg, rgba(19, 37, 74, 0.50) 0%, rgba(19, 37, 74, 0.28) 50%, rgba(19, 37, 74, 0.08) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center bottom; background-repeat: no-repeat; padding: 36px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-        <span style="background-color: rgba(19, 37, 74, 0.70); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(19, 37, 74, 0.28) 0%, rgba(19, 37, 74, 0.14) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
           SPCTT 2027 ANNUAL CONFERENCE
         </span>
-        <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.65);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
-        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.65);">Abstract Review Decision Notification</p>
+        <h1 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.3px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.85);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
+        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">Abstract Review Decision Notification</p>
       </div>
 
       <!-- Notification Banner -->
@@ -365,24 +359,12 @@ export const emailService = {
     const fromAddress = config.EMAIL.DEFAULT_FROM || '"SPCTT 2027 Secretariat" <spctt2027@spctt.org>';
     const ccAddress = config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
 
-    // Prepare attachments (inline CID banner for best email client compatibility)
-    const attachments = [];
-    const localBannerPath = path.resolve(__dirname, '../assets/email-banner.png');
-    if (fs.existsSync(localBannerPath)) {
-      attachments.push({
-        filename: 'spctt-banner.png',
-        path: localBannerPath,
-        cid: 'emailHeaderBanner'
-      });
-    }
-
     const mailOptions = {
       from: fromAddress,
       to: `"${recipientName}" <${recipientEmail}>`,
       cc: ccAddress,
       subject: subject,
-      html: htmlContent,
-      attachments
+      html: htmlContent
     };
 
     try {
