@@ -63,8 +63,13 @@ function normalizeAbstractRow(row) {
     }
   }
 
+  // Normalize 'submitted' from MySQL to 'pending' for UI consistency
+  const normalizedStatus = (!row.status || row.status === 'submitted') ? 'pending' : row.status;
+
   return {
     ...row,
+    status: normalizedStatus,
+    raw_status: row.status,
     name: row.name || row.authors || row.submitter_name || '',
     institute_name: row.institute_name || row.affiliation || row.submitter_org || '',
     topic: row.topic || row.title || '',
@@ -120,7 +125,7 @@ export const Abstract = {
       category: finalCategory,
       abstract_text: finalAbstractText,
       file_url: finalPdfUrl,
-      status: 'submitted'
+      status: 'submitted' // MySQL ENUM compatibility
     };
 
     if (cols.has('name')) insertData.name = finalName;
@@ -211,8 +216,12 @@ export const Abstract = {
     const params = [];
 
     if (status) {
-      query += ' AND a.status = ?';
-      params.push(status);
+      if (status === 'pending' || status === 'submitted') {
+        query += " AND (a.status = 'submitted' OR a.status = 'pending')";
+      } else {
+        query += ' AND a.status = ?';
+        params.push(status);
+      }
     }
     if (category) {
       query += ' AND a.category = ?';
@@ -242,10 +251,20 @@ export const Abstract = {
    */
   async updateStatus(id, { status, reviewComments }) {
     const pool = getPool();
-    await pool.query(
-      'UPDATE abstracts SET status = ?, review_comments = ? WHERE id = ?',
-      [status, reviewComments || null, id]
-    );
+    const cols = await getAbstractColumns();
+    const dbStatus = (status === 'pending' || status === 'submitted') ? 'submitted' : status;
+
+    if (cols.has('review_comments')) {
+      await pool.query(
+        'UPDATE abstracts SET status = ?, review_comments = ? WHERE id = ?',
+        [dbStatus, reviewComments || null, id]
+      );
+    } else {
+      await pool.query(
+        'UPDATE abstracts SET status = ? WHERE id = ?',
+        [dbStatus, id]
+      );
+    }
     return this.findById(id);
   },
 

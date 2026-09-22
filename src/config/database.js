@@ -272,7 +272,7 @@ export async function initDatabase() {
             \`abstract_text\` LONGTEXT DEFAULT NULL,
             \`pdf_url\` VARCHAR(255) DEFAULT NULL,
             \`file_url\` VARCHAR(255) DEFAULT NULL,
-            \`status\` ENUM('submitted', 'under_review', 'accepted', 'rejected') DEFAULT 'submitted',
+            \`status\` ENUM('pending', 'submitted', 'under_review', 'accepted', 'rejected') DEFAULT 'pending',
             \`review_comments\` TEXT DEFAULT NULL,
             \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -281,8 +281,15 @@ export async function initDatabase() {
         `);
         console.log("Table 'abstracts' created.");
       } else {
-        // Ensure missing columns exist in existing abstracts table
+        // Ensure missing columns exist in existing abstracts table and status supports pending
         try {
+          // Update status column enum and default to 'pending'
+          try {
+            await pool.query("ALTER TABLE `abstracts` MODIFY COLUMN `status` ENUM('pending', 'submitted', 'under_review', 'accepted', 'rejected') DEFAULT 'pending'");
+          } catch (modStatusErr) {
+            console.warn('Could not update status column enum on abstracts:', modStatusErr.message);
+          }
+
           const [absColumns] = await pool.query('SHOW COLUMNS FROM `abstracts`');
           const existingAbsColNames = absColumns.map((c) => c.Field);
 
