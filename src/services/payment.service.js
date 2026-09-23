@@ -196,18 +196,18 @@ export const paymentService = {
   },
 
   /**
-   * Get Payment Breakdown for Registration
+   * Get Payment Status by Registration ID (for Admin & User)
    */
-  async getPaymentDetails(registrationId, userId, role) {
+  async getPaymentStatusByRegistrationId(registrationId, userId, role) {
     const reg = await Registration.findById(registrationId);
     if (!reg) {
-      const error = new Error('Registration not found.');
+      const error = new Error('Registration record not found.');
       error.statusCode = 404;
       throw error;
     }
 
     if (role !== 'admin' && reg.user_id !== userId) {
-      const error = new Error('Access denied to this registration.');
+      const error = new Error('Access denied to view this registration payment status.');
       error.statusCode = 403;
       throw error;
     }
@@ -215,7 +215,18 @@ export const paymentService = {
     const invoices = await Registration.getInvoicesByRegistrationId(reg.id);
 
     return {
-      registration: reg,
+      registrationId: reg.id,
+      registrationCode: reg.registration_code,
+      fullName: reg.full_name,
+      email: reg.email,
+      phone: reg.phone,
+      organization: reg.organization,
+      categoryName: reg.category_name,
+      paymentStatus: reg.payment_status,
+      paymentMethod: reg.payment_method,
+      transactionId: reg.transaction_id,
+      paidAt: reg.paid_at,
+      status: reg.status,
       breakdown: {
         categoryPrice: parseFloat(reg.category_price || 0),
         accompanyingTotal: parseFloat(reg.accompanying_total || 0),
@@ -224,9 +235,18 @@ export const paymentService = {
         gstAmount: parseFloat(reg.gst_amount || 0),
         grandTotal: parseFloat(reg.grand_total || 0)
       },
-      invoices
+      invoices,
+      registration: reg
     };
+  },
+
+  /**
+   * Get Payment Breakdown for Registration
+   */
+  async getPaymentDetails(registrationId, userId, role) {
+    return this.getPaymentStatusByRegistrationId(registrationId, userId, role);
   }
 };
 
 export default paymentService;
+
