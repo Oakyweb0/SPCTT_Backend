@@ -607,7 +607,7 @@
     "/api/auth/register": {
       "post": {
         "tags": [
-          "🌐 User Authentication (Website)"
+          "User Authentication (Website)"
         ],
         "summary": "User Registration / Create an Account",
         "description": "Register a new user account with title, full name, email, organization, mobile number, and password.",
@@ -637,7 +637,7 @@
     "/api/auth/login": {
       "post": {
         "tags": [
-          "🌐 User Authentication (Website)"
+          "User Authentication (Website)"
         ],
         "summary": "User Sign In",
         "description": "Sign in user with email and password to receive JWT bearer token.",
@@ -664,7 +664,7 @@
     "/api/auth/admin/login": {
       "post": {
         "tags": [
-          "🛡️ Admin Authentication"
+          "Admin Authentication"
         ],
         "summary": "Admin Sign In",
         "description": "Authenticate administrator to access Admin Management Portal.",
@@ -691,7 +691,7 @@
     "/api/user/profile": {
       "get": {
         "tags": [
-          "👤 User Portal - Profile (Website)"
+          "User Portal - Profile (Website)"
         ],
         "summary": "Get User Profile",
         "security": [
@@ -707,7 +707,7 @@
       },
       "put": {
         "tags": [
-          "👤 User Portal - Profile (Website)"
+          "User Portal - Profile (Website)"
         ],
         "summary": "Update User Profile",
         "security": [
@@ -773,7 +773,7 @@
     "/api/registration/categories": {
       "get": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Get Registration Categories & Fees",
         "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates, Accompanying Persons).",
@@ -787,7 +787,7 @@
     "/api/registration/current": {
       "get": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Get Current User Registration Status",
         "description": "Get draft or submitted registration details of the logged-in user.",
@@ -806,7 +806,7 @@
     "/api/registration/step1-category": {
       "post": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Step 1: Select Category",
         "description": "Save selected category for conference registration.",
@@ -835,7 +835,7 @@
     "/api/registration/step2-attendee": {
       "post": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Step 2: Save Attendee Details & Contact Information",
         "description": "Save attendee profile, organization, phone, address, city, state, country, and pincode.",
@@ -864,7 +864,7 @@
     "/api/registration/step3-accompanying": {
       "post": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Step 3: Optional Item(s) Registration (Accompanying Persons)",
         "description": "Register accompanying persons (1, 2, or 0) with their titles and names at ₹3,500 each.",
@@ -893,7 +893,7 @@
     "/api/registration/step4-billing": {
       "post": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Step 4: Save Billing Details & Generate Proforma Invoice",
         "description": "Save billing entity name, entity address, GST & PAN numbers, and calculate 18% GST Proforma Invoice.",
@@ -922,7 +922,7 @@
     "/api/registration/payment": {
       "post": {
         "tags": [
-          "👤 User Portal - Registration Flow (Website)"
+          "User Portal - Registration Flow (Website)"
         ],
         "summary": "Make Payment (Axis Razorpay)",
         "description": "Process conference payment, mark registration as confirmed, and generate official tax invoice and receipt.",
@@ -951,7 +951,7 @@
     "/api/registration/invoices": {
       "get": {
         "tags": [
-          "📑 User Portal - Invoices & Receipts (Website)"
+          "User Portal - Invoices & Receipts (Website)"
         ],
         "summary": "Get User Invoices & Receipts",
         "description": "Retrieve all proforma invoices, tax invoices, and payment receipts of current user.",
@@ -970,7 +970,7 @@
     "/api/registration/invoices/{id}": {
       "get": {
         "tags": [
-          "📑 User Portal - Invoices & Receipts (Website)"
+          "User Portal - Invoices & Receipts (Website)"
         ],
         "summary": "Get Single Invoice / Receipt By ID",
         "security": [
@@ -998,7 +998,7 @@
     "/api/abstracts": {
       "post": {
         "tags": [
-          "📝 User Portal - Abstract Submission (Website)"
+          "User Portal - Abstract Submission (Website)"
         ],
         "summary": "Submit Research Abstract (PDF Max 1MB - Cloudflare R2)",
         "description": "Submit a research abstract for SPCTT 2026 conference presentation (Poster or Oral). PDF file upload is strictly limited to 1 MB maximum and stored directly in Cloudflare R2 object storage (spctt2027/Abstract_pdf).",
@@ -1032,7 +1032,7 @@
     "/api/abstracts/my": {
       "get": {
         "tags": [
-          "📝 User Portal - Abstract Submission (Website)"
+          "User Portal - Abstract Submission (Website)"
         ],
         "summary": "View My Submitted Abstracts",
         "description": "Retrieve list of all abstracts submitted by the current user.",
@@ -1051,7 +1051,7 @@
     "/api/admin/dashboard-stats": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get Admin Dashboard Overview Stats",
         "description": "Returns counts for registrations, accepted/pending abstracts, user totals, and revenue metrics.",
@@ -1070,7 +1070,7 @@
     "/api/admin/registrations": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get All Registrations with Pagination & Filters",
         "security": [
@@ -1127,7 +1127,7 @@
     "/api/admin/registrations/{id}/status": {
       "put": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Update Registration Status",
         "security": [
@@ -1178,7 +1178,7 @@
     "/api/admin/abstracts": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get All Abstracts with Pagination & Filters",
         "security": [
@@ -1235,7 +1235,7 @@
     "/api/admin/abstracts/{id}/status": {
       "put": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Update Abstract Review Status",
         "security": [
@@ -1291,7 +1291,7 @@
     "/api/admin/invoices": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get All Invoices & Billing Records",
         "security": [
@@ -1309,7 +1309,7 @@
     "/api/admin/users": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get All Users with Pagination & Filters",
         "security": [
@@ -1364,7 +1364,7 @@
       },
       "post": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Create New User Account (Admin)",
         "security": [
@@ -1392,7 +1392,7 @@
     "/api/admin/users/{id}": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get Single User by ID",
         "security": [
@@ -1418,7 +1418,7 @@
       },
       "put": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Update User Details & Status (Admin)",
         "security": [
@@ -1454,7 +1454,7 @@
       },
       "delete": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Delete User Account & Linked Records",
         "security": [
@@ -1557,7 +1557,7 @@
     "/api/admin/abstracts/export": {
       "get": {
         "tags": [
-          "📊 Admin - Excel Exports & Reports"
+          "Admin - Excel Exports & Reports"
         ],
         "summary": "Export Abstracts to Excel (.xlsx)",
         "description": "Generates and downloads a styled Microsoft Excel (.xlsx) file containing all submitted abstracts, author names, institutes, topics, review statuses, and Cloudflare R2 PDF links.",
@@ -1631,7 +1631,7 @@
     "/api/admin/users/export": {
       "get": {
         "tags": [
-          "📊 Admin - Excel Exports & Reports"
+          "Admin - Excel Exports & Reports"
         ],
         "summary": "Export Users to Excel (.xlsx)",
         "description": "Generates and downloads a styled Microsoft Excel (.xlsx) file containing all user accounts, contact details, roles, and account statuses.",
@@ -1705,7 +1705,7 @@
     "/api/admin/abstracts/{id}/send-email": {
       "post": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Resend Abstract Decision Email to Author",
         "security": [
@@ -1733,7 +1733,7 @@
     "/api/admin/abstracts/{id}/email-logs": {
       "get": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Get Email Logs for an Abstract",
         "security": [
@@ -1761,7 +1761,7 @@
     "/api/admin/abstracts/{id}": {
       "delete": {
         "tags": [
-          "🛡️ Admin Management"
+          "Admin Management"
         ],
         "summary": "Delete Abstract & Cloudflare R2 File",
         "security": [
@@ -1789,7 +1789,7 @@
     "/api/payments/create-order": {
       "post": {
         "tags": [
-          "💳 Payment Gateway & Razorpay"
+          "Payment Gateway & Razorpay"
         ],
         "summary": "Create Razorpay Payment Order",
         "description": "Generate a Razorpay Order ID for registration checkout.",
@@ -1818,7 +1818,7 @@
     "/api/payments/verify": {
       "post": {
         "tags": [
-          "💳 Payment Gateway & Razorpay"
+          "Payment Gateway & Razorpay"
         ],
         "summary": "Verify Razorpay Payment Signature",
         "description": "Verify HMAC SHA-256 signature returned by Razorpay checkout client and confirm registration.",
@@ -1850,7 +1850,7 @@
     "/api/payments/webhook": {
       "post": {
         "tags": [
-          "💳 Payment Gateway & Razorpay"
+          "Payment Gateway & Razorpay"
         ],
         "summary": "Razorpay Webhook Handler",
         "description": "Listen to Razorpay webhook events (payment.captured, order.paid, payment.failed) to auto-confirm payments.",
@@ -1885,7 +1885,7 @@
     "/api/payments/status/{registrationId}": {
       "get": {
         "tags": [
-          "💳 Payment Gateway & Razorpay"
+          "Payment Gateway & Razorpay"
         ],
         "summary": "Get Payment Status by Registration ID",
         "description": "Fetch real-time payment, transaction, and invoice status for a specific registration.",
