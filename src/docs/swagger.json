@@ -331,7 +331,8 @@
         "properties": {
           "email": {
             "type": "string",
-            "example": "tvivek2021@gmail.com"
+            "format": "email",
+            "example": "doctor@hospital.org"
           }
         }
       },
@@ -356,15 +357,17 @@
         "properties": {
           "token": {
             "type": "string",
-            "example": "a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890"
+            "example": "a1b2c3d4e5f67890..."
           },
           "newPassword": {
             "type": "string",
-            "example": "newStrongPassword123"
+            "format": "password",
+            "example": "NewPassword@123"
           },
           "confirmPassword": {
             "type": "string",
-            "example": "newStrongPassword123"
+            "format": "password",
+            "example": "NewPassword@123"
           }
         }
       },
@@ -536,7 +539,7 @@
           "pdf": {
             "type": "string",
             "format": "binary",
-            "description": "Abstract PDF document upload (Strictly Maximum 1 MB, .pdf only. Files exceeding 1 MB are not accepted. Saved to Cloudflare R2 object storage)."
+            "description": "Abstract PDF document upload (Strictly Maximum 20 MB, .pdf only. Files exceeding 20 MB are not accepted. Saved to Cloudflare R2 object storage)."
           }
         }
       },
@@ -598,6 +601,30 @@
           "razorpay_signature": {
             "type": "string",
             "example": "9ef4dffbfd84f1318f6739a3ce19f9d85851857ae648f114332d8401e0949a3d"
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "Password@123"
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "NewPassword@123"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "NewPassword@123"
           }
         }
       }
@@ -1000,8 +1027,8 @@
         "tags": [
           "User Portal - Abstract Submission (Website)"
         ],
-        "summary": "Submit Research Abstract (PDF Max 1MB - Cloudflare R2)",
-        "description": "Submit a research abstract for SPCTT 2026 conference presentation (Poster or Oral). PDF file upload is strictly limited to 1 MB maximum and stored directly in Cloudflare R2 object storage (spctt2027/Abstract_pdf).",
+        "summary": "Submit Research Abstract (PDF Max 20MB - Cloudflare R2)",
+        "description": "Submit a research abstract for SPCTT 2026 conference presentation (Poster or Oral). PDF file upload is strictly limited to 20 MB maximum and stored directly in Cloudflare R2 object storage (spctt2027/Abstract_pdf).",
         "security": [
           {
             "BearerAuth": []
@@ -1910,6 +1937,92 @@
           },
           "404": {
             "description": "Registration not found"
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "User Authentication (Website)"
+        ],
+        "summary": "Change User Password",
+        "description": "Change password for logged-in user by verifying current password.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully"
+          },
+          "400": {
+            "description": "Current password incorrect or validation failure"
+          }
+        }
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "User Authentication (Website)"
+        ],
+        "summary": "Request Password Reset (Forgot Password)",
+        "description": "Send a password reset token/link to registered email.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset token generated and email dispatched"
+          },
+          "404": {
+            "description": "User email not found"
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "tags": [
+          "User Authentication (Website)"
+        ],
+        "summary": "Reset Password with Token",
+        "description": "Reset user password using reset token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successfully"
+          },
+          "400": {
+            "description": "Invalid or expired reset token"
           }
         }
       }

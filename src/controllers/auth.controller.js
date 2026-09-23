@@ -99,11 +99,32 @@ export async function resetPassword(req, res, next) {
   }
 }
 
+/**
+ * Change Password (for logged in user)
+ * POST /api/auth/change-password
+ */
+export async function changePassword(req, res, next) {
+  try {
+    const userId = req.user.user_id || req.user.id;
+    const result = await authService.changePassword({
+      userId,
+      ...req.body
+    });
+    return sendSuccess(res, result, result.message, 200);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
 export default {
   signup,
   login,
   adminLogin,
   forgotPassword,
   verifyResetToken,
-  resetPassword
+  resetPassword,
+  changePassword
 };

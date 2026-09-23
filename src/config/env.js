@@ -67,7 +67,7 @@ export const config = {
   UPLOAD: {
     DIR: path.resolve(rootDir, process.env.UPLOAD_DIR || 'uploads'),
     MAX_SIZE_MB: parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10),
-    ABSTRACT_MAX_SIZE_MB: parseInt(process.env.ABSTRACT_MAX_FILE_SIZE_MB || '1', 10)
+    ABSTRACT_MAX_SIZE_MB: parseInt(process.env.ABSTRACT_MAX_FILE_SIZE_MB || '20', 10)
   },
 
   R2: {

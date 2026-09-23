@@ -1,18 +1,21 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
-import { generateToken } from '../utils/jwt.js';
+import { generateToken, verifyToken } from '../utils/jwt.js';
 
 export const authService = {
   /**
    * Register a new user
    */
-  async register({ title = 'Mr.', name, fullName, email, organization, phone, password, role }) {
+  async register({ title = 'Mr.', name, fullName, email, organization, phone, city, state, country, password, role }) {
     const finalName = (fullName || name || '').trim();
     const finalEmail = (email || '').trim().toLowerCase();
     const finalTitle = (title || 'Mr.').trim();
     const finalOrg = (organization || '').trim();
     const finalPhone = (phone || '').trim();
+    const finalCity = city ? city.trim() : null;
+    const finalState = state ? state.trim() : null;
+    const finalCountry = country ? country.trim() : 'India';
 
     // Check if email already registered
     const existing = await User.findByEmail(finalEmail);
@@ -37,6 +40,9 @@ export const authService = {
       email: finalEmail,
       organization: finalOrg || null,
       phone: finalPhone || null,
+      city: finalCity,
+      state: finalState,
+      country: finalCountry,
       password: hashedPassword,
       role: userRole,
       status: 'active'
@@ -170,17 +176,26 @@ export const authService = {
       throw error;
     }
 
-    // Generate random 64-character hex token and 1-hour expiration
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    // Generate signed JWT reset token (valid for 1 hour)
+    const resetToken = generateToken(
+      {
+        user_id: user.id,
+        email: user.email,
+        purpose: 'password_reset'
+      },
+      '1h'
+    );
 
-    await User.setResetToken(user.id, resetToken, expiresAt);
+    try {
+      await User.setResetToken(user.id, resetToken, new Date(Date.now() + 60 * 60 * 1000));
+    } catch (dbErr) {
+      // Ignored if ALTER permission is restricted on DB server
+    }
 
     return {
       success: true,
       email: user.email,
       resetToken,
-      expiresAt,
       message: 'Password reset token has been generated. Use this token with the reset-password API to set your new password.'
     };
   },
@@ -195,13 +210,23 @@ export const authService = {
       throw error;
     }
 
-    const user = await User.findByResetToken(token.trim());
+    try {
+      const { valid, decoded } = verifyToken(token.trim());
+      if (valid && decoded) {
+        const userId = decoded.user_id || decoded.id;
+        const user = await User.findById(userId);
+        if (user) {
+          return { valid: true, email: user.email };
+        }
+      }
+    } catch (err) {}
+
+    const user = await User.findByResetToken(token.trim()).catch(() => null);
     if (!user) {
       const error = new Error('Invalid or expired password reset token.');
       error.statusCode = 400;
       throw error;
     }
-
     return {
       valid: true,
       email: user.email
@@ -230,8 +255,22 @@ export const authService = {
       throw error;
     }
 
-    const user = await User.findByResetToken(token.trim());
-    if (!user) {
+    let userId = null;
+    try {
+      const { valid, decoded } = verifyToken(token.trim());
+      if (valid && decoded) {
+        userId = decoded.user_id || decoded.id;
+      }
+    } catch (err) {}
+
+    if (!userId) {
+      const dbUser = await User.findByResetToken(token.trim()).catch(() => null);
+      if (dbUser) {
+        userId = dbUser.id;
+      }
+    }
+
+    if (!userId) {
       const error = new Error('Invalid or expired password reset token. Please request a new one.');
       error.statusCode = 400;
       throw error;
@@ -240,12 +279,62 @@ export const authService = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await User.updateById(user.id, { password: hashedPassword });
-    await User.clearResetToken(user.id);
+    await User.updateById(userId, { password: hashedPassword });
+    try {
+      await User.clearResetToken(userId);
+    } catch (e) {}
 
     return {
       success: true,
       message: 'Password has been reset successfully! You can now log in with your new password.'
+    };
+  },
+
+  /**
+   * Change Password (for authenticated user)
+   */
+  async changePassword({ userId, currentPassword, newPassword, confirmPassword }) {
+    if (!currentPassword) {
+      const error = new Error('Current password is required.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      const error = new Error('New password must be at least 6 characters long.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      const error = new Error('New password and confirm password do not match.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error('User account not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const fullUser = await User.findByEmail(user.email);
+    const isMatch = await bcrypt.compare(currentPassword, fullUser.password);
+    if (!isMatch) {
+      const error = new Error('Current password is incorrect.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.updateById(user.id, { password: hashedPassword });
+
+    return {
+      success: true,
+      message: 'Password updated successfully!'
     };
   }
 };

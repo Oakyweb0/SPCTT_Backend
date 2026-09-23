@@ -5,9 +5,11 @@ import {
   adminLogin,
   forgotPassword,
   verifyResetToken,
-  resetPassword
+  resetPassword,
+  changePassword
 } from '../controllers/auth.controller.js';
 import { validateSignup, validateLogin } from '../validators/auth.validator.js';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
@@ -54,5 +56,12 @@ router.post('/verify-reset-token', verifyResetToken);
  * @access  Public
  */
 router.post('/reset-password', resetPassword);
+
+/**
+ * @route   POST /api/auth/change-password
+ * @desc    Change password for currently authenticated user
+ * @access  Private (Bearer JWT)
+ */
+router.post('/change-password', authenticateToken, changePassword);
 
 export default router;

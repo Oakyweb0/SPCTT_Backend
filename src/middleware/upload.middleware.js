@@ -48,7 +48,7 @@ export const upload = multer({
   fileFilter
 });
 
-// Dedicated Abstract PDF Uploader: Memory storage for R2, strictly PDF only, strictly 1MB max limit
+// Dedicated Abstract PDF Uploader: Memory storage for R2, strictly PDF only, strictly 20MB max limit
 const abstractPdfStorage = multer.memoryStorage();
 
 const abstractPdfFilter = (req, file, cb) => {
@@ -63,13 +63,13 @@ const abstractPdfFilter = (req, file, cb) => {
 const rawAbstractUpload = multer({
   storage: abstractPdfStorage,
   limits: {
-    fileSize: (config.UPLOAD.ABSTRACT_MAX_SIZE_MB || 1) * 1024 * 1024 // 1 MB strict limit
+    fileSize: (config.UPLOAD.ABSTRACT_MAX_SIZE_MB || 20) * 1024 * 1024 // 20 MB strict limit
   },
   fileFilter: abstractPdfFilter
 });
 
 /**
- * Middleware wrapper for handling Abstract PDF upload with clear 1MB & format error messages
+ * Middleware wrapper for handling Abstract PDF upload with clear 20MB & format error messages
  */
 export const uploadAbstractPdfMiddleware = (req, res, next) => {
   const uploader = rawAbstractUpload.fields([
@@ -82,13 +82,13 @@ export const uploadAbstractPdfMiddleware = (req, res, next) => {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           status: false,
-          message: 'PDF file size exceeds the 1 MB limit (Maximum allowed: 1 MB). Please compress your PDF and try again.',
+          message: 'PDF file size exceeds the 20 MB limit (Maximum allowed: 20 MB). Please compress your PDF and try again.',
           error: 'FILE_TOO_LARGE'
         });
       }
       return res.status(400).json({
         status: false,
-        message: err.message || 'File upload error. Only PDF files up to 1 MB are accepted.',
+        message: err.message || 'File upload error. Only PDF files up to 20 MB are accepted.',
         error: 'INVALID_FILE'
       });
     }

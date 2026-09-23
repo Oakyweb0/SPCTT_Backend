@@ -62,11 +62,11 @@ export const User = {
   /**
    * Create a new user
    */
-  async create({ title = 'Mr.', name, email, organization = null, phone = null, password, role = 'user', status = 'active' }) {
+  async create({ title = 'Mr.', name, email, organization = null, phone = null, address = null, city = null, state = null, country = 'India', pincode = null, password, role = 'user', status = 'active' }) {
     const pool = getPool();
     const [result] = await pool.query(
-      'INSERT INTO users (title, name, email, organization, phone, password, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [title, name, email.trim().toLowerCase(), organization, phone, password, role, status]
+      'INSERT INTO users (title, name, email, organization, phone, address, city, state, country, pincode, password, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [title, name, email.trim().toLowerCase(), organization, phone, address, city, state, country, pincode, password, role, status]
     );
     return this.findById(result.insertId);
   },

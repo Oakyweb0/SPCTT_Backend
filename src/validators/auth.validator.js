@@ -6,7 +6,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Validate user signup payload
  */
 export function validateSignup(req, res, next) {
-  const { name, fullName, email, organization, password, repeatPassword } = req.body;
+  const { name, fullName, email, organization, city, state, country, password } = req.body;
   const errors = {};
 
   const resolvedName = (fullName || name || '').trim();
@@ -31,8 +31,16 @@ export function validateSignup(req, res, next) {
     errors.password = 'Password must be at least 6 characters long.';
   }
 
-  if (repeatPassword !== undefined && password !== repeatPassword) {
-    errors.repeatPassword = 'Passwords do not match.';
+  if (country !== undefined && !country.trim()) {
+    errors.country = 'Country is required.';
+  }
+
+  if (state !== undefined && !state.trim()) {
+    errors.state = 'State is required.';
+  }
+
+  if (city !== undefined && !city.trim()) {
+    errors.city = 'City is required.';
   }
 
   if (Object.keys(errors).length > 0) {

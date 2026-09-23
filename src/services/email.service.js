@@ -62,7 +62,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abstract Accepted - SPCTT 2027</title>
+    <title>Abstract Received - SPCTT 2027</title>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
@@ -72,9 +72,9 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
         <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
       </div>
 
-      <!-- Celebration Banner -->
-      <div style="background-color: #ecfdf5; border-bottom: 1px solid #a7f3d0; padding: 18px 24px; text-align: center;">
-        <strong style="color: #065f46; font-size: 16px; letter-spacing: 0.2px;">Congratulations! Your Abstract Has Been Accepted</strong>
+      <!-- Notification Banner -->
+      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; text-align: center;">
+        <strong style="color: #000000; font-size: 16px; letter-spacing: 0.2px;">Congratulations! Your Abstract Has Been Received</strong>
       </div>
 
       <!-- Main Body -->
@@ -83,7 +83,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
           Dear <strong>${safeName}</strong>,
         </p>
         <p style="font-size: 15px; line-height: 1.6; color: #334155;">
-          We are pleased to inform you that following peer evaluation by the Scientific Review Committee, your abstract submission has been officially <strong>ACCEPTED</strong> for presentation at the upcoming <strong>SPCTT 2027 Annual Conference</strong>.
+          We are pleased to inform you that your abstract submission has been officially <strong>RECEIVED</strong> and is <strong>pending for review</strong> for the upcoming <strong>SPCTT 2027 Annual Conference</strong>.
         </p>
 
         <!-- Abstract Details Card -->
@@ -119,8 +119,8 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
             <tr>
               <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Status:</td>
               <td style="padding: 6px 0;">
-                <span style="background-color: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; text-transform: uppercase;">
-                  ACCEPTED
+                <span style="background-color: #f1f5f9; color: #000000; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; text-transform: uppercase; border: 1px solid #cbd5e1;">
+                  RECEIVED
                 </span>
               </td>
             </tr>
@@ -148,7 +148,6 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
         <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
           <p style="margin: 0 0 4px 0;">Warm regards,</p>
           <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
-          <p style="margin: 0; color: #64748b;">SPCTT 2027 Annual Conference Secretariat</p>
           <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Email: <a href="mailto:spctt2027@spctt.org" style="color: #13254A; text-decoration: none;">spctt2027@spctt.org</a></p>
         </div>
 
@@ -326,7 +325,7 @@ export const emailService = {
 
     const emailType = isAccepted ? 'abstract_accepted' : 'abstract_rejected';
     const subject = isAccepted
-      ? `[SPCTT 2027] Abstract Accepted: ${abstractCode} - ${topic}`
+      ? `[SPCTT 2027] Abstract Received: ${abstractCode} - ${topic}`
       : `[SPCTT 2027] Abstract Review Decision: ${abstractCode} - ${topic}`;
 
     const htmlContent = isAccepted

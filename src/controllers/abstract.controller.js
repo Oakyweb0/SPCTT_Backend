@@ -55,7 +55,7 @@ export const abstractController = {
         return sendValidationError(res, 'Topic / Abstract title is required.');
       }
 
-      // Handle PDF file upload (strictly PDF & max 1 MB)
+      // Handle PDF file upload (strictly PDF & max 20 MB)
       let pdfUrl = req.body.pdfUrl || req.body.pdf_url || req.body.fileUrl || req.body.file_url || null;
       let uploadedFileObj = null;
 
@@ -70,9 +70,9 @@ export const abstractController = {
       }
 
       if (uploadedFileObj) {
-        const MAX_1MB = 1 * 1024 * 1024;
-        if (uploadedFileObj.size && uploadedFileObj.size > MAX_1MB) {
-          return sendValidationError(res, 'PDF file size exceeds 1 MB. Maximum allowed size is 1 MB.');
+        const MAX_20MB = 20 * 1024 * 1024;
+        if (uploadedFileObj.size && uploadedFileObj.size > MAX_20MB) {
+          return sendValidationError(res, 'PDF file size exceeds 20 MB. Maximum allowed size is 20 MB.');
         }
 
         const isPdf = uploadedFileObj.mimetype === 'application/pdf' || 
