@@ -20,6 +20,11 @@ async function startServer() {
       logger.info('======================================================');
     });
 
+    // Configure server timeouts for large 20MB file uploads
+    server.timeout = 300000; // 5 minutes
+    server.keepAliveTimeout = 65000; // 65 seconds
+    server.headersTimeout = 66000; // 66 seconds
+
     // 3. Graceful Shutdown Handlers
     const shutdown = (signal) => {
       logger.info(`${signal} received: closing HTTP server gracefully...`);

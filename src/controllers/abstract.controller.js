@@ -55,7 +55,7 @@ export const abstractController = {
         return sendValidationError(res, 'Topic / Abstract title is required.');
       }
 
-      // Handle PDF file upload (strictly PDF & max 20 MB)
+      // Handle Document / Image file upload (PDF or Images, max 20 MB)
       let pdfUrl = req.body.pdfUrl || req.body.pdf_url || req.body.fileUrl || req.body.file_url || null;
       let uploadedFileObj = null;
 
@@ -64,6 +64,10 @@ export const abstractController = {
           uploadedFileObj = req.files.pdf[0];
         } else if (req.files.file && req.files.file.length > 0) {
           uploadedFileObj = req.files.file[0];
+        } else if (req.files.image && req.files.image.length > 0) {
+          uploadedFileObj = req.files.image[0];
+        } else if (req.files.document && req.files.document.length > 0) {
+          uploadedFileObj = req.files.document[0];
         }
       } else if (req.file) {
         uploadedFileObj = req.file;
@@ -72,28 +76,32 @@ export const abstractController = {
       if (uploadedFileObj) {
         const MAX_20MB = 20 * 1024 * 1024;
         if (uploadedFileObj.size && uploadedFileObj.size > MAX_20MB) {
-          return sendValidationError(res, 'PDF file size exceeds 20 MB. Maximum allowed size is 20 MB.');
+          return sendValidationError(res, 'File size exceeds 20 MB. Maximum allowed size is 20 MB.');
         }
 
         const isPdf = uploadedFileObj.mimetype === 'application/pdf' || 
                       (uploadedFileObj.originalname && uploadedFileObj.originalname.toLowerCase().endsWith('.pdf'));
-        if (!isPdf) {
-          return sendValidationError(res, 'Only PDF document files (.pdf) are permitted for abstract submissions.');
+        const isImage = (uploadedFileObj.mimetype && uploadedFileObj.mimetype.startsWith('image/')) || 
+                      (uploadedFileObj.originalname && /\.(jpg|jpeg|png|webp|gif)$/i.test(uploadedFileObj.originalname));
+
+        if (!isPdf && !isImage) {
+          return sendValidationError(res, 'Only PDF documents (.pdf) and Images (.jpg, .jpeg, .png, .webp) up to 20 MB are permitted.');
         }
 
-        // Upload directly to Cloudflare R2 (folder: Abstract_pdf/)
+        // Upload directly to Cloudflare R2 (spctt2027/Abstract_pdf)
         try {
-          const r2UploadResult = await r2Service.uploadAbstractPdf({
+          const r2UploadResult = await r2Service.uploadFile({
             buffer: uploadedFileObj.buffer,
             originalName: uploadedFileObj.originalname,
-            mimeType: uploadedFileObj.mimetype || 'application/pdf',
+            mimeType: uploadedFileObj.mimetype || (isPdf ? 'application/pdf' : 'image/jpeg'),
+            folder: 'Abstract_pdf',
             filePath: uploadedFileObj.path
           });
           pdfUrl = r2UploadResult.url;
-          logger.info(`Abstract PDF stored at: ${pdfUrl} (R2: ${r2UploadResult.isR2})`);
+          logger.info(`Abstract ${isImage ? 'Image' : 'PDF'} stored in Cloudflare R2 (spctt2027/Abstract_pdf): ${pdfUrl}`);
         } catch (uploadErr) {
-          logger.error('Failed to upload PDF to Cloudflare R2 / storage:', uploadErr.message);
-          return sendError(res, 'Failed to process and store abstract PDF file. Please try again.', 500, uploadErr);
+          logger.error('Failed to upload file to Cloudflare R2 / storage:', uploadErr.message);
+          return sendError(res, 'Failed to process and store file on Cloudflare R2. Please try again.', 500, uploadErr);
         }
       }
 

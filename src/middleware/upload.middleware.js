@@ -48,33 +48,39 @@ export const upload = multer({
   fileFilter
 });
 
-// Dedicated Abstract PDF Uploader: Memory storage for R2, strictly PDF only, strictly 20MB max limit
-const abstractPdfStorage = multer.memoryStorage();
+// Dedicated Cloudflare R2 Uploader: Memory storage for R2, supports both PDF and Image files up to 20MB max limit
+const memoryUploadStorage = multer.memoryStorage();
 
-const abstractPdfFilter = (req, file, cb) => {
-  const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
-  if (isPdf) {
+const abstractDocumentFilter = (req, file, cb) => {
+  const isPdf = file.mimetype === 'application/pdf' || (file.originalname && file.originalname.toLowerCase().endsWith('.pdf'));
+  const isImage = file.mimetype?.startsWith('image/') || 
+                  (file.originalname && /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(file.originalname));
+
+  if (isPdf || isImage) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file format. Only PDF documents (.pdf) are allowed for scientific abstract submissions. Images and other file types are not accepted.'), false);
+    cb(new Error('Invalid file format. Only PDF documents (.pdf) and Image files (.jpg, .jpeg, .png, .webp) up to 20 MB are allowed for submissions.'), false);
   }
 };
 
 const rawAbstractUpload = multer({
-  storage: abstractPdfStorage,
+  storage: memoryUploadStorage,
   limits: {
-    fileSize: 22 * 1024 * 1024 // 22 MB buffer limit in Multer
+    fileSize: 35 * 1024 * 1024, // 35 MB buffer limit in Multer (safely accommodates 20MB file + multipart header overhead)
+    fieldSize: 35 * 1024 * 1024
   },
-  fileFilter: abstractPdfFilter
+  fileFilter: abstractDocumentFilter
 });
 
 /**
- * Middleware wrapper for handling Abstract PDF upload with clear 20MB & format error messages
+ * Middleware wrapper for handling Abstract PDF & Image upload with clear 20MB & format error messages
  */
 export const uploadAbstractPdfMiddleware = (req, res, next) => {
   const uploader = rawAbstractUpload.fields([
     { name: 'pdf', maxCount: 1 },
-    { name: 'file', maxCount: 1 }
+    { name: 'file', maxCount: 1 },
+    { name: 'image', maxCount: 1 },
+    { name: 'document', maxCount: 1 }
   ]);
 
   uploader(req, res, (err) => {
@@ -82,22 +88,26 @@ export const uploadAbstractPdfMiddleware = (req, res, next) => {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           status: false,
-          message: 'PDF file size exceeds the 20 MB limit (Maximum allowed: 20 MB). Please compress your PDF and try again.',
+          message: 'File size exceeds the 20 MB limit (Maximum allowed: 20 MB). Please compress your file and try again.',
           error: 'FILE_TOO_LARGE'
         });
       }
       return res.status(400).json({
         status: false,
-        message: err.message || 'File upload error. Only PDF files up to 20 MB are accepted.',
+        message: err.message || 'File upload error. Only PDF and Image files up to 20 MB are accepted.',
         error: 'INVALID_FILE'
       });
     }
 
-    const uploadedFile = (req.files?.pdf && req.files.pdf[0]) || (req.files?.file && req.files.file[0]);
+    const uploadedFile = (req.files?.pdf && req.files.pdf[0]) || 
+                         (req.files?.file && req.files.file[0]) ||
+                         (req.files?.image && req.files.image[0]) ||
+                         (req.files?.document && req.files.document[0]);
+
     if (uploadedFile && uploadedFile.size > 20 * 1024 * 1024) {
       return res.status(400).json({
         status: false,
-        message: `PDF file size (${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB) exceeds the 20 MB limit. Please compress your PDF and try again.`,
+        message: `File size (${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB) exceeds the 20 MB limit. Please compress your file and try again.`,
         error: 'FILE_TOO_LARGE'
       });
     }
@@ -105,6 +115,8 @@ export const uploadAbstractPdfMiddleware = (req, res, next) => {
     next();
   });
 };
+
+export const uploadAbstractMiddleware = uploadAbstractPdfMiddleware;
 
 export default upload;
 

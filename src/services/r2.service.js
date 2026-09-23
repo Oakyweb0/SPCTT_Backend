@@ -43,90 +43,87 @@ export const r2Service = {
   },
 
   /**
-   * Upload an abstract PDF file to Cloudflare R2
-   * Bucket: spctt2027, Folder: Abstract_pdf/
+   * General Upload strictly to Cloudflare R2 (Handles both Images and PDFs)
+   * Target Bucket: spctt2027, Folder: Abstract_pdf/
    */
-  async uploadAbstractPdf({ buffer, originalName, mimeType = 'application/pdf', filePath = null }) {
-    const ext = path.extname(originalName || 'document.pdf').toLowerCase() || '.pdf';
+  async uploadFile({ buffer, originalName, mimeType = '', folder = null, filePath = null }) {
+    const ext = path.extname(originalName || '').toLowerCase() || (mimeType?.includes('pdf') ? '.pdf' : '.jpg');
     const base = path
-      .basename(originalName || 'abstract', ext)
+      .basename(originalName || 'file', ext)
       .replace(/[^a-zA-Z0-9_-]/g, '_');
     const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e6)}`;
     const fileName = `${base}_${uniqueSuffix}${ext}`;
-    const folder = (config.R2.FOLDER || 'Abstract_pdf').replace(/^\/+|\/+$/g, '');
-    const key = `${folder}/${fileName}`;
+    
+    // Store in Cloudflare R2 Abstract_pdf folder
+    const targetFolder = (folder || config.R2.FOLDER || 'Abstract_pdf').replace(/^\/+|\/+$/g, '');
+    const key = `${targetFolder}/${fileName}`;
 
     let fileBuffer = buffer;
     if (!fileBuffer && filePath && fs.existsSync(filePath)) {
       fileBuffer = fs.readFileSync(filePath);
     }
 
-    const client = getR2Client();
-
-    if (client && fileBuffer) {
-      try {
-        const command = new PutObjectCommand({
-          Bucket: config.R2.BUCKET_NAME,
-          Key: key,
-          Body: fileBuffer,
-          ContentType: mimeType || 'application/pdf'
-        });
-
-        await client.send(command);
-        logger.info(`Successfully uploaded PDF to Cloudflare R2: ${key}`);
-
-        let fileUrl = '';
-        if (config.R2.PUBLIC_URL) {
-          const cleanPublic = config.R2.PUBLIC_URL.replace(/\/+$/, '');
-          fileUrl = `${cleanPublic}/${key}`;
-        } else {
-          // If no public domain, create presigned URL or standard R2 bucket object path
-          try {
-            fileUrl = await this.getPresignedUrl(key, 86400 * 7); // 7 days valid
-          } catch (signErr) {
-            fileUrl = `https://${config.R2.BUCKET_NAME}.${config.R2.ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
-          }
-        }
-
-        return {
-          key,
-          fileName,
-          url: fileUrl,
-          isR2: true
-        };
-      } catch (r2Err) {
-        logger.error(`Cloudflare R2 upload error for ${key}:`, r2Err.message);
-        // Fallback to local storage if R2 fails
-      }
+    if (!fileBuffer) {
+      throw new Error('No file buffer provided for Cloudflare upload.');
     }
 
-    // Local Storage Fallback if R2 not configured or errored
+    const client = getR2Client();
+    if (!client) {
+      throw new Error('Cloudflare R2 client is not initialized. Please verify R2 credentials.');
+    }
+
+    const isImage = mimeType?.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(ext);
+    const detectedMime = mimeType || (isImage ? (ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg') : 'application/pdf');
+
     try {
-      const localDir = path.resolve(config.UPLOAD.DIR, folder);
-      if (!fs.existsSync(localDir)) {
-        fs.mkdirSync(localDir, { recursive: true });
-      }
+      const command = new PutObjectCommand({
+        Bucket: config.R2.BUCKET_NAME,
+        Key: key,
+        Body: fileBuffer,
+        ContentType: detectedMime
+      });
 
-      const localPath = path.resolve(localDir, fileName);
-      if (fileBuffer) {
-        fs.writeFileSync(localPath, fileBuffer);
-      } else if (filePath && fs.existsSync(filePath)) {
-        fs.copyFileSync(filePath, localPath);
-      }
+      await client.send(command);
+      logger.info(`Successfully uploaded to Cloudflare R2 (${config.R2.BUCKET_NAME}/${key}) [${detectedMime}]`);
 
-      const localUrl = `/uploads/${folder}/${fileName}`;
-      logger.info(`Saved abstract PDF locally (R2 fallback): ${localUrl}`);
+      let fileUrl = '';
+      if (config.R2.PUBLIC_URL) {
+        const cleanPublic = config.R2.PUBLIC_URL.replace(/\/+$/, '');
+        fileUrl = `${cleanPublic}/${key}`;
+      } else {
+        try {
+          fileUrl = await this.getPresignedUrl(key, 86400 * 7); // 7 days valid
+        } catch (signErr) {
+          fileUrl = `https://${config.R2.BUCKET_NAME}.${config.R2.ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
+        }
+      }
 
       return {
         key,
         fileName,
-        url: localUrl,
-        isR2: false
+        url: fileUrl,
+        isR2: true,
+        contentType: detectedMime,
+        isImage
       };
-    } catch (localErr) {
-      logger.error('Failed to save abstract PDF locally:', localErr.message);
-      throw new Error(`Failed to save PDF: ${localErr.message}`);
+    } catch (r2Err) {
+      logger.error(`Cloudflare R2 upload error for ${key}:`, r2Err.message);
+      throw new Error(`Failed to upload to Cloudflare R2: ${r2Err.message}`);
     }
+  },
+
+  /**
+   * Upload an abstract document / image strictly to Cloudflare R2
+   */
+  async uploadAbstractDocument({ buffer, originalName, mimeType, filePath = null }) {
+    return this.uploadFile({ buffer, originalName, mimeType, folder: 'Abstract_pdf', filePath });
+  },
+
+  /**
+   * Upload an abstract PDF file strictly to Cloudflare R2 (spctt2027/Abstract_pdf)
+   */
+  async uploadAbstractPdf({ buffer, originalName, mimeType = 'application/pdf', filePath = null }) {
+    return this.uploadFile({ buffer, originalName, mimeType, folder: 'Abstract_pdf', filePath });
   },
 
   /**

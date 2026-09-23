@@ -6,16 +6,16 @@
   },
   "servers": [
     {
-      "url": "https://api.spctt.org",
-      "description": "Live Production API Server (https://api.spctt.org)"
+      "url": "/",
+      "description": "Current Server (Auto-detect Host & Port)"
     },
     {
       "url": "http://localhost:5000",
       "description": "Local Development Server (http://localhost:5000)"
     },
     {
-      "url": "/",
-      "description": "Current Server (Auto Protocol & Host)"
+      "url": "https://api.spctt.org",
+      "description": "Live Production API Server (https://api.spctt.org)"
     }
   ],
   "components": {
