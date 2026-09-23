@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
-const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/imgi_2_page_header.png';
+const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_header_banner_v5.png';
 
 let transporter = null;
 
@@ -67,13 +67,9 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header with Banner Background and Black / 40 Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.40) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-        <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-          SPCTT 2027 ANNUAL CONFERENCE
-        </span>
-        <h1 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.3px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.85);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
-        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi</p>
+      <!-- Brand Header Banner Image (Matching Screenshot Design) -->
+      <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
+        <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
       </div>
 
       <!-- Celebration Banner -->
@@ -160,8 +156,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
 
       <!-- Footer -->
       <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
-        <p style="margin: 0 0 4px 0;">This is an automated notification sent from SPCTT 2027 Secretariat.</p>
-        <p style="margin: 0;">&copy; 2026-2027 Society of Pulmonary Care & Thyroid Therapeutics. All rights reserved.</p>
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
     </div>
@@ -199,13 +194,9 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header with Banner Background and Black / 40 Overlay -->
-      <div style="background-color: #13254A; background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.40) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding: 34px 24px; text-align: center; color: #ffffff; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-        <span style="background-color: rgba(19, 37, 74, 0.85); color: #ffffff; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; display: inline-block; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-          SPCTT 2027 ANNUAL CONFERENCE
-        </span>
-        <h1 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.3px; color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,0.85);">Society of Pulmonary Care & Thyroid Therapeutics</h1>
-        <p style="margin: 0; font-size: 14px; color: #ffffff; opacity: 0.98; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">Abstract Review Decision Notification</p>
+      <!-- Brand Header Banner Image (Matching Screenshot Design) -->
+      <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
+        <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
       </div>
 
       <!-- Notification Banner -->
@@ -262,7 +253,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
 
         <!-- Encouragement & Conference Invitation -->
         <p style="font-size: 15px; line-height: 1.6; color: #334155;">
-          While your abstract could not be accommodated in this cycle's presentation schedule, we warmly invite you to attend <strong>SPCTT 2027</strong> as a conference delegate. The conference will feature keynote lectures, interactive clinical workshops, masterclasses, and networking sessions with leading experts in pulmonary and thyroid medicine.
+          While your abstract could not be accommodated in this cycle's presentation schedule, we warmly invite you to attend <strong>SPCTT 2027</strong> as a conference delegate. The conference will feature keynote lectures, interactive clinical workshops, masterclasses, and networking sessions with leading experts in pediatric cellular therapy and bone marrow transplant.
         </p>
 
         <!-- CTA Button -->
@@ -285,7 +276,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
       <!-- Footer -->
       <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
         <p style="margin: 0 0 4px 0;">This is an automated notification sent from SPCTT 2027 Secretariat.</p>
-        <p style="margin: 0;">&copy; 2026-2027 Society of Pulmonary Care & Thyroid Therapeutics. All rights reserved.</p>
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
     </div>
