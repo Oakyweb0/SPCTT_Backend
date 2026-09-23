@@ -91,7 +91,14 @@ export const config = {
     CC_DEFAULT: process.env.EMAIL_CC_DEFAULT || 'tvivek2021@gmail.com'
   },
 
-  LOG_LEVEL: process.env.LOG_LEVEL || 'info'
+  LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+
+  RAZORPAY: {
+    KEY_ID: process.env.RAZORPAY_KEY_ID || '',
+    KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
+    WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+    CURRENCY: process.env.RAZORPAY_CURRENCY || 'INR'
+  }
 };
 
 export default config;

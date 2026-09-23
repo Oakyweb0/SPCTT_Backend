@@ -252,7 +252,8 @@ export async function initDatabase() {
         console.log("Table 'invoices' created.");
       }
 
-      // 8. Create Abstracts Table
+
+      // 9. Create Abstracts Table
       if (!existingTables.has('abstracts')) {
         console.log("Table 'abstracts' does not exist. Creating...");
         await pool.query(`

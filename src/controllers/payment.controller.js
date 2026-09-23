@@ -2,8 +2,8 @@ import { paymentService } from '../services/payment.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 /**
- * Initialize / Create Payment Order
- * POST /api/payment/create-order
+ * Initialize / Create Razorpay Payment Order
+ * POST /api/payments/create-order
  */
 export async function createOrder(req, res, next) {
   try {
@@ -19,25 +19,8 @@ export async function createOrder(req, res, next) {
 }
 
 /**
- * Process / Confirm Payment
- * POST /api/payment/process (and POST /api/payment)
- */
-export async function processPayment(req, res, next) {
-  try {
-    const userId = req.user.user_id;
-    const result = await paymentService.processPayment(userId, req.body);
-    return sendSuccess(res, result, 'Payment processed successfully! Your conference registration is confirmed.');
-  } catch (error) {
-    if (error.statusCode) {
-      return sendError(res, error.message, error.statusCode);
-    }
-    next(error);
-  }
-}
-
-/**
- * Verify Payment (Razorpay / Signature verification)
- * POST /api/payment/verify
+ * Verify Razorpay Payment Signature
+ * POST /api/payments/verify
  */
 export async function verifyPayment(req, res, next) {
   try {
@@ -53,49 +36,32 @@ export async function verifyPayment(req, res, next) {
 }
 
 /**
- * Get Current User Payment Status
- * GET /api/payment/status
+ * Razorpay Webhook Handler
+ * POST /api/payments/webhook
  */
-export async function getPaymentStatus(req, res, next) {
+export async function handleWebhook(req, res, next) {
   try {
-    const userId = req.user.user_id;
-    const result = await paymentService.getPaymentStatus(userId);
-    return sendSuccess(res, result, 'Payment status fetched successfully');
+    const signature = req.headers['x-razorpay-signature'] || '';
+    const rawBody = req.rawBody || JSON.stringify(req.body);
+    const result = await paymentService.handleWebhook(req.body, signature, rawBody);
+    return res.status(200).json(result);
   } catch (error) {
-    if (error.statusCode) {
-      return sendError(res, error.message, error.statusCode);
-    }
-    next(error);
+    console.error('❌ Webhook error:', error.message);
+    return res.status(error.statusCode || 400).json({ status: false, message: error.message });
   }
 }
 
 /**
- * Get Payment / Invoice History
- * GET /api/payment/history
+ * Get Payment Status by Registration ID
+ * GET /api/payments/status/:registrationId
  */
-export async function getPaymentHistory(req, res, next) {
-  try {
-    const userId = req.user.user_id;
-    const result = await paymentService.getPaymentHistory(userId);
-    return sendSuccess(res, result, 'Payment history fetched successfully');
-  } catch (error) {
-    if (error.statusCode) {
-      return sendError(res, error.message, error.statusCode);
-    }
-    next(error);
-  }
-}
-
-/**
- * Get Payment Details for Registration
- * GET /api/payment/details/:registrationId
- */
-export async function getPaymentDetails(req, res, next) {
+export async function getPaymentStatusByRegistrationId(req, res, next) {
   try {
     const userId = req.user.user_id;
     const role = req.user.role;
-    const result = await paymentService.getPaymentDetails(req.params.registrationId, userId, role);
-    return sendSuccess(res, result, 'Payment details retrieved successfully');
+    const registrationId = req.params.registrationId;
+    const result = await paymentService.getPaymentStatusByRegistrationId(registrationId, userId, role);
+    return sendSuccess(res, result, 'Payment status fetched successfully');
   } catch (error) {
     if (error.statusCode) {
       return sendError(res, error.message, error.statusCode);
@@ -106,9 +72,7 @@ export async function getPaymentDetails(req, res, next) {
 
 export default {
   createOrder,
-  processPayment,
   verifyPayment,
-  getPaymentStatus,
-  getPaymentHistory,
-  getPaymentDetails
+  handleWebhook,
+  getPaymentStatusByRegistrationId
 };

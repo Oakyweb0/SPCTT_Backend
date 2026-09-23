@@ -37,7 +37,11 @@ app.use((req, res, next) => {
   });
   next();
 });
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // 2. Static File Serving (Uploads)
@@ -45,14 +49,16 @@ app.use('/uploads', express.static(config.UPLOAD.DIR));
 
 // 3. Dynamic Swagger UI Documentation
 const swaggerSpecPath = path.join(__dirname, 'docs', 'swagger.json');
-let swaggerSpec = {};
-try {
-  if (fs.existsSync(swaggerSpecPath)) {
-    swaggerSpec = JSON.parse(fs.readFileSync(swaggerSpecPath, 'utf8'));
+const getSwaggerSpec = () => {
+  try {
+    if (fs.existsSync(swaggerSpecPath)) {
+      return JSON.parse(fs.readFileSync(swaggerSpecPath, 'utf8'));
+    }
+  } catch (err) {
+    console.warn('Note: Swagger spec file error:', err.message);
   }
-} catch (err) {
-  console.warn('Note: Swagger spec file error:', err.message);
-}
+  return {};
+};
 
 const swaggerUiOptions = {
   customCss: `
@@ -66,18 +72,22 @@ const swaggerUiOptions = {
 };
 
 // Direct JSON spec endpoint
-app.get('/api-docs/swagger.json', (req, res) => res.json(swaggerSpec));
-app.get('/api/docs/swagger.json', (req, res) => res.json(swaggerSpec));
+app.get('/api-docs/swagger.json', (req, res) => res.json(getSwaggerSpec()));
+app.get('/api/docs/swagger.json', (req, res) => res.json(getSwaggerSpec()));
 
 // Swagger UI mount
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
+  swaggerUi.setup(getSwaggerSpec(), swaggerUiOptions)(req, res, next);
+});
+app.use('/api/docs', swaggerUi.serve, (req, res, next) => {
+  swaggerUi.setup(getSwaggerSpec(), swaggerUiOptions)(req, res, next);
+});
 
 // 4. API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/registration', registrationRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/abstracts', abstractRoutes);
 
@@ -112,13 +122,11 @@ app.get('/', (req, res) => {
         invoices: `GET ${baseUrl}/api/registration/invoices`,
         invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`
       },
-      payment: {
-        createOrder: `POST ${baseUrl}/api/payment/create-order`,
-        processPayment: `POST ${baseUrl}/api/payment/process`,
-        verifyPayment: `POST ${baseUrl}/api/payment/verify`,
-        status: `GET ${baseUrl}/api/payment/status`,
-        history: `GET ${baseUrl}/api/payment/history`,
-        details: `GET ${baseUrl}/api/payment/details/:registrationId`
+      payments: {
+        createOrder: `POST ${baseUrl}/api/payments/create-order`,
+        verifyPayment: `POST ${baseUrl}/api/payments/verify`,
+        webhook: `POST ${baseUrl}/api/payments/webhook`,
+        statusByRegistration: `GET ${baseUrl}/api/payments/status/:registrationId`
       },
       admin: {
         dashboardStats: `GET ${baseUrl}/api/admin/dashboard-stats`,

@@ -1,38 +1,34 @@
 import express from 'express';
 import {
   createOrder,
-  processPayment,
   verifyPayment,
-  getPaymentStatus,
-  getPaymentHistory,
-  getPaymentDetails
+  handleWebhook,
+  getPaymentStatusByRegistrationId
 } from '../controllers/payment.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
 /**
- * All Payment Routes require Bearer JWT Authentication
+ * Public Webhook Route (No Bearer JWT required, authenticated via Razorpay signature)
+ * POST /api/payments/webhook
  */
-router.use(authenticateToken);
+router.post('/webhook', handleWebhook);
 
-// Create / Initialize Payment Order
-router.post('/create-order', createOrder);
+/**
+ * Authenticated Payment Routes (Require Bearer JWT)
+ */
 
-// Process / Confirm Payment
-router.post('/process', processPayment);
-router.post('/', processPayment); // Alias to POST /api/payment
+// 1. Create / Initialize Razorpay Payment Order
+// POST /api/payments/create-order
+router.post('/create-order', authenticateToken, createOrder);
 
-// Verify Payment Gateway Transaction / Signature
-router.post('/verify', verifyPayment);
+// 2. Verify Razorpay Payment Signature
+// POST /api/payments/verify
+router.post('/verify', authenticateToken, verifyPayment);
 
-// Get Payment Status of Current User
-router.get('/status', getPaymentStatus);
-
-// Get User Payment & Invoice History
-router.get('/history', getPaymentHistory);
-
-// Get Payment Details for a specific registration
-router.get('/details/:registrationId', getPaymentDetails);
+// 3. Get Payment Status for a specific Registration
+// GET /api/payments/status/:registrationId
+router.get('/status/:registrationId', authenticateToken, getPaymentStatusByRegistrationId);
 
 export default router;
