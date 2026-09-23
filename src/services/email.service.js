@@ -83,7 +83,9 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
       
       <!-- Brand Header Banner Image (Matching Screenshot Design) -->
       <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
-        <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
+        <a href="https://2027.spctt.org/" target="_blank" style="display: block; text-decoration: none; border: 0; outline: none;">
+          <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
+        </a>
       </div>
 
       <!-- Notification Banner -->
@@ -233,7 +235,9 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
       
       <!-- Brand Header Banner Image (Matching Screenshot Design) -->
       <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
-        <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
+        <a href="https://2027.spctt.org/" target="_blank" style="display: block; text-decoration: none; border: 0; outline: none;">
+          <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
+        </a>
       </div>
 
       <!-- Notification Banner -->

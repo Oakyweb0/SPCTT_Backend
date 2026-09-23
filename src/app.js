@@ -38,11 +38,12 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({
+  limit: '25mb',
   verify: (req, res, buf) => {
     req.rawBody = buf;
   }
 }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // 2. Static File Serving (Uploads)
 app.use('/uploads', express.static(config.UPLOAD.DIR));

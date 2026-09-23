@@ -63,7 +63,7 @@ const abstractPdfFilter = (req, file, cb) => {
 const rawAbstractUpload = multer({
   storage: abstractPdfStorage,
   limits: {
-    fileSize: (config.UPLOAD.ABSTRACT_MAX_SIZE_MB || 20) * 1024 * 1024 // 20 MB strict limit
+    fileSize: 22 * 1024 * 1024 // 22 MB buffer limit in Multer
   },
   fileFilter: abstractPdfFilter
 });
@@ -92,6 +92,16 @@ export const uploadAbstractPdfMiddleware = (req, res, next) => {
         error: 'INVALID_FILE'
       });
     }
+
+    const uploadedFile = (req.files?.pdf && req.files.pdf[0]) || (req.files?.file && req.files.file[0]);
+    if (uploadedFile && uploadedFile.size > 20 * 1024 * 1024) {
+      return res.status(400).json({
+        status: false,
+        message: `PDF file size (${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB) exceeds the 20 MB limit. Please compress your PDF and try again.`,
+        error: 'FILE_TOO_LARGE'
+      });
+    }
+
     next();
   });
 };
