@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
-const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_header_banner_v5.png';
+const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header_styled.png';
 
 let transporter = null;
 
@@ -81,12 +81,23 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header Banner Image (Matching Screenshot Design) -->
-      <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
-        <a href="https://2027.spctt.org/" target="_blank" style="display: block; text-decoration: none; border: 0; outline: none;">
-          <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
-        </a>
-      </div>
+      <!-- Brand Header Banner (Table Background - Prevents Gmail Hover Download Button & Non-Clickable) -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0;">
+        <tr>
+          <td align="center" valign="top" bgcolor="#13254A" background="${BANNER_IMAGE_URL}" style="background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; height: 163px; padding: 0; line-height: 0; font-size: 0;" height="163">
+            <!--[if gte mso 9]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:163px;">
+              <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
+              <v:textbox inset="0,0,0,0">
+            <![endif]-->
+            <div style="height: 163px; line-height: 163px; font-size: 1px; user-select: none;">&nbsp;</div>
+            <!--[if gte mso 9]>
+              </v:textbox>
+            </v:rect>
+            <![endif]-->
+          </td>
+        </tr>
+      </table>
 
       <!-- Notification Banner -->
       <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
@@ -155,7 +166,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
 
         <!-- CTA Button -->
         <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
+          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
             Visit Conference Portal
           </a>
         </div>
@@ -233,12 +244,23 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header Banner Image (Matching Screenshot Design) -->
-      <div style="border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; line-height: 0;">
-        <a href="https://2027.spctt.org/" target="_blank" style="display: block; text-decoration: none; border: 0; outline: none;">
-          <img src="${BANNER_IMAGE_URL}" alt="Society for Pediatric Cellular Therapy and Transplant - SPCTT 2027 Annual Conference" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none;" />
-        </a>
-      </div>
+      <!-- Brand Header Banner (Table Background - Prevents Gmail Hover Download Button & Non-Clickable) -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0;">
+        <tr>
+          <td align="center" valign="top" bgcolor="#13254A" background="${BANNER_IMAGE_URL}" style="background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; height: 163px; padding: 0; line-height: 0; font-size: 0;" height="163">
+            <!--[if gte mso 9]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:163px;">
+              <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
+              <v:textbox inset="0,0,0,0">
+            <![endif]-->
+            <div style="height: 163px; line-height: 163px; font-size: 1px; user-select: none;">&nbsp;</div>
+            <!--[if gte mso 9]>
+              </v:textbox>
+            </v:rect>
+            <![endif]-->
+          </td>
+        </tr>
+      </table>
 
       <!-- Notification Banner -->
       <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
@@ -251,7 +273,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
           Dear <strong>${safeName}</strong>,
         </p>
         <p style="font-size: 16px; line-height: 1.6; color: #334155;">
-          Thank you for submitting your abstract to <strong>SPCTT 2027</strong>. Due to high submission volume and limited session capacity, we regret to inform you that your abstract could not be accepted for presentation.
+          Thank you for submitting your abstract to <strong>SPCTT 2027</strong>. Due to high submission volume and limited session capacity, we regret to inform you that your abstract could not be Received for presentation.
         </p>
 
         <!-- Abstract Details Card -->
@@ -296,7 +318,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
 
         <!-- CTA Button -->
         <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.25);">
+          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.25);">
             Register as Conference Delegate
           </a>
         </div>
