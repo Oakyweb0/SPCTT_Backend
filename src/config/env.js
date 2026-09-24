@@ -83,13 +83,13 @@ export const config = {
     SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
     SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
     SMTP_SECURE: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
-    SMTP_USER: process.env.SMTP_USER || 'spctt2027@spctt.org',
+    SMTP_USER: process.env.SMTP_USER || 'submit@spctt.org',
     SMTP_PASS: process.env.SMTP_PASS || '',
     FROM_NAME: process.env.EMAIL_FROM_NAME || 'SPCTT 2027',
-    FROM_EMAIL: process.env.EMAIL_FROM_ADDRESS || 'spctt2027@spctt.org',
-    DEFAULT_FROM: process.env.SMTP_FROM || '"SPCTT 2027" <spctt2027@spctt.org>',
-    ABSTRACT_FROM: process.env.ABSTRACT_FROM || '"SPCTT 2027" <spctt2027@spctt.org>',
-    ABSTRACT_ADMIN_EMAIL: process.env.ABSTRACT_ADMIN_EMAIL || 'spctt2027@spctt.org',
+    FROM_EMAIL: process.env.EMAIL_FROM_ADDRESS || 'submit@spctt.org',
+    DEFAULT_FROM: process.env.SMTP_FROM || '"SPCTT 2027" <submit@spctt.org>',
+    ABSTRACT_FROM: process.env.ABSTRACT_FROM || '"SPCTT 2027" <submit@spctt.org>',
+    ABSTRACT_ADMIN_EMAIL: process.env.ABSTRACT_ADMIN_EMAIL || 'submit@spctt.org',
     CC_DEFAULT: process.env.EMAIL_CC_DEFAULT || 'tvivek2021@gmail.com'
   },
 

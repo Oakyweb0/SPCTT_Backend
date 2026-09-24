@@ -208,7 +208,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
               <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:spctt2027@spctt.org" style="color: #13254A; text-decoration: none;">spctt2027@spctt.org</a></p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
               <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
                 <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">For Abstract Query:</p>
@@ -345,7 +345,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
                 <p style="margin: 0 0 4px 0;">Sincerely,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
                 <p style="margin: 0; color: #64748b; font-size: 14px;">SPCTT 2027 Annual Conference</p>
-                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:spctt2027@spctt.org" style="color: #13254A; text-decoration: none;">spctt2027@spctt.org</a></p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
               <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
                 <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 15px;">For Abstract Query:</p>
@@ -494,12 +494,6 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
           <li style="margin-bottom: 8px;"><strong>Delegate Registration:</strong> As per conference guidelines, all accepted presenters must register at <a href="https://2027.spctt.org/registration/register" style="color: #004b63; font-weight: 600; text-decoration: underline;">SPCTT Portal</a>.</li>
         </ol>
 
-        <!-- CTA Button -->
-        <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/user/dashboard" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
-            View Submissions in Portal
-          </a>
-        </div>
 
         <!-- Signoff -->
         <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
@@ -509,11 +503,11 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
                 <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">SPCTT 2027 Annual Conference</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:spctt2027@spctt.org" style="color: #13254A; text-decoration: none;">spctt2027@spctt.org</a></p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
               <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
                 <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">For Abstract Queries:</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:spctt2027@spctt.org" style="color: #13254A; text-decoration: none; font-weight: 600;">spctt2027@spctt.org</a></p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none; font-weight: 600;">submit@spctt.org</a></p>
               </td>
             </tr>
           </table>
@@ -638,19 +632,11 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
 
           ${abstractContentSnippet}
         </div>
-
-        <!-- Action Button -->
-        <div style="text-align: center; margin: 30px 0 20px 0;">
-          <a href="https://2027.spctt.org/admin/abstracts" style="background-color: #13254A; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block;">
-            Open Admin Dashboard to Review
-          </a>
-        </div>
-
       </div>
 
       <!-- Footer -->
       <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
-        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; spctt2027@spctt.org</p>
+        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
     </div>
@@ -662,9 +648,9 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
 export const emailService = {
   /**
    * Send Abstract Submission Confirmation to User and Notification to Admin
-   * - From: spctt2027@spctt.org
+   * - From: submit@spctt.org
    * - Author Email CC: tvivek2021@gmail.com
-   * - Admin Email: spctt2027@spctt.org (with CC: tvivek2021@gmail.com)
+   * - Admin Email: submit@spctt.org (with CC: tvivek2021@gmail.com)
    */
   async sendAbstractSubmissionEmails({ abstract }) {
     if (!abstract) {
@@ -682,9 +668,9 @@ export const emailService = {
     const pdfUrl = abstract.pdf_url || abstract.file_url || null;
     const createdAt = abstract.created_at || new Date();
 
-    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || '"SPCTT 2027" <spctt2027@spctt.org>';
+    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || '"SPCTT 2027" <submit@spctt.org>';
     const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
-    const adminEmail = process.env.ABSTRACT_ADMIN_EMAIL || config.EMAIL.ABSTRACT_ADMIN_EMAIL || 'spctt2027@spctt.org';
+    const adminEmail = process.env.ABSTRACT_ADMIN_EMAIL || config.EMAIL.ABSTRACT_ADMIN_EMAIL || 'submit@spctt.org';
 
     const results = {
       authorEmail: null,
@@ -768,7 +754,7 @@ export const emailService = {
       }
     }
 
-    // 2. Send notification email to Admin at spctt2027@spctt.org (with CC to tvivek2021@gmail.com)
+    // 2. Send notification email to Admin at submit@spctt.org (with CC to tvivek2021@gmail.com)
     const adminSubject = `[New Abstract Submission] ${abstractCode} - ${topic} (${recipientName})`;
     const adminHtml = generateAdminSubmissionNotificationHtml({
       name: recipientName,
@@ -901,7 +887,7 @@ export const emailService = {
         reviewComments: comments
       });
 
-    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <spctt2027@spctt.org>';
+    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
     const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
 
     const mailOptions = {
