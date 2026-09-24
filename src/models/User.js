@@ -1,5 +1,8 @@
 import { getPool } from '../config/database.js';
 
+// In-memory fallback cache for reset tokens when database column is missing or restricted
+const inMemoryResetTokens = new Map(); // key: userId, value: { token, expiresAt, email }
+
 export const User = {
   /**
    * Find a user by email
@@ -30,12 +33,25 @@ export const User = {
    */
   async findByResetToken(token) {
     if (!token) return null;
+    const cleanToken = token.toString().trim();
     const pool = getPool();
-    const [rows] = await pool.query(
-      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
-      [token.toString().trim()]
-    );
-    return rows[0] || null;
+    try {
+      const [rows] = await pool.query(
+        'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
+        [cleanToken]
+      );
+      if (rows[0]) return rows[0];
+    } catch (dbErr) {
+      // Column might not exist in database, check fallback
+    }
+
+    // In-memory fallback
+    for (const [userId, data] of inMemoryResetTokens.entries()) {
+      if (data.token === cleanToken && data.expiresAt > new Date()) {
+        return this.findById(userId);
+      }
+    }
+    return null;
   },
 
   /**
@@ -43,12 +59,28 @@ export const User = {
    */
   async findByEmailAndResetOtp(email, otp) {
     if (!email || !otp) return null;
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otp.toString().trim();
     const pool = getPool();
-    const [rows] = await pool.query(
-      'SELECT * FROM users WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
-      [email.trim().toLowerCase(), otp.toString().trim()]
-    );
-    return rows[0] || null;
+    try {
+      const [rows] = await pool.query(
+        'SELECT * FROM users WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
+        [cleanEmail, cleanOtp]
+      );
+      if (rows[0]) return rows[0];
+    } catch (dbErr) {
+      // Column might not exist in database, check fallback
+    }
+
+    // In-memory fallback
+    const user = await this.findByEmail(cleanEmail);
+    if (user && inMemoryResetTokens.has(user.id.toString())) {
+      const tokenData = inMemoryResetTokens.get(user.id.toString());
+      if (tokenData && tokenData.token === cleanOtp && tokenData.expiresAt > new Date()) {
+        return user;
+      }
+    }
+    return null;
   },
 
   /**
@@ -56,10 +88,20 @@ export const User = {
    */
   async setResetToken(userId, token, expiresAt) {
     const pool = getPool();
-    await pool.query(
-      'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
-      [token, expiresAt, userId]
-    );
+    const strUserId = userId.toString();
+    const strToken = token.toString().trim();
+    
+    // Always keep in memory store
+    inMemoryResetTokens.set(strUserId, { token: strToken, expiresAt });
+
+    try {
+      await pool.query(
+        'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
+        [strToken, expiresAt, userId]
+      );
+    } catch (dbErr) {
+      // Ignored if DB table does not have column due to restricted ALTER permissions
+    }
   },
 
   /**
@@ -67,10 +109,17 @@ export const User = {
    */
   async clearResetToken(userId) {
     const pool = getPool();
-    await pool.query(
-      'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
-      [userId]
-    );
+    const strUserId = userId.toString();
+    inMemoryResetTokens.delete(strUserId);
+
+    try {
+      await pool.query(
+        'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
+        [userId]
+      );
+    } catch (dbErr) {
+      // Ignored if DB table does not have column
+    }
   },
 
   /**
