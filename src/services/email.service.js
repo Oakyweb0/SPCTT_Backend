@@ -3,6 +3,9 @@ import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
 const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header_styled.png';
+const HEADER_P1 = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_header_p1.png';
+const HEADER_P2 = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_header_p2.png';
+const HEADER_P3 = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_header_p3.png';
 
 let transporter = null;
 
@@ -81,20 +84,17 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header Banner (Table Background - Prevents Gmail Hover Download Button & Non-Clickable) -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0;">
+      <!-- Brand Header Banner (Seamless 3-Slice Banner - 100% Prevents Gmail Hover Download Button & Non-Clickable) -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; line-height: 0; font-size: 0; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <tr>
-          <td align="center" valign="top" bgcolor="#13254A" background="${BANNER_IMAGE_URL}" style="background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; height: 163px; padding: 0; line-height: 0; font-size: 0;" height="163">
-            <!--[if gte mso 9]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:163px;">
-              <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
-              <v:textbox inset="0,0,0,0">
-            <![endif]-->
-            <div style="height: 163px; line-height: 163px; font-size: 1px; user-select: none;">&nbsp;</div>
-            <!--[if gte mso 9]>
-              </v:textbox>
-            </v:rect>
-            <![endif]-->
+          <td width="33.33%" valign="top" style="width: 33.33%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P1}" alt="Society for Pediatric Cellular Therapy and Transplant" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
+          </td>
+          <td width="33.34%" valign="top" style="width: 33.34%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P2}" alt="SPCTT 2027 Annual Conference" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
+          </td>
+          <td width="33.33%" valign="top" style="width: 33.33%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P3}" alt="March 6-7 2027 Taj Vivanta Dwarka New Delhi" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
           </td>
         </tr>
       </table>
@@ -244,27 +244,24 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
     <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
       
-      <!-- Brand Header Banner (Table Background - Prevents Gmail Hover Download Button & Non-Clickable) -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0;">
+      <!-- Brand Header Banner (Seamless 3-Slice Banner - 100% Prevents Gmail Hover Download Button & Non-Clickable) -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; line-height: 0; font-size: 0; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <tr>
-          <td align="center" valign="top" bgcolor="#13254A" background="${BANNER_IMAGE_URL}" style="background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; height: 163px; padding: 0; line-height: 0; font-size: 0;" height="163">
-            <!--[if gte mso 9]>
-            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:163px;">
-              <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
-              <v:textbox inset="0,0,0,0">
-            <![endif]-->
-            <div style="height: 163px; line-height: 163px; font-size: 1px; user-select: none;">&nbsp;</div>
-            <!--[if gte mso 9]>
-              </v:textbox>
-            </v:rect>
-            <![endif]-->
+          <td width="33.33%" valign="top" style="width: 33.33%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P1}" alt="Society for Pediatric Cellular Therapy and Transplant" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
+          </td>
+          <td width="33.34%" valign="top" style="width: 33.34%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P2}" alt="SPCTT 2027 Annual Conference" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
+          </td>
+          <td width="33.33%" valign="top" style="width: 33.33%; padding: 0; margin: 0; line-height: 0; font-size: 0; border: 0;">
+            <img src="${HEADER_P3}" alt="March 6-7 2027 Taj Vivanta Dwarka New Delhi" width="217" style="display: block; width: 100%; height: auto; border: 0; outline: none; margin: 0; padding: 0;" />
           </td>
         </tr>
       </table>
 
       <!-- Notification Banner -->
       <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
-        <strong style="color: #475569; font-size: 18px; letter-spacing: 0.2px;">Review Outcome Notification</strong>
+        <strong style="color: #000000; font-size: 18px; letter-spacing: 0.2px;">Your Abstract Has Been Rejected</strong>
       </div>
 
       <!-- Main Body -->
@@ -301,8 +298,8 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
             <tr>
               <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
               <td style="padding: 8px 0;">
-                <span style="background-color: #fee2e2; color: #b91c1c; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase;">
-                  NOT RECEIVED
+              <span style="background-color: #f1f5f9; color: #000000; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #cbd5e1;">
+                  REJECTED
                 </span>
               </td>
             </tr>
