@@ -953,7 +953,155 @@ export const emailService = {
         message: `Failed to dispatch email to ${recipientEmail}: ${sendError.message}`
       };
     }
+  },
+
+  /**
+   * Send Password Reset OTP Email
+   */
+  async sendPasswordResetOtpEmail({ user, otp, expiryMinutes = 15 }) {
+    if (!user || !user.email) {
+      throw new Error('User email is required to send password reset OTP.');
+    }
+
+    const recipientEmail = user.email.trim();
+    const recipientName = user.name || user.fullName || 'Conference Attendee';
+    const fromAddress = process.env.EMAIL_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const subject = `[SPCTT 2027] Password Reset OTP: ${otp}`;
+
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Password Reset OTP - SPCTT 2027</title>
+      <style>
+        @media only screen and (max-width: 520px) {
+          .responsive-td {
+            display: block !important;
+            width: 100% !important;
+            text-align: left !important;
+            padding-bottom: 12px !important;
+            box-sizing: border-box !important;
+          }
+          .mobile-padding {
+            padding: 24px 16px !important;
+          }
+        }
+      </style>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+      <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+        
+        ${generateEmailHeaderHtml()}
+
+        <!-- Notification Banner -->
+        <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; text-align: center;">
+          <strong style="color: #13254A; font-size: 18px; letter-spacing: 0.2px;">Password Reset Verification Code</strong>
+        </div>
+
+        <!-- Main Body -->
+        <div class="mobile-padding" style="padding: 32px 24px;">
+          <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
+            Dear <strong>${recipientName}</strong>,
+          </p>
+          <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+            We received a request to reset your password for the <strong>SPCTT 2027 Conference Portal</strong> account (<code>${recipientEmail}</code>).
+          </p>
+          <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+            Please use the following One-Time Password (OTP) to proceed with resetting your password:
+          </p>
+
+          <!-- OTP Display Card -->
+          <div style="text-align: center; margin: 28px 0; padding: 24px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px;">
+            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; display: block; margin-bottom: 8px;">
+              Your One-Time Password (OTP)
+            </span>
+            <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #13254A; font-family: monospace; line-height: 1.2; padding: 8px 0;">
+              ${otp}
+            </div>
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #dc2626; font-weight: 600;">
+              ⏱️ Valid for ${expiryMinutes} minutes only
+            </p>
+          </div>
+
+          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 14px; margin-bottom: 24px;">
+            <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.5;">
+              <strong>Security Note:</strong> Do not share this OTP with anyone. SPCTT representatives will never ask for your password or OTP. If you did not make this request, you can safely ignore this email.
+            </p>
+          </div>
+
+          <p style="font-size: 14px; line-height: 1.5; color: #64748b; margin-bottom: 0;">
+            Warm regards,<br>
+            <strong style="color: #1e293b;">SPCTT 2027 Organizing Team</strong><br>
+            Society for Pediatric Cellular Therapy and Transplant
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0;">&copy; 2027 SPCTT. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    const mailOptions = {
+      from: fromAddress,
+      to: `"${recipientName}" <${recipientEmail}>`,
+      subject: subject,
+      html: htmlContent
+    };
+
+    try {
+      const activeTransporter = getTransporter();
+      console.log(`📧 Dispatching password reset OTP email to '${recipientEmail}'...`);
+      const info = await activeTransporter.sendMail(mailOptions);
+      console.log(`✅ Password reset OTP email sent successfully! MessageId: ${info.messageId}`);
+
+      await EmailLog.create({
+        userId: user.id || null,
+        recipientEmail,
+        recipientName,
+        fromEmail: fromAddress,
+        subject,
+        emailType: 'password_reset_otp',
+        status: 'sent',
+        errorMessage: null
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        recipientEmail,
+        status: 'sent',
+        message: `Password reset OTP email sent successfully to ${recipientEmail}.`
+      };
+    } catch (sendError) {
+      console.error(`❌ Failed to send password reset OTP email to ${recipientEmail}:`, sendError.message);
+
+      await EmailLog.create({
+        userId: user.id || null,
+        recipientEmail,
+        recipientName,
+        fromEmail: fromAddress,
+        subject,
+        emailType: 'password_reset_otp',
+        status: 'failed',
+        errorMessage: sendError.message
+      });
+
+      return {
+        success: false,
+        recipientEmail,
+        status: 'failed',
+        error: sendError.message,
+        message: `Failed to dispatch OTP email: ${sendError.message}`
+      };
+    }
   }
 };
 
 export default emailService;
+

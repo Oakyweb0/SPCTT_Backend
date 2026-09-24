@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { generateToken, verifyToken } from '../utils/jwt.js';
+import { emailService } from './email.service.js';
 
 export const authService = {
   /**
@@ -160,7 +161,7 @@ export const authService = {
   },
 
   /**
-   * Request Password Reset (Forgot Password)
+   * Request Password Reset (Forgot Password with OTP)
    */
   async forgotPassword(email) {
     if (!email || !email.trim()) {
@@ -176,57 +177,72 @@ export const authService = {
       throw error;
     }
 
-    // Generate signed JWT reset token (valid for 1 hour)
-    const resetToken = generateToken(
-      {
-        user_id: user.id,
-        email: user.email,
-        purpose: 'password_reset'
-      },
-      '1h'
-    );
+    // Generate a 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiryMinutes = 15;
+    const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
+    // Store OTP in database
+    await User.setResetToken(user.id, otp, expiresAt);
+
+    // Send OTP email
+    let emailResult = null;
     try {
-      await User.setResetToken(user.id, resetToken, new Date(Date.now() + 60 * 60 * 1000));
-    } catch (dbErr) {
-      // Ignored if ALTER permission is restricted on DB server
+      emailResult = await emailService.sendPasswordResetOtpEmail({
+        user,
+        otp,
+        expiryMinutes
+      });
+    } catch (mailErr) {
+      console.error('❌ Error sending password reset OTP email:', mailErr.message);
     }
 
     return {
       success: true,
       email: user.email,
-      resetToken,
-      message: 'Password reset token has been generated. Use this token with the reset-password API to set your new password.'
+      otpSent: emailResult ? emailResult.success : true,
+      message: `A 6-digit OTP has been sent to ${user.email}. Please check your inbox or spam folder.`
     };
   },
 
   /**
-   * Verify Reset Token
+   * Verify Reset Token / OTP
    */
-  async verifyResetToken(token) {
-    if (!token || !token.trim()) {
-      const error = new Error('Reset token is required.');
+  async verifyResetToken(tokenData) {
+    const payload = typeof tokenData === 'string' ? { token: tokenData } : (tokenData || {});
+    const code = (payload.otp || payload.token || '').toString().trim();
+    const email = (payload.email || '').toString().trim();
+
+    if (!code) {
+      const error = new Error('OTP / Reset code is required.');
       error.statusCode = 400;
       throw error;
     }
 
-    try {
-      const { valid, decoded } = verifyToken(token.trim());
-      if (valid && decoded) {
-        const userId = decoded.user_id || decoded.id;
-        const user = await User.findById(userId);
-        if (user) {
-          return { valid: true, email: user.email };
-        }
-      }
-    } catch (err) {}
-
-    const user = await User.findByResetToken(token.trim()).catch(() => null);
+    let user = null;
+    if (email) {
+      user = await User.findByEmailAndResetOtp(email, code);
+    }
     if (!user) {
-      const error = new Error('Invalid or expired password reset token.');
+      user = await User.findByResetToken(code);
+    }
+
+    if (!user) {
+      try {
+        const { valid, decoded } = verifyToken(code);
+        if (valid && decoded) {
+          const userId = decoded.user_id || decoded.id;
+          user = await User.findById(userId);
+        }
+      } catch (err) {}
+    }
+
+    if (!user) {
+      const error = new Error('Invalid or expired OTP. Please check the code or request a new one.');
       error.statusCode = 400;
       throw error;
     }
+
     return {
       valid: true,
       email: user.email
@@ -234,11 +250,12 @@ export const authService = {
   },
 
   /**
-   * Reset Password with Token
+   * Reset Password with OTP / Token
    */
-  async resetPassword({ token, newPassword, confirmPassword }) {
-    if (!token || !token.trim()) {
-      const error = new Error('Reset token is required.');
+  async resetPassword({ token, otp, email, newPassword, confirmPassword }) {
+    const code = (otp || token || '').toString().trim();
+    if (!code) {
+      const error = new Error('OTP / Reset code is required.');
       error.statusCode = 400;
       throw error;
     }
@@ -255,23 +272,27 @@ export const authService = {
       throw error;
     }
 
-    let userId = null;
-    try {
-      const { valid, decoded } = verifyToken(token.trim());
-      if (valid && decoded) {
-        userId = decoded.user_id || decoded.id;
-      }
-    } catch (err) {}
-
-    if (!userId) {
-      const dbUser = await User.findByResetToken(token.trim()).catch(() => null);
-      if (dbUser) {
-        userId = dbUser.id;
-      }
+    let user = null;
+    if (email && email.trim()) {
+      user = await User.findByEmailAndResetOtp(email.trim(), code);
     }
 
-    if (!userId) {
-      const error = new Error('Invalid or expired password reset token. Please request a new one.');
+    if (!user) {
+      user = await User.findByResetToken(code);
+    }
+
+    if (!user) {
+      try {
+        const { valid, decoded } = verifyToken(code);
+        if (valid && decoded) {
+          const userId = decoded.user_id || decoded.id;
+          user = await User.findById(userId);
+        }
+      } catch (err) {}
+    }
+
+    if (!user) {
+      const error = new Error('Invalid or expired OTP / reset code. Please request a new OTP.');
       error.statusCode = 400;
       throw error;
     }
@@ -279,14 +300,14 @@ export const authService = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await User.updateById(userId, { password: hashedPassword });
+    await User.updateById(user.id, { password: hashedPassword });
     try {
-      await User.clearResetToken(userId);
+      await User.clearResetToken(user.id);
     } catch (e) {}
 
     return {
       success: true,
-      message: 'Password has been reset successfully! You can now log in with your new password.'
+      message: 'Password has been updated successfully! You can now log in with your new password.'
     };
   },
 

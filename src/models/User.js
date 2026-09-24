@@ -26,13 +26,27 @@ export const User = {
   },
 
   /**
-   * Find a user by reset token
+   * Find a user by reset token or OTP
    */
   async findByResetToken(token) {
+    if (!token) return null;
     const pool = getPool();
     const [rows] = await pool.query(
       'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
-      [token]
+      [token.toString().trim()]
+    );
+    return rows[0] || null;
+  },
+
+  /**
+   * Find a user by Email and Reset OTP / Token
+   */
+  async findByEmailAndResetOtp(email, otp) {
+    if (!email || !otp) return null;
+    const pool = getPool();
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE email = ? AND reset_token = ? AND reset_token_expires > NOW() LIMIT 1',
+      [email.trim().toLowerCase(), otp.toString().trim()]
     );
     return rows[0] || null;
   },

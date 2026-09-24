@@ -67,14 +67,13 @@ export async function forgotPassword(req, res, next) {
 }
 
 /**
- * Verify Password Reset Token
+ * Verify Password Reset Token / OTP
  * POST /api/auth/verify-reset-token
  */
 export async function verifyResetToken(req, res, next) {
   try {
-    const { token } = req.body;
-    const result = await authService.verifyResetToken(token);
-    return sendSuccess(res, result, 'Password reset token is valid.', 200);
+    const result = await authService.verifyResetToken(req.body);
+    return sendSuccess(res, result, 'OTP is valid.', 200);
   } catch (error) {
     if (error.statusCode) {
       return sendError(res, error.message, error.statusCode);
