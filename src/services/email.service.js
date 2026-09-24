@@ -44,19 +44,19 @@ function getTransporter() {
 function generateEmailHeaderHtml() {
   return `
       <!-- Brand Header Banner -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; background-image: linear-gradient(90deg, rgba(19, 37, 74, 0.95) 0%, rgba(19, 37, 74, 0.75) 50%, rgba(19, 37, 74, 0.40) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; background-image: linear-gradient(90deg, rgba(19, 37, 74, 0.80) 0%, rgba(19, 37, 74, 0.58) 50%, rgba(19, 37, 74, 0.25) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <!--[if gte mso 9]>
         <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:180px;">
         <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
         <v:textbox inset="0,0,0,0">
         <![endif]-->
         <tr>
-          <td align="center" valign="middle" style="padding: 28px 20px 24px 20px; text-align: center; background: linear-gradient(90deg, rgba(19, 37, 74, 0.95) 0%, rgba(19, 37, 74, 0.75) 50%, rgba(19, 37, 74, 0.40) 100%);">
+          <td align="center" valign="middle" style="padding: 28px 20px 24px 20px; text-align: center; background: linear-gradient(90deg, rgba(19, 37, 74, 0.80) 0%, rgba(19, 37, 74, 0.58) 50%, rgba(19, 37, 74, 0.25) 100%);">
             
             <!-- Top Badge / Pill -->
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 12px auto;">
               <tr>
-                <td style="background-color: #0c1938; background: rgba(12, 25, 56, 0.95); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; padding: 5px 18px; text-align: center;">
+                <td style="background-color: #0c1938; background: rgba(12, 25, 56, 0.90); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; padding: 5px 18px; text-align: center;">
                   <span style="color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: block; line-height: 1.2;">
                     SPCTT 2027 ANNUAL CONFERENCE
                   </span>
@@ -65,12 +65,12 @@ function generateEmailHeaderHtml() {
             </table>
 
             <!-- Conference / Society Title -->
-            <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 20px; font-weight: 700; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.7);">
+            <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 20px; font-weight: 700; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.85);">
               Society for Pediatric Cellular Therapy and Transplant
             </h1>
 
             <!-- Conference Date & Venue -->
-            <p style="margin: 0; color: #ffffff; font-size: 13px; font-weight: 600; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 1px 3px rgba(0,0,0,0.7); opacity: 0.95;">
+            <p style="margin: 0; color: #ffffff; font-size: 13px; font-weight: 600; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 1px 4px rgba(0,0,0,0.85); opacity: 0.95;">
               March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi
             </p>
 
@@ -494,13 +494,6 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
           <li style="margin-bottom: 8px;"><strong>Delegate Registration:</strong> As per conference guidelines, all accepted presenters must register at <a href="https://2027.spctt.org/registration/register" style="color: #004b63; font-weight: 600; text-decoration: underline;">SPCTT Portal</a>.</li>
         </ol>
 
-        <!-- CTA Button -->
-        <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/user/dashboard" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
-            View Submissions in Portal
-          </a>
-        </div>
-
         <!-- Signoff -->
         <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
@@ -584,9 +577,9 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Notification Bar -->
-      <div style="background-color: #64748b; color: #ffffff; padding: 18px 24px; text-align: center;">
+      <div style="color: #13254A; padding: 18px 24px; text-align: center;">
         <span style="background-color: #22c55e; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px;">New Abstract Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 700; color: #ffffff;">New Abstract Submitted for SPCTT 2027</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 700; color: #13254A;">New Abstract Submitted for SPCTT 2027</h2>
       </div>
 
       <!-- Main Body -->
@@ -637,13 +630,6 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
           </table>
 
           ${abstractContentSnippet}
-        </div>
-
-        <!-- Action Button -->
-        <div style="text-align: center; margin: 30px 0 20px 0;">
-          <a href="https://2027.spctt.org/admin/abstracts" style="background-color: #13254A; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block;">
-            Open Admin Dashboard to Review
-          </a>
         </div>
 
       </div>
