@@ -44,12 +44,12 @@ export const config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   IS_PRODUCTION: (process.env.NODE_ENV || 'development') === 'production',
   IS_DEVELOPMENT: (process.env.NODE_ENV || 'development') === 'development',
-  
+
   PORT: parseInt(process.env.PORT || '5000', 10),
   APP_URL: process.env.APP_URL || '', // If empty, dynamically derived from req in controllers/app
   CLIENT_URL: process.env.CLIENT_URL || '',
   CORS_ALLOWED_ORIGINS: parseCorsOrigins(process.env.CLIENT_URL || process.env.CORS_ORIGINS),
-  
+
   DB: {
     HOST: process.env.DB_HOST || '127.0.0.1',
     PORT: parseInt(process.env.DB_PORT || '3306', 10),
@@ -58,7 +58,7 @@ export const config = {
     NAME: process.env.DB_NAME || 'spctt_db',
     CONNECTION_LIMIT: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10)
   },
-  
+
   JWT: {
     SECRET: process.env.JWT_SECRET || 'SPCTT_DEFAULT_SECURE_JWT_SECRET_2026_KEY',
     EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h'
@@ -88,6 +88,8 @@ export const config = {
     FROM_NAME: process.env.EMAIL_FROM_NAME || 'SPCTT 2027 Secretariat',
     FROM_EMAIL: process.env.EMAIL_FROM_ADDRESS || 'spctt2027@spctt.org',
     DEFAULT_FROM: process.env.SMTP_FROM || '"SPCTT 2027 Secretariat" <spctt2027@spctt.org>',
+    ABSTRACT_FROM: process.env.ABSTRACT_FROM || '"SPCTT 2027 Secretariat" <spctt2027@spctt.org>',
+    ABSTRACT_ADMIN_EMAIL: process.env.ABSTRACT_ADMIN_EMAIL || 'spctt2027@spctt.org',
     CC_DEFAULT: process.env.EMAIL_CC_DEFAULT || 'tvivek2021@gmail.com'
   },
 

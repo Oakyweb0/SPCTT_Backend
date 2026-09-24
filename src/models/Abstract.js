@@ -47,6 +47,21 @@ function buildSelectExpressions(cols) {
 function normalizeAbstractRow(row) {
   if (!row) return null;
 
+  let meta = {};
+  let cleanAbstractText = row.abstract_text || '';
+
+  if (cleanAbstractText && cleanAbstractText.includes('<!--SPCTT_META:')) {
+    const metaMatch = cleanAbstractText.match(/<!--SPCTT_META:([\s\S]*?)-->/);
+    if (metaMatch) {
+      try {
+        meta = JSON.parse(metaMatch[1]);
+        cleanAbstractText = cleanAbstractText.replace(/<!--SPCTT_META:[\s\S]*?-->/, '').trim();
+      } catch (e) {
+        // Ignore metadata parse error
+      }
+    }
+  }
+
   let pdfUrl = row.pdf_url || null;
 
   if (row.file_url) {
@@ -66,20 +81,29 @@ function normalizeAbstractRow(row) {
   // Normalize 'submitted' from MySQL to 'pending' for UI consistency
   const normalizedStatus = (!row.status || row.status === 'submitted') ? 'pending' : row.status;
 
+  const effectiveName = meta.name || row.name || row.authors || row.submitter_name || '';
+  const effectiveInstitute = meta.institute_name || row.institute_name || row.affiliation || row.submitter_org || '';
+  const effectiveTopic = meta.topic || row.topic || row.title || '';
+  const effectiveEmail = meta.email || row.email || row.submitter_email || '';
+  const effectivePhone = meta.phone || row.phone || row.submitter_phone || '';
+
   return {
     ...row,
     status: normalizedStatus,
     raw_status: row.status,
-    name: row.name || row.authors || row.submitter_name || '',
-    institute_name: row.institute_name || row.affiliation || row.submitter_org || '',
-    topic: row.topic || row.title || '',
-    email: row.email || row.submitter_email || '',
-    phone: row.phone || row.submitter_phone || '',
+    abstract_text: cleanAbstractText,
+    name: effectiveName,
+    institute_name: effectiveInstitute,
+    topic: effectiveTopic,
+    email: effectiveEmail,
+    phone: effectivePhone,
     pdf_url: pdfUrl,
     file_url: pdfUrl,
-    display_name: row.display_name || row.name || row.authors || row.submitter_name || '',
-    display_institute: row.display_institute || row.institute_name || row.affiliation || '',
-    display_topic: row.display_topic || row.topic || row.title || ''
+    display_name: effectiveName,
+    display_institute: effectiveInstitute,
+    display_topic: effectiveTopic,
+    display_email: effectiveEmail,
+    display_phone: effectivePhone
   };
 }
 
@@ -111,10 +135,21 @@ export const Abstract = {
     const finalCategory = (category || 'Poster').trim();
     const finalEmail = (email || '').trim();
     const finalPhone = (phone || '').trim();
-    const finalAbstractText = (abstractText || '').trim();
+    const rawAbstractText = (abstractText || '').trim();
     const finalPdfUrl = pdfUrl || fileUrl || null;
 
     const cols = await getAbstractColumns();
+
+    // Embed contact metadata into abstract_text so it's always preserved across DB schemas
+    const metaTag = `\n\n<!--SPCTT_META:${JSON.stringify({
+      name: finalName,
+      email: finalEmail,
+      phone: finalPhone,
+      institute_name: finalInstitute,
+      topic: finalTopic
+    })}-->`;
+
+    const storedAbstractText = rawAbstractText ? `${rawAbstractText}${metaTag}` : metaTag;
 
     const insertData = {
       abstract_code: abstractCode,
@@ -123,7 +158,7 @@ export const Abstract = {
       authors: finalName,
       affiliation: finalInstitute,
       category: finalCategory,
-      abstract_text: finalAbstractText,
+      abstract_text: storedAbstractText,
       file_url: finalPdfUrl,
       status: 'submitted' // MySQL ENUM compatibility
     };

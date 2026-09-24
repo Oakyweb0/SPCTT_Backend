@@ -1,6 +1,7 @@
 import { Abstract } from '../models/Abstract.js';
 import { sendSuccess, sendError, sendValidationError } from '../utils/response.js';
 import { r2Service } from '../services/r2.service.js';
+import { emailService } from '../services/email.service.js';
 import { logger } from '../utils/logger.js';
 
 export const abstractController = {
@@ -121,7 +122,23 @@ export const abstractController = {
         fileUrl: pdfUrl
       });
 
-      return sendSuccess(res, created, 'Abstract submitted successfully!', 201);
+      // Dispatch Abstract Submission Emails in the background (Author confirmation + Admin alert with CC)
+      let emailResult = null;
+      try {
+        emailResult = await emailService.sendAbstractSubmissionEmails({ abstract: created });
+      } catch (emailErr) {
+        logger.error('Failed to send abstract submission confirmation emails:', emailErr.message);
+      }
+
+      return sendSuccess(
+        res,
+        {
+          ...created,
+          email_delivery: emailResult
+        },
+        'Abstract submitted successfully! Confirmation email has been sent.',
+        201
+      );
     } catch (error) {
       console.error('Error submitting abstract:', error);
       return sendError(res, 'Failed to submit abstract.', 500, error);
