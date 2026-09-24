@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
-const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header.png';
+const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header_styled.png';
 
 let transporter = null;
 
@@ -39,47 +39,17 @@ function getTransporter() {
 }
 
 /**
- * Common Email Header Banner with live editable HTML text over background banner image & gradient overlay
+ * Common Email Header Banner with robust <img> tag for universal email client compatibility (Gmail, Outlook, Apple Mail)
  */
 function generateEmailHeaderHtml() {
   return `
       <!-- Brand Header Banner -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; background-image: linear-gradient(90deg, rgba(19, 37, 74, 0.80) 0%, rgba(19, 37, 74, 0.58) 50%, rgba(19, 37, 74, 0.25) 100%), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center top; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
-        <!--[if gte mso 9]>
-        <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:180px;">
-        <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#13254A" />
-        <v:textbox inset="0,0,0,0">
-        <![endif]-->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <tr>
-          <td align="center" valign="middle" style="padding: 28px 20px 24px 20px; text-align: center; background: linear-gradient(90deg, rgba(19, 37, 74, 0.80) 0%, rgba(19, 37, 74, 0.58) 50%, rgba(19, 37, 74, 0.25) 100%);">
-            
-            <!-- Top Badge / Pill -->
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 12px auto;">
-              <tr>
-                <td style="background-color: #0c1938; background: rgba(12, 25, 56, 0.90); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; padding: 5px 18px; text-align: center;">
-                  <span style="color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: block; line-height: 1.2;">
-                    SPCTT 2027 ANNUAL CONFERENCE
-                  </span>
-                </td>
-              </tr>
-            </table>
-
-            <!-- Conference / Society Title -->
-            <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 20px; font-weight: 700; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.85);">
-              Society for Pediatric Cellular Therapy and Transplant
-            </h1>
-
-            <!-- Conference Date & Venue -->
-            <p style="margin: 0; color: #ffffff; font-size: 13px; font-weight: 600; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-shadow: 0 1px 4px rgba(0,0,0,0.85); opacity: 0.95;">
-              March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi
-            </p>
-
+          <td align="center" valign="top" style="padding: 0; margin: 0; line-height: 0; font-size: 0; background-color: #13254A;">
+            <img src="${BANNER_IMAGE_URL}" alt="SPCTT 2027 Annual Conference - Society for Pediatric Cellular Therapy and Transplant" width="650" style="display: block; width: 100%; max-width: 650px; height: auto; border: 0; outline: none; text-decoration: none; border-top-left-radius: 12px; border-top-right-radius: 12px;" />
           </td>
         </tr>
-        <!--[if gte mso 9]>
-        </v:textbox>
-        </v:rect>
-        <![endif]-->
       </table>
   `;
 }
