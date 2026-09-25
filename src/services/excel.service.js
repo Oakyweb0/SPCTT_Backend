@@ -302,7 +302,7 @@ export const excelService = {
         user_email: item.user_email || 'N/A',
         amount: Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
         status: (item.status || 'created').toUpperCase(),
-        payment_method: item.payment_method || 'Axis Razorpay (Elisyan India)',
+        payment_method: item.payment_method || 'Axis Razorpay (PAGE WORLDWIDE)',
         razorpay_payment_id: item.razorpay_payment_id || 'N/A',
         razorpay_order_id: item.razorpay_order_id || 'N/A',
         created_at: formatDate(item.created_at)

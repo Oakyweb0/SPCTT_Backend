@@ -61,7 +61,7 @@ export const paymentService = {
         amount,
         currency: 'INR',
         status: 'created',
-        payment_method: 'Axis Razorpay (Elisyan India)',
+        payment_method: 'Axis Razorpay (PAGE WORLDWIDE)',
         notes: `Payment initialization for registration ${reg.registration_code}`
       });
     } catch (dbErr) {
@@ -126,7 +126,7 @@ export const paymentService = {
     }
 
     const txnId = razorpayPaymentId || transactionId || `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const method = paymentMethod || paymentGateway || 'Axis Razorpay (Elisyan India)';
+    const method = paymentMethod || paymentGateway || 'Axis Razorpay (PAGE WORLDWIDE)';
 
     // 1. Confirm registration in DB
     const updatedReg = await Registration.updateById(reg.id, {
@@ -229,7 +229,7 @@ export const paymentService = {
     if (reg.payment_status !== 'paid') {
       await this.processPayment(userId, {
         registrationId: reg.id,
-        paymentMethod: 'Axis Razorpay (Elisyan India)',
+        paymentMethod: 'Axis Razorpay (PAGE WORLDWIDE)',
         transactionId: txnId,
         razorpayOrderId,
         razorpayPaymentId: txnId,

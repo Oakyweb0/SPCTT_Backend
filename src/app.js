@@ -533,6 +533,7 @@ app.use('/api/docs', swaggerUi.serve, (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/registration', registrationRoutes);
+app.use('/api/registrations', registrationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/abstracts', abstractRoutes);

@@ -315,7 +315,7 @@
           },
           "paymentMethod": {
             "type": "string",
-            "example": "Axis Razorpay (Elisyan India)"
+            "example": "Axis Razorpay (PAGE WORLDWIDE)"
           },
           "transactionId": {
             "type": "string",
