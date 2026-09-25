@@ -2,9 +2,13 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { Registration } from '../models/Registration.js';
 import { Abstract } from '../models/Abstract.js';
+import { Payment } from '../models/Payment.js';
+import { Invoice } from '../models/Invoice.js';
 import { EmailLog } from '../models/EmailLog.js';
 import { emailService } from '../services/email.service.js';
 import { excelService } from '../services/excel.service.js';
+import { paymentService } from '../services/payment.service.js';
+import { invoicePdfService } from '../services/invoicePdf.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const adminController = {
@@ -258,6 +262,106 @@ export const adminController = {
     } catch (error) {
       console.error('Error fetching admin invoices:', error);
       return sendError(res, 'Failed to fetch invoices.', 500, error);
+    }
+  },
+
+  /**
+   * Download Any Invoice PDF (Admin)
+   * GET /api/admin/invoices/:id/download
+   */
+  async downloadInvoice(req, res, next) {
+    try {
+      const invoice = await Invoice.findById(req.params.id) || await Registration.getInvoiceById(req.params.id);
+      if (!invoice) {
+        return sendError(res, 'Invoice not found.', 404);
+      }
+
+      const pdfBuffer = await invoicePdfService.generateInvoicePdf(invoice);
+      const filename = `Invoice_${invoice.invoice_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`;
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error downloading invoice PDF for admin:', error);
+      return sendError(res, 'Failed to download invoice PDF.', 500, error);
+    }
+  },
+
+  /**
+   * View Any Invoice PDF Inline (Admin)
+   * GET /api/admin/invoices/:id/pdf
+   */
+  async viewInvoicePdf(req, res, next) {
+    try {
+      const invoice = await Invoice.findById(req.params.id) || await Registration.getInvoiceById(req.params.id);
+      if (!invoice) {
+        return sendError(res, 'Invoice not found.', 404);
+      }
+
+      const pdfBuffer = await invoicePdfService.generateInvoicePdf(invoice);
+      const filename = `Invoice_${invoice.invoice_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`;
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error viewing invoice PDF for admin:', error);
+      return sendError(res, 'Failed to view invoice PDF.', 500, error);
+    }
+  },
+
+  /**
+   * Get All Payment Transactions with Filters and Pagination (Admin)
+   * GET /api/admin/payments
+   */
+  async getPayments(req, res, next) {
+    try {
+      const { page, limit, status, search, userId, registrationId } = req.query;
+      const result = await paymentService.getAllPaymentHistory({
+        page,
+        limit,
+        status,
+        search,
+        userId,
+        registrationId
+      });
+      return sendSuccess(res, result, 'Payment transactions retrieved successfully.');
+    } catch (error) {
+      console.error('Error fetching admin payments:', error);
+      return sendError(res, 'Failed to fetch payment transactions.', 500, error);
+    }
+  },
+
+  /**
+   * Export All Payments to Excel (.xlsx) (Admin)
+   * GET /api/admin/payments/export
+   */
+  async exportPayments(req, res, next) {
+    try {
+      const { status, search, userId, registrationId } = req.query;
+      const { payments } = await paymentService.getAllPaymentHistory({
+        page: 1,
+        limit: 5000,
+        status,
+        search,
+        userId,
+        registrationId
+      });
+
+      const buffer = await excelService.generatePaymentsExcel(payments);
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `SPCTT_Payments_${timestamp}.xlsx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+      return res.send(buffer);
+    } catch (error) {
+      console.error('Error exporting payments to Excel:', error);
+      return sendError(res, 'Failed to export payments to Excel.', 500, error);
     }
   },
 

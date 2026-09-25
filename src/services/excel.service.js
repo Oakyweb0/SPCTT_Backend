@@ -261,7 +261,60 @@ export const excelService = {
     autoFitColumns(worksheet);
 
     return workbook.xlsx.writeBuffer();
+  },
+
+  /**
+   * Generate Excel Workbook for Payments
+   * @param {Array} payments 
+   * @returns {Promise<Buffer>}
+   */
+  async generatePaymentsExcel(payments = []) {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'SPCTT 2026 Admin Portal';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Payment Transactions', {
+      views: [{ state: 'frozen', ySplit: 1 }]
+    });
+
+    worksheet.columns = [
+      { header: 'S.No', key: 'sno', width: 8, style: { alignment: { horizontal: 'center' } } },
+      { header: 'Payment ID', key: 'id', width: 12, style: { alignment: { horizontal: 'center' } } },
+      { header: 'Registration Code', key: 'registration_code', width: 18, style: { alignment: { horizontal: 'center' } } },
+      { header: 'User Name', key: 'user_name', width: 26 },
+      { header: 'User Email', key: 'user_email', width: 28 },
+      { header: 'Amount (₹)', key: 'amount', width: 16, style: { alignment: { horizontal: 'right' } } },
+      { header: 'Payment Status', key: 'status', width: 16, style: { alignment: { horizontal: 'center' } } },
+      { header: 'Payment Method', key: 'payment_method', width: 26 },
+      { header: 'Razorpay Payment ID / Txn ID', key: 'razorpay_payment_id', width: 28 },
+      { header: 'Razorpay Order ID', key: 'razorpay_order_id', width: 28 },
+      { header: 'Transaction Date', key: 'created_at', width: 22, style: { alignment: { horizontal: 'center' } } }
+    ];
+
+    styleHeaderRow(worksheet.getRow(1), '4338CA'); // Indigo theme header
+
+    payments.forEach((item, index) => {
+      worksheet.addRow({
+        sno: index + 1,
+        id: item.id,
+        registration_code: item.registration_code || `REG-${item.registration_id || 'N/A'}`,
+        user_name: item.user_name || item.registration_name || 'N/A',
+        user_email: item.user_email || 'N/A',
+        amount: Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+        status: (item.status || 'created').toUpperCase(),
+        payment_method: item.payment_method || 'Axis Razorpay (Elisyan India)',
+        razorpay_payment_id: item.razorpay_payment_id || 'N/A',
+        razorpay_order_id: item.razorpay_order_id || 'N/A',
+        created_at: formatDate(item.created_at)
+      });
+    });
+
+    styleDataRows(worksheet, 2);
+    autoFitColumns(worksheet);
+
+    return workbook.xlsx.writeBuffer();
   }
 };
 
 export default excelService;
+

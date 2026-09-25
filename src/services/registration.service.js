@@ -1,6 +1,8 @@
 import { Category } from '../models/Category.js';
 import { Registration } from '../models/Registration.js';
 import { User } from '../models/User.js';
+import { Invoice } from '../models/Invoice.js';
+import { invoicePdfService } from './invoicePdf.service.js';
 
 const ACCOMPANYING_PERSON_RATE = 3500.00;
 const GST_PERCENT = 18.00;
@@ -374,13 +376,44 @@ export const registrationService = {
    * Get single invoice by ID
    */
   async getInvoiceById(invoiceId, userId, role) {
-    const invoice = await Registration.getInvoiceById(invoiceId, userId, role);
+    const invoice = await Invoice.findById(invoiceId, userId, role) || await Registration.getInvoiceById(invoiceId, userId, role);
     if (!invoice) {
       const error = new Error('Invoice not found.');
       error.statusCode = 404;
       throw error;
     }
     return invoice;
+  },
+
+  /**
+   * Generate Invoice / Receipt PDF Buffer
+   */
+  async generateInvoicePdf(invoiceId, userId, role) {
+    const invoice = await this.getInvoiceById(invoiceId, userId, role);
+    const pdfBuffer = await invoicePdfService.generateInvoicePdf(invoice);
+    return {
+      invoice,
+      pdfBuffer,
+      filename: `Invoice_${invoice.invoice_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
+    };
+  },
+
+  /**
+   * Generate Invoice / Receipt PDF Buffer by Invoice Number
+   */
+  async generateInvoicePdfByNumber(invoiceNumber, userId, role) {
+    const invoice = await Invoice.findByInvoiceNumber(invoiceNumber, userId, role);
+    if (!invoice) {
+      const error = new Error(`Invoice '${invoiceNumber}' not found.`);
+      error.statusCode = 404;
+      throw error;
+    }
+    const pdfBuffer = await invoicePdfService.generateInvoicePdf(invoice);
+    return {
+      invoice,
+      pdfBuffer,
+      filename: `Invoice_${invoice.invoice_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
+    };
   }
 };
 

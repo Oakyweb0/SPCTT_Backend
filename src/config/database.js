@@ -252,6 +252,36 @@ export async function initDatabase() {
         console.log("Table 'invoices' created.");
       }
 
+      // 8. Create Payments Table
+      if (!existingTables.has('payments')) {
+        console.log("Table 'payments' does not exist. Creating...");
+        await pool.query(`
+          CREATE TABLE \`payments\` (
+            \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+            \`registration_id\` INT DEFAULT NULL,
+            \`user_id\` INT NOT NULL,
+            \`razorpay_order_id\` VARCHAR(100) DEFAULT NULL,
+            \`razorpay_payment_id\` VARCHAR(100) DEFAULT NULL,
+            \`razorpay_signature\` VARCHAR(255) DEFAULT NULL,
+            \`amount\` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+            \`currency\` VARCHAR(10) DEFAULT 'INR',
+            \`status\` ENUM('created', 'pending', 'paid', 'captured', 'failed', 'refunded') DEFAULT 'created',
+            \`payment_method\` VARCHAR(100) DEFAULT 'Axis Razorpay (Elisyan India)',
+            \`webhook_event\` VARCHAR(100) DEFAULT NULL,
+            \`notes\` TEXT DEFAULT NULL,
+            \`raw_response\` LONGTEXT DEFAULT NULL,
+            \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX (\`registration_id\`),
+            INDEX (\`user_id\`),
+            INDEX (\`razorpay_order_id\`),
+            INDEX (\`razorpay_payment_id\`),
+            INDEX (\`status\`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+        console.log("Table 'payments' created.");
+      }
+
 
       // 9. Create Abstracts Table
       if (!existingTables.has('abstracts')) {

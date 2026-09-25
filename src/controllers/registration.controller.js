@@ -154,6 +154,72 @@ export async function getInvoiceById(req, res, next) {
   }
 }
 
+/**
+ * Download Invoice PDF
+ * GET /api/registration/invoices/:id/download
+ */
+export async function downloadInvoice(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const role = req.user.role;
+    const { pdfBuffer, filename } = await registrationService.generateInvoicePdf(req.params.id, userId, role);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+/**
+ * View / Stream Invoice PDF inline in browser
+ * GET /api/registration/invoices/:id/pdf
+ */
+export async function viewInvoicePdf(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const role = req.user.role;
+    const { pdfBuffer, filename } = await registrationService.generateInvoicePdf(req.params.id, userId, role);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+/**
+ * Download Invoice PDF by Invoice Number
+ * GET /api/registration/invoices/download/:invoiceNumber
+ */
+export async function downloadInvoiceByNumber(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const role = req.user.role;
+    const { pdfBuffer, filename } = await registrationService.generateInvoicePdfByNumber(req.params.invoiceNumber, userId, role);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
 export default {
   getCategories,
   getUserRegistration,
@@ -163,5 +229,8 @@ export default {
   saveStep4Billing,
   processPayment,
   getUserInvoices,
-  getInvoiceById
+  getInvoiceById,
+  downloadInvoice,
+  viewInvoicePdf,
+  downloadInvoiceByNumber
 };

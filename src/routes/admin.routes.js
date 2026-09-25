@@ -24,9 +24,15 @@ router.get('/abstracts/:id/email-logs', adminController.getAbstractEmailLogs);
 router.delete('/abstracts/:id', adminController.deleteAbstract);
 
 // 4. Invoices Management
+router.get('/invoices/:id/download', adminController.downloadInvoice);
+router.get('/invoices/:id/pdf', adminController.viewInvoicePdf);
 router.get('/invoices', adminController.getInvoices);
 
-// 5. Users Management
+// 5. Payments Management
+router.get('/payments/export', adminController.exportPayments);
+router.get('/payments', adminController.getPayments);
+
+// 6. Users Management
 router.get('/users/export', adminController.exportUsers);
 router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserById);

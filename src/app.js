@@ -566,12 +566,20 @@ app.get('/', (req, res) => {
         step4Billing: `POST ${baseUrl}/api/registration/step4-billing`,
         payment: `POST ${baseUrl}/api/registration/payment`,
         invoices: `GET ${baseUrl}/api/registration/invoices`,
-        invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`
+        invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`,
+        invoiceDownload: `GET ${baseUrl}/api/registration/invoices/:id/download`,
+        invoicePdf: `GET ${baseUrl}/api/registration/invoices/:id/pdf`,
+        invoiceDownloadByNumber: `GET ${baseUrl}/api/registration/invoices/download/:invoiceNumber`
       },
       payments: {
         createOrder: `POST ${baseUrl}/api/payments/create-order`,
         verifyPayment: `POST ${baseUrl}/api/payments/verify`,
         webhook: `POST ${baseUrl}/api/payments/webhook`,
+        history: `GET ${baseUrl}/api/payments/history`,
+        historyByRegistration: `GET ${baseUrl}/api/payments/history/registration/:registrationId`,
+        allPayments: `GET ${baseUrl}/api/payments/all`,
+        exportPayments: `GET ${baseUrl}/api/payments/export`,
+        paymentById: `GET ${baseUrl}/api/payments/:id`,
         statusByRegistration: `GET ${baseUrl}/api/payments/status/:registrationId`
       },
       admin: {
@@ -579,6 +587,8 @@ app.get('/', (req, res) => {
         registrations: `GET ${baseUrl}/api/admin/registrations`,
         abstracts: `GET ${baseUrl}/api/admin/abstracts`,
         invoices: `GET ${baseUrl}/api/admin/invoices`,
+        payments: `GET ${baseUrl}/api/admin/payments`,
+        exportPayments: `GET ${baseUrl}/api/admin/payments/export`,
         users: `GET ${baseUrl}/api/admin/users`,
         userById: `GET ${baseUrl}/api/admin/users/:id`,
         updateUser: `PUT ${baseUrl}/api/admin/users/:id`,
