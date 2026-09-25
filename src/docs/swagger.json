@@ -803,7 +803,23 @@
           "User Portal - Registration Flow (Website)"
         ],
         "summary": "Get Registration Categories & Fees",
-        "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates, Accompanying Persons).",
+        "description": "Retrieve available registration categories with pricing (SPCTT Members, Non-Members, Fellows, Nurses, Industry Delegates, Accompanying Persons) supporting fee_type flag (regular or on_spot).",
+        "parameters": [
+          {
+            "name": "fee_type",
+            "in": "query",
+            "description": "Pricing flag: 'regular' (default) or 'on_spot'",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "regular",
+                "on_spot"
+              ],
+              "default": "regular"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of categories retrieved"

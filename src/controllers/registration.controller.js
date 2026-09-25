@@ -7,7 +7,8 @@ import { sendSuccess, sendError } from '../utils/response.js';
  */
 export async function getCategories(req, res, next) {
   try {
-    const categories = await registrationService.getCategories();
+    const feeType = req.query.fee_type || req.query.type || req.query.flag || req.query.feeType || 'regular';
+    const categories = await registrationService.getCategories(feeType);
     return sendSuccess(res, categories, 'Registration categories fetched successfully');
   } catch (error) {
     if (error.statusCode) {

@@ -4,15 +4,16 @@ import { User } from '../models/User.js';
 import { Invoice } from '../models/Invoice.js';
 import { invoicePdfService } from './invoicePdf.service.js';
 
-const ACCOMPANYING_PERSON_RATE = 3500.00;
+const REGULAR_ACCOMPANYING_RATE = 3500.00;
+const ON_SPOT_ACCOMPANYING_RATE = 4000.00;
 const GST_PERCENT = 18.00;
 
 export const registrationService = {
   /**
-   * Get all active categories
+   * Get all active categories with dynamic pricing based on fee type flag
    */
-  async getCategories() {
-    return Category.findAllActive();
+  async getCategories(feeType = 'regular') {
+    return Category.findAllActive(feeType);
   },
 
   /**
@@ -35,16 +36,22 @@ export const registrationService = {
   },
 
   /**
-   * Step 1: Select Category
+   * Step 1: Select Category & Fee Type Flag (regular vs on_spot)
    */
-  async saveStep1Category(userId, { categoryId, categoryCode }) {
+  async saveStep1Category(userId, { categoryId, categoryCode, feeType, fee_type, flag }) {
     const user = await User.findById(userId);
+    const rawFeeType = feeType || fee_type || flag || 'regular';
+    const isSpot = String(rawFeeType).toLowerCase() === 'on_spot' || 
+                   String(rawFeeType).toLowerCase() === 'on-spot' || 
+                   String(rawFeeType).toLowerCase() === 'onspot' ||
+                   String(rawFeeType).toLowerCase() === 'spot';
+    const normalizedFeeType = isSpot ? 'on_spot' : 'regular';
 
     let category = null;
     if (categoryId) {
-      category = await Category.findById(categoryId);
+      category = await Category.findById(categoryId, normalizedFeeType);
     } else if (categoryCode) {
-      category = await Category.findByCode(categoryCode);
+      category = await Category.findByCode(categoryCode, normalizedFeeType);
     }
 
     if (!category) {
@@ -57,7 +64,11 @@ export const registrationService = {
 
     const stepCompleted = Math.max(reg.step_completed || 1, 2);
     const catPrice = parseFloat(category.price || 0);
-    const accompanyingTotal = parseFloat(reg.accompanying_total || 0);
+
+    const accRate = normalizedFeeType === 'on_spot' ? ON_SPOT_ACCOMPANYING_RATE : REGULAR_ACCOMPANYING_RATE;
+    const accCount = parseInt(reg.accompanying_count || 0, 10);
+    const accompanyingTotal = accCount * accRate;
+
     const subtotal = catPrice + accompanyingTotal;
     const gstAmount = parseFloat(((subtotal * GST_PERCENT) / 100).toFixed(2));
     const grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
@@ -66,6 +77,8 @@ export const registrationService = {
       category_id: category.id,
       category_name: category.name,
       category_price: catPrice,
+      fee_type: normalizedFeeType,
+      accompanying_total: accompanyingTotal,
       subtotal,
       gst_rate: GST_PERCENT,
       gst_amount: gstAmount,
@@ -75,7 +88,8 @@ export const registrationService = {
 
     return {
       registrationId: reg.id,
-      category
+      category,
+      feeType: normalizedFeeType
     };
   },
 
@@ -138,9 +152,12 @@ export const registrationService = {
     const user = await User.findById(userId);
     const reg = await Registration.findOrCreateDraft(userId, user);
 
+    const isSpot = reg.fee_type === 'on_spot';
+    const accRate = isSpot ? ON_SPOT_ACCOMPANYING_RATE : REGULAR_ACCOMPANYING_RATE;
+
     const personCount = parseInt(count || 0, 10);
     const validPersons = Array.isArray(accompanyingPersons) ? accompanyingPersons.slice(0, personCount) : [];
-    const accompanyingTotal = personCount * ACCOMPANYING_PERSON_RATE;
+    const accompanyingTotal = personCount * accRate;
 
     const catPrice = parseFloat(reg.category_price || 0);
     const subtotal = catPrice + accompanyingTotal;
@@ -173,6 +190,9 @@ export const registrationService = {
     const { entityName, entityAddress, gstNumber, panNumber } = billingData;
     const user = await User.findById(userId);
     const reg = await Registration.findOrCreateDraft(userId, user);
+
+    const isSpot = reg.fee_type === 'on_spot';
+    const accRate = isSpot ? ON_SPOT_ACCOMPANYING_RATE : REGULAR_ACCOMPANYING_RATE;
 
     // Calculations
     const categoryPrice = parseFloat(reg.category_price || 0);
@@ -246,7 +266,7 @@ export const registrationService = {
         title: 'Accompanying Person(s) Cost',
         description: `Registration for ${reg.accompanying_count} accompanying person(s)`,
         quantity: reg.accompanying_count,
-        rate: ACCOMPANYING_PERSON_RATE,
+        rate: accRate,
         amount: accompanyingTotal,
         gst_rate: GST_PERCENT,
         gst_amount: accGst,

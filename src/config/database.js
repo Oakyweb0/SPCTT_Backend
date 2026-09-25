@@ -144,7 +144,9 @@ export async function initDatabase() {
             \`id\` INT AUTO_INCREMENT PRIMARY KEY,
             \`name\` VARCHAR(150) NOT NULL,
             \`code\` VARCHAR(100) NOT NULL UNIQUE,
-            \`price\` DECIMAL(10, 2) NOT NULL,
+            \`regular_fee\` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+            \`on_spot_fee\` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+            \`price\` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
             \`currency\` VARCHAR(10) DEFAULT 'INR',
             \`description\` TEXT DEFAULT NULL,
             \`status\` ENUM('active', 'inactive') DEFAULT 'active',
@@ -152,25 +154,43 @@ export async function initDatabase() {
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
         console.log("Table 'registration_categories' created.");
+      } else {
+        try {
+          const [catCols] = await pool.query('SHOW COLUMNS FROM `registration_categories`');
+          const catColNames = catCols.map((c) => c.Field);
+          if (!catColNames.includes('regular_fee')) {
+            await pool.query('ALTER TABLE `registration_categories` ADD COLUMN `regular_fee` DECIMAL(10, 2) NOT NULL DEFAULT 0.00 AFTER `code`');
+          }
+          if (!catColNames.includes('on_spot_fee')) {
+            await pool.query('ALTER TABLE `registration_categories` ADD COLUMN `on_spot_fee` DECIMAL(10, 2) NOT NULL DEFAULT 0.00 AFTER `regular_fee`');
+          }
+        } catch (catColErr) {
+          console.warn('Could not alter registration_categories columns:', catColErr.message);
+        }
       }
 
-      // Seed default categories
+      // Seed / update default categories with Regular and On-Spot fees
       try {
         const defaultCategories = [
-          { name: 'SPCTT Members (Consultants)', code: 'SPCTT_MEMBERS', price: 3250.00 },
-          { name: 'Non-Members (Consultants)', code: 'NON_MEMBERS', price: 4000.00 },
-          { name: 'Fellows/ Students', code: 'FELLOWS_STUDENTS', price: 2500.00 },
-          { name: 'Nurses', code: 'NURSES', price: 2000.00 },
-          { name: 'Industry Delegates', code: 'INDUSTRY_DELEGATES', price: 6000.00 },
-          { name: 'Accompanying Persons (including children > 10 yrs old)', code: 'ACCOMPANYING_PERSONS', price: 4000.00 }
+          { name: 'SPCTT Members (Consultants)', code: 'SPCTT_MEMBERS', regular_fee: 2500.00, on_spot_fee: 3000.00, price: 2500.00 },
+          { name: 'Non-Members (Consultants)', code: 'NON_MEMBERS', regular_fee: 3500.00, on_spot_fee: 4000.00, price: 3500.00 },
+          { name: 'Fellows / Students', code: 'FELLOWS_STUDENTS', regular_fee: 2000.00, on_spot_fee: 2500.00, price: 2000.00 },
+          { name: 'Nurses', code: 'NURSES', regular_fee: 1500.00, on_spot_fee: 2000.00, price: 1500.00 },
+          { name: 'Industry Delegates', code: 'INDUSTRY_DELEGATES', regular_fee: 5000.00, on_spot_fee: 6000.00, price: 5000.00 },
+          { name: 'Accompanying Persons (including children > 10 yrs old)', code: 'ACCOMPANYING_PERSONS', regular_fee: 3500.00, on_spot_fee: 4000.00, price: 3500.00 }
         ];
 
         for (const cat of defaultCategories) {
           const [exists] = await pool.query('SELECT id FROM `registration_categories` WHERE `code` = ? LIMIT 1', [cat.code]);
           if (exists.length === 0) {
             await pool.query(
-              'INSERT INTO `registration_categories` (`name`, `code`, `price`) VALUES (?, ?, ?)',
-              [cat.name, cat.code, cat.price]
+              'INSERT INTO `registration_categories` (`name`, `code`, `regular_fee`, `on_spot_fee`, `price`) VALUES (?, ?, ?, ?, ?)',
+              [cat.name, cat.code, cat.regular_fee, cat.on_spot_fee, cat.price]
+            );
+          } else {
+            await pool.query(
+              'UPDATE `registration_categories` SET `name` = ?, `regular_fee` = ?, `on_spot_fee` = ?, `price` = ? WHERE `code` = ?',
+              [cat.name, cat.regular_fee, cat.on_spot_fee, cat.regular_fee, cat.code]
             );
           }
         }
@@ -189,6 +209,7 @@ export async function initDatabase() {
             \`category_id\` INT DEFAULT NULL,
             \`category_name\` VARCHAR(150) DEFAULT NULL,
             \`category_price\` DECIMAL(10, 2) DEFAULT 0.00,
+            \`fee_type\` VARCHAR(50) DEFAULT 'regular',
             \`title\` VARCHAR(20) DEFAULT 'Mr.',
             \`full_name\` VARCHAR(150) DEFAULT NULL,
             \`email\` VARCHAR(150) DEFAULT NULL,
@@ -223,6 +244,16 @@ export async function initDatabase() {
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
         console.log("Table 'registrations' created.");
+      } else {
+        try {
+          const [regCols] = await pool.query('SHOW COLUMNS FROM `registrations`');
+          const regColNames = regCols.map((c) => c.Field);
+          if (!regColNames.includes('fee_type')) {
+            await pool.query("ALTER TABLE `registrations` ADD COLUMN `fee_type` VARCHAR(50) DEFAULT 'regular' AFTER `category_price`");
+          }
+        } catch (regColErr) {
+          console.warn('Could not alter registrations table columns:', regColErr.message);
+        }
       }
 
       // 7. Create Invoices Table
