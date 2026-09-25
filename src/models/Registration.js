@@ -245,6 +245,15 @@ export const Registration = {
   },
 
   /**
+   * Count pending registrations
+   */
+  async countPending() {
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM registrations WHERE payment_status = "pending" OR payment_status IS NULL');
+    return rows[0]?.count || 0;
+  },
+
+  /**
    * Sum total revenue collected from paid registrations
    */
   async sumRevenue() {

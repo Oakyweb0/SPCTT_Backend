@@ -22,6 +22,7 @@ export const adminController = {
         totalUsers,
         totalRegistrations,
         paidRegistrations,
+        pendingRegistrations,
         totalRevenue,
         totalAbstracts,
         recentRegistrations,
@@ -30,10 +31,11 @@ export const adminController = {
         User.count('user'),
         Registration.countTotal(),
         Registration.countPaid(),
+        Registration.countPending(),
         Registration.sumRevenue(),
         Abstract.count(),
-        Registration.findRecent(5),
-        Abstract.findRecent(5)
+        Registration.findRecent(100),
+        Abstract.findRecent(100)
       ]);
 
       return sendSuccess(
@@ -42,6 +44,7 @@ export const adminController = {
           totalUsers,
           totalRegistrations,
           paidRegistrations,
+          pendingRegistrations,
           totalRevenue,
           totalAbstracts,
           recentRegistrations,
