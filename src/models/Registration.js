@@ -213,6 +213,15 @@ export const Registration = {
           item.accompanying_persons = [];
         }
       }
+      
+      let gt = parseFloat(item.grand_total || 0);
+      if (gt === 0 && (parseFloat(item.category_price || 0) > 0 || parseFloat(item.accompanying_total || 0) > 0)) {
+        const catP = parseFloat(item.category_price || 0);
+        const accT = parseFloat(item.accompanying_total || 0);
+        const sub = catP + accT;
+        const gst = (sub * 18) / 100;
+        item.grand_total = (sub + gst).toFixed(2);
+      }
       return item;
     });
   },
@@ -258,6 +267,14 @@ export const Registration = {
         } catch (e) {
           item.accompanying_persons = [];
         }
+      }
+      let gt = parseFloat(item.grand_total || 0);
+      if (gt === 0 && (parseFloat(item.category_price || 0) > 0 || parseFloat(item.accompanying_total || 0) > 0)) {
+        const catP = parseFloat(item.category_price || 0);
+        const accT = parseFloat(item.accompanying_total || 0);
+        const sub = catP + accT;
+        const gst = (sub * 18) / 100;
+        item.grand_total = (sub + gst).toFixed(2);
       }
       return item;
     });

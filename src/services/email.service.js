@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
-const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header_styled.png';
+const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header.png';
 
 let transporter = null;
 
@@ -477,7 +477,7 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
               </td>
               <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
                 <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">For Abstract Queries:</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none; font-weight: 600;">submit@spctt.org</a></p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>

@@ -54,10 +54,20 @@ export const registrationService = {
     const reg = await Registration.findOrCreateDraft(userId, user);
 
     const stepCompleted = Math.max(reg.step_completed || 1, 2);
+    const catPrice = parseFloat(category.price || 0);
+    const accompanyingTotal = parseFloat(reg.accompanying_total || 0);
+    const subtotal = catPrice + accompanyingTotal;
+    const gstAmount = parseFloat(((subtotal * GST_PERCENT) / 100).toFixed(2));
+    const grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
+
     await Registration.updateById(reg.id, {
       category_id: category.id,
       category_name: category.name,
-      category_price: category.price,
+      category_price: catPrice,
+      subtotal,
+      gst_rate: GST_PERCENT,
+      gst_amount: gstAmount,
+      grand_total: grandTotal,
       step_completed: stepCompleted
     });
 
@@ -130,11 +140,20 @@ export const registrationService = {
     const validPersons = Array.isArray(accompanyingPersons) ? accompanyingPersons.slice(0, personCount) : [];
     const accompanyingTotal = personCount * ACCOMPANYING_PERSON_RATE;
 
+    const catPrice = parseFloat(reg.category_price || 0);
+    const subtotal = catPrice + accompanyingTotal;
+    const gstAmount = parseFloat(((subtotal * GST_PERCENT) / 100).toFixed(2));
+    const grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
+
     const stepCompleted = Math.max(reg.step_completed || 1, 4);
     await Registration.updateById(reg.id, {
       accompanying_count: personCount,
       accompanying_persons: JSON.stringify(validPersons),
       accompanying_total: accompanyingTotal,
+      subtotal,
+      gst_rate: GST_PERCENT,
+      gst_amount: gstAmount,
+      grand_total: grandTotal,
       step_completed: stepCompleted
     });
 
@@ -284,6 +303,20 @@ export const registrationService = {
       throw error;
     }
 
+    // Ensure grand_total and subtotal are calculated if somehow 0
+    let subtotal = parseFloat(reg.subtotal || 0);
+    let gstRate = parseFloat(reg.gst_rate || GST_PERCENT);
+    let gstAmount = parseFloat(reg.gst_amount || 0);
+    let grandTotal = parseFloat(reg.grand_total || 0);
+
+    if (grandTotal === 0 && (parseFloat(reg.category_price || 0) > 0 || parseFloat(reg.accompanying_total || 0) > 0)) {
+      const catPrice = parseFloat(reg.category_price || 0);
+      const accTotal = parseFloat(reg.accompanying_total || 0);
+      subtotal = catPrice + accTotal;
+      gstAmount = parseFloat(((subtotal * gstRate) / 100).toFixed(2));
+      grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
+    }
+
     const txnId = `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     const method = paymentMethod || 'Axis Razorpay (Elisyan India)';
 
@@ -293,7 +326,11 @@ export const registrationService = {
       payment_status: 'paid',
       transaction_id: txnId,
       paid_at: new Date(),
-      status: 'confirmed'
+      status: 'confirmed',
+      subtotal,
+      gst_rate: gstRate,
+      gst_amount: gstAmount,
+      grand_total: grandTotal
     });
 
     // Mark existing invoices paid
@@ -309,11 +346,11 @@ export const registrationService = {
       title: 'Official Receipt & Tax Invoice - SPCTT 2026',
       description: `Payment confirmed for ${reg.registration_code} via ${method} (Txn: ${txnId})`,
       quantity: 1,
-      rate: reg.subtotal,
-      amount: reg.subtotal,
-      gst_rate: reg.gst_rate,
-      gst_amount: reg.gst_amount,
-      total_amount: reg.grand_total,
+      rate: subtotal,
+      amount: subtotal,
+      gst_rate: gstRate,
+      gst_amount: gstAmount,
+      total_amount: grandTotal,
       status: 'paid'
     });
 

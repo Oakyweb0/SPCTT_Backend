@@ -27,7 +27,28 @@ export const paymentService = {
 
     const user = await User.findById(userId);
     const orderId = `ORDER_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const amount = parseFloat(reg.grand_total || 0);
+
+    let subtotal = parseFloat(reg.subtotal || 0);
+    let gstRate = parseFloat(reg.gst_rate || 18.00);
+    let gstAmount = parseFloat(reg.gst_amount || 0);
+    let grandTotal = parseFloat(reg.grand_total || 0);
+
+    if (grandTotal === 0 && (parseFloat(reg.category_price || 0) > 0 || parseFloat(reg.accompanying_total || 0) > 0)) {
+      const catPrice = parseFloat(reg.category_price || 0);
+      const accTotal = parseFloat(reg.accompanying_total || 0);
+      subtotal = catPrice + accTotal;
+      gstAmount = parseFloat(((subtotal * gstRate) / 100).toFixed(2));
+      grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
+
+      await Registration.updateById(reg.id, {
+        subtotal,
+        gst_rate: gstRate,
+        gst_amount: gstAmount,
+        grand_total: grandTotal
+      });
+    }
+
+    const amount = grandTotal;
 
     return {
       orderId,
@@ -47,9 +68,9 @@ export const paymentService = {
       breakdown: {
         categoryPrice: parseFloat(reg.category_price || 0),
         accompanyingTotal: parseFloat(reg.accompanying_total || 0),
-        subtotal: parseFloat(reg.subtotal || 0),
-        gstRate: parseFloat(reg.gst_rate || 18.00),
-        gstAmount: parseFloat(reg.gst_amount || 0),
+        subtotal,
+        gstRate,
+        gstAmount,
         grandTotal: amount
       }
     };
@@ -72,6 +93,19 @@ export const paymentService = {
       throw error;
     }
 
+    let subtotal = parseFloat(reg.subtotal || 0);
+    let gstRate = parseFloat(reg.gst_rate || 18.00);
+    let gstAmount = parseFloat(reg.gst_amount || 0);
+    let grandTotal = parseFloat(reg.grand_total || 0);
+
+    if (grandTotal === 0 && (parseFloat(reg.category_price || 0) > 0 || parseFloat(reg.accompanying_total || 0) > 0)) {
+      const catPrice = parseFloat(reg.category_price || 0);
+      const accTotal = parseFloat(reg.accompanying_total || 0);
+      subtotal = catPrice + accTotal;
+      gstAmount = parseFloat(((subtotal * gstRate) / 100).toFixed(2));
+      grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
+    }
+
     const txnId = transactionId || `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     const method = paymentMethod || paymentGateway || 'Axis Razorpay (Elisyan India)';
 
@@ -81,7 +115,11 @@ export const paymentService = {
       payment_status: 'paid',
       transaction_id: txnId,
       paid_at: new Date(),
-      status: 'confirmed'
+      status: 'confirmed',
+      subtotal,
+      gst_rate: gstRate,
+      gst_amount: gstAmount,
+      grand_total: grandTotal
     });
 
     // Mark existing invoices paid
@@ -97,11 +135,11 @@ export const paymentService = {
       title: 'Official Receipt & Tax Invoice - SPCTT 2026',
       description: `Payment confirmed for ${reg.registration_code} via ${method} (Txn: ${txnId})`,
       quantity: 1,
-      rate: reg.subtotal,
-      amount: reg.subtotal,
-      gst_rate: reg.gst_rate,
-      gst_amount: reg.gst_amount,
-      total_amount: reg.grand_total,
+      rate: subtotal,
+      amount: subtotal,
+      gst_rate: gstRate,
+      gst_amount: gstAmount,
+      total_amount: grandTotal,
       status: 'paid'
     });
 
