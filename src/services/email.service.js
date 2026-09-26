@@ -49,7 +49,7 @@ function generateEmailHeaderHtml() {
           <td align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0; font-size: 0; background-color: #13254A; background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; text-align: center;">
             <a href="https://2027.spctt.org/" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; max-width: 650px; text-decoration: none; border: 0; outline: none; cursor: pointer;">
               <!-- Transparent 1x1 data spacer that makes entire banner clickable without displaying external img tag for Gmail download overlay -->
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="650" height="190" style="display: block; width: 100%; max-width: 650px; height: 190px; border: 0; outline: none; opacity: 0; margin: 0; padding: 0;" alt="SPCTT 2027 Annual Conference" />
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="650" height="140" style="display: block; width: 100%; max-width: 650px; height: 140px; border: 0; outline: none; opacity: 0; margin: 0; padding: 0;" alt="SPCTT 2027 Annual Conference" />
             </a>
           </td>
         </tr>
