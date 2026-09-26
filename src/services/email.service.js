@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
-const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header.png';
+const BANNER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_2027_banner_header.png';
 
 let transporter = null;
 
@@ -39,36 +39,18 @@ function getTransporter() {
 }
 
 /**
- * Common Email Header Banner with Pure CSS Gradient (No Image Tag = No Download Icon)
+ * Common Email Header Banner using Cloudflare R2 Banner Image (Clickable Link, No Gmail Download Icon)
  */
 function generateEmailHeaderHtml() {
   return `
-      <!-- Brand Header Banner with Pure CSS Gradient (No Image Tag = No Download Icon) -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #0B1B3D; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
+      <!-- Brand Header Banner with Transparent Clickable Link Overlay (No Gmail Download Icon) -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; max-width: 650px; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <tr>
-          <td align="center" valign="middle" style="padding: 30px 20px 28px 20px; background: linear-gradient(135deg, #0B1B3D 0%, #13254A 50%, #1E3A8A 100%); background-color: #13254A; text-align: center;">
-            <div style="cursor: default; pointer-events: none; user-select: none;">
-              <!-- Pill Badge -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
-                <tr>
-                  <td align="center" style="background-color: rgba(11, 27, 61, 0.85); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 20px; padding: 5px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-                    <span style="font-size: 11px; font-weight: 700; color: #ffffff; letter-spacing: 1.2px; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: inline-block;">
-                      SPCTT 2027 ANNUAL CONFERENCE
-                    </span>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Main Society Title -->
-              <h1 style="margin: 12px 0 6px 0; font-size: 21px; font-weight: 800; color: #ffffff; line-height: 1.35; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.85); letter-spacing: -0.2px;">
-                Society for Pediatric Cellular Therapy and Transplant
-              </h1>
-
-              <!-- Date and Venue -->
-              <p style="margin: 0; font-size: 13px; font-weight: 600; color: #e2e8f0; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-shadow: 0 1px 3px rgba(0,0,0,0.85);">
-                March 6–7, 2027 | Taj Vivanta, Dwarka, New Delhi
-              </p>
-            </div>
+          <td align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0; font-size: 0; background-color: #13254A; background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; text-align: center;">
+            <a href="https://2027.spctt.org/" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; max-width: 650px; text-decoration: none; border: 0; outline: none; cursor: pointer;">
+              <!-- Transparent 1x1 data spacer that makes entire banner clickable without displaying external img tag for Gmail download overlay -->
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="650" height="190" style="display: block; width: 100%; max-width: 650px; height: 190px; border: 0; outline: none; opacity: 0; margin: 0; padding: 0;" alt="SPCTT 2027 Annual Conference" />
+            </a>
           </td>
         </tr>
       </table>

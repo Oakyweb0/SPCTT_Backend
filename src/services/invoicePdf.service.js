@@ -6,41 +6,28 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const HEADER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/assets_imgi_2_page_header.png';
-const LOCAL_HEADER_IMAGE_PATH = path.join(__dirname, '../assets/receipt_header.png');
+const HEADER_IMAGE_URL = 'https://pub-32253d31098b4cfc9f901824d48b3dc5.r2.dev/assets/spctt_2027_banner_header.png';
 
 let cachedHeaderImageBuffer = null;
 
 /**
- * Fetch header image buffer with in-memory caching and local filesystem fallback
+ * Fetch header image buffer strictly from Cloudflare R2 with in-memory caching
  */
 async function getHeaderImageBuffer() {
   if (cachedHeaderImageBuffer) {
     return cachedHeaderImageBuffer;
   }
 
-  // 1. Try local file first for speed
-  try {
-    if (fs.existsSync(LOCAL_HEADER_IMAGE_PATH)) {
-      cachedHeaderImageBuffer = await fs.promises.readFile(LOCAL_HEADER_IMAGE_PATH);
-      return cachedHeaderImageBuffer;
-    }
-  } catch (err) {
-    console.warn('Local header image read failed:', err?.message);
-  }
-
-  // 2. Fetch from Cloudflare URL
+  // Fetch directly from Cloudflare R2 URL
   try {
     const res = await fetch(HEADER_IMAGE_URL);
     if (res.ok) {
       const arrayBuffer = await res.arrayBuffer();
       cachedHeaderImageBuffer = Buffer.from(arrayBuffer);
-      // Save locally in background for next time
-      fs.promises.writeFile(LOCAL_HEADER_IMAGE_PATH, cachedHeaderImageBuffer).catch(() => { });
       return cachedHeaderImageBuffer;
     }
   } catch (err) {
-    console.error('Failed to fetch header image from Cloudflare:', err?.message);
+    console.error('Failed to fetch header image from Cloudflare R2:', err?.message);
   }
 
   return null;
@@ -125,41 +112,41 @@ export const invoicePdfService = {
           try {
             doc.image(headerBuffer, startX, currentY, { width: usableWidth, height: bannerHeight });
 
-            // Dark navy overlay for clear text contrast as originally styled
+            // Light translucent overlay so Red and Black text is crisp and high contrast
             doc.save();
-            doc.rect(startX, currentY, usableWidth, bannerHeight).fillOpacity(0.60).fill('#0B1B3D');
+            doc.rect(startX, currentY, usableWidth, bannerHeight).fillOpacity(0.85).fill('#FFFFFF');
             doc.restore();
 
             // Border around header banner
-            doc.rect(startX, currentY, usableWidth, bannerHeight).lineWidth(1).strokeColor('#476EAC').stroke();
+            doc.rect(startX, currentY, usableWidth, bannerHeight).lineWidth(1).strokeColor('#C0192B').stroke();
 
-            // Left side text: Conference Title & Society (Enlarged)
-            doc.fontSize(17).font('Helvetica-Bold').fillColor('#FFFFFF')
+            // Left side text: Conference Title (Red) & Society (Black)
+            doc.fontSize(17).font('Helvetica-Bold').fillColor('#C0192B')
               .text('4th SPCTT 2027', startX + 16, currentY + 12);
 
-            doc.fontSize(10).font('Helvetica-Bold').fillColor('#E2E8F0')
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#111827')
               .text('Annual Conference of Society for Pediatric Cellular Therapy and Transplant', startX + 16, currentY + 36, { width: 310 });
 
-            // Right side text: DATES & VENUE
+            // Right side text: DATES (Red) & VENUE (Red) with Black values
             const rightX = startX + 320;
             const rightWidth = 190;
 
-            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#93C5FD')
+            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#C0192B')
               .text('DATES', rightX, currentY + 12, { width: rightWidth, align: 'right' });
-            doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#FFFFFF')
+            doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#111827')
               .text('March 06 & 07, 2027', rightX, currentY + 23, { width: rightWidth, align: 'right' });
 
-            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#93C5FD')
+            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#C0192B')
               .text('VENUE', rightX, currentY + 41, { width: rightWidth, align: 'right' });
-            doc.fontSize(8.5).font('Helvetica').fillColor('#FFFFFF')
+            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#111827')
               .text('Taj Vivanta, Dwarka,\nNew Delhi (India)', rightX, currentY + 52, { width: rightWidth, align: 'right' });
 
-            // Bottom bar on Banner: GST Number
-            doc.strokeColor('rgba(255, 255, 255, 0.25)').lineWidth(0.75).moveTo(startX + 16, currentY + 88).lineTo(endX - 16, currentY + 88).stroke();
+            // Bottom bar on Banner: GST Number (Red Label, Black Value)
+            doc.strokeColor('rgba(192, 25, 43, 0.25)').lineWidth(0.75).moveTo(startX + 16, currentY + 88).lineTo(endX - 16, currentY + 88).stroke();
 
-            doc.fontSize(9).font('Helvetica-Bold').fillColor('#93C5FD')
+            doc.fontSize(9).font('Helvetica-Bold').fillColor('#C0192B')
               .text('GST Number : ', startX + 16, currentY + 94, { continued: true })
-              .fillColor('#FFFFFF').text(gstNum);
+              .fillColor('#111827').text(gstNum);
 
             currentY += bannerHeight + 14;
           } catch (e) {
