@@ -200,7 +200,7 @@ export const excelService = {
         phone: item.phone || 'N/A',
         organization: item.organization || 'N/A',
         category_name: item.category_name || item.category || 'Standard',
-        amount: Number(item.total_amount || item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+        amount: Number(item.total_payable || (parseFloat(item.grand_total || 0) * 1.045) || item.total_amount || item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
         payment_status: (item.payment_status || 'unpaid').toUpperCase(),
         status: (item.status || 'draft').toUpperCase(),
         payment_id: item.razorpay_payment_id || item.payment_id || 'N/A',
@@ -302,7 +302,7 @@ export const excelService = {
         user_email: item.user_email || 'N/A',
         amount: Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
         status: (item.status || 'created').toUpperCase(),
-        payment_method: item.payment_method || 'Axis Razorpay (PAGE WORLDWIDE)',
+        payment_method: (item.payment_method || 'Razorpay (PAGE WORLDWIDE)').replace(/Axis\s*Razorpay/gi, 'Razorpay').replace(/Elisyan\s*India/gi, 'PAGE WORLDWIDE'),
         razorpay_payment_id: item.razorpay_payment_id || 'N/A',
         razorpay_order_id: item.razorpay_order_id || 'N/A',
         created_at: formatDate(item.created_at)

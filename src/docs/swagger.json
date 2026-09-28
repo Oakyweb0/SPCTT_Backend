@@ -315,7 +315,7 @@
           },
           "paymentMethod": {
             "type": "string",
-            "example": "Axis Razorpay (PAGE WORLDWIDE)"
+            "example": "Razorpay (PAGE WORLDWIDE)"
           },
           "transactionId": {
             "type": "string",
@@ -967,7 +967,7 @@
         "tags": [
           "User Portal - Registration Flow (Website)"
         ],
-        "summary": "Make Payment (Axis Razorpay)",
+        "summary": "Make Payment (Razorpay)",
         "description": "Process conference payment, mark registration as confirmed, and generate official tax invoice and receipt.",
         "security": [
           {

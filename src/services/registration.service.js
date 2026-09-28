@@ -340,7 +340,7 @@ export const registrationService = {
     }
 
     const txnId = `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const method = paymentMethod || 'Axis Razorpay (PAGE WORLDWIDE)';
+    const method = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
 
     // Confirm registration
     const updatedReg = await Registration.updateById(reg.id, {

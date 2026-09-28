@@ -1,6 +1,7 @@
 import { Payment } from '../models/Payment.js';
 import { Registration } from '../models/Registration.js';
 import { User } from '../models/User.js';
+import { config } from '../config/env.js';
 import { createRazorpayOrder } from '../utils/razorpay.js';
 
 export const paymentService = {
@@ -11,7 +12,8 @@ export const paymentService = {
     let reg;
     if (registrationId) {
       reg = await Registration.findById(registrationId);
-    } else {
+    }
+    if (!reg) {
       reg = await Registration.findByUserId(userId);
     }
 
@@ -97,7 +99,7 @@ export const paymentService = {
         amount: finalAmountInRs,
         currency: 'INR',
         status: 'created',
-        payment_method: 'Axis Razorpay (PAGE WORLDWIDE)',
+        payment_method: 'Razorpay (PAGE WORLDWIDE)',
         notes: `Payment initialization for registration ${reg.registration_code}`
       });
     } catch (dbErr) {
@@ -105,6 +107,7 @@ export const paymentService = {
     }
 
     return {
+      keyId: config.RAZORPAY.KEY_ID || process.env.RAZORPAY_KEY_ID || '',
       orderId,
       paymentId: paymentRecord?.id || null,
       registrationId: reg.id,
@@ -140,7 +143,8 @@ export const paymentService = {
     let reg;
     if (registrationId) {
       reg = await Registration.findById(registrationId);
-    } else {
+    }
+    if (!reg) {
       reg = await Registration.findByUserId(userId);
     }
 
@@ -164,7 +168,7 @@ export const paymentService = {
     }
 
     const txnId = razorpayPaymentId || transactionId || `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const method = paymentMethod || paymentGateway || 'Axis Razorpay (PAGE WORLDWIDE)';
+    const method = paymentMethod || paymentGateway || 'Razorpay (PAGE WORLDWIDE)';
 
     // 1. Confirm registration in DB
     const updatedReg = await Registration.updateById(reg.id, {
@@ -251,7 +255,8 @@ export const paymentService = {
     let reg;
     if (registrationId) {
       reg = await Registration.findById(registrationId);
-    } else {
+    }
+    if (!reg) {
       reg = await Registration.findByUserId(userId);
     }
 
@@ -267,7 +272,7 @@ export const paymentService = {
     if (reg.payment_status !== 'paid') {
       await this.processPayment(userId, {
         registrationId: reg.id,
-        paymentMethod: 'Axis Razorpay (PAGE WORLDWIDE)',
+        paymentMethod: 'Razorpay (PAGE WORLDWIDE)',
         transactionId: txnId,
         razorpayOrderId,
         razorpayPaymentId: txnId,
@@ -488,7 +493,9 @@ export const paymentService = {
         subtotal: parseFloat(reg.subtotal || 0),
         gstRate: parseFloat(reg.gst_rate || 18.00),
         gstAmount: parseFloat(reg.gst_amount || 0),
-        grandTotal: parseFloat(reg.grand_total || 0)
+        grandTotal: parseFloat(reg.grand_total || 0),
+        facilitationCharges: parseFloat((parseFloat(reg.grand_total || 0) * 0.045).toFixed(2)),
+        totalPayable: parseFloat((parseFloat(reg.grand_total || 0) * 1.045).toFixed(2))
       },
       payments,
       invoices,

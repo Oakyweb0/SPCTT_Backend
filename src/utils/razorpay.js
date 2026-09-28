@@ -8,10 +8,10 @@ let razorpayInstance = null;
  * Get or initialize the Razorpay SDK instance
  */
 export function getRazorpayClient() {
-  if (!razorpayInstance) {
-    const key_id = config.RAZORPAY.KEY_ID || process.env.RAZORPAY_KEY_ID;
-    const key_secret = config.RAZORPAY.KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
+  const key_id = config.RAZORPAY.KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const key_secret = config.RAZORPAY.KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
 
+  if (!razorpayInstance || razorpayInstance.key_id !== key_id) {
     if (!key_id || !key_secret || key_id.includes('YourKeyIdHere')) {
       console.warn('⚠️ Razorpay credentials not fully configured in environment. Using fallback mode.');
     }
@@ -20,6 +20,7 @@ export function getRazorpayClient() {
       key_id: key_id || 'rzp_test_placeholder',
       key_secret: key_secret || 'placeholder_secret'
     });
+    razorpayInstance.key_id = key_id;
   }
 
   return razorpayInstance;
@@ -36,7 +37,9 @@ export function getRazorpayClient() {
 export async function createRazorpayOrder({ amountInPaise, currency = 'INR', receipt, notes = {} }) {
   const key_id = config.RAZORPAY.KEY_ID || process.env.RAZORPAY_KEY_ID;
   const key_secret = config.RAZORPAY.KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
-
+  console.log('key_id', key_id);
+  console.log('key_secret', key_secret);
+  console.log('reciept', receipt);
   // If live/test Razorpay keys are provided, invoke official Razorpay API
   if (key_id && key_secret && !key_id.includes('YourKeyIdHere')) {
     const rzp = getRazorpayClient();
@@ -49,6 +52,7 @@ export async function createRazorpayOrder({ amountInPaise, currency = 'INR', rec
         app: 'SPCTT_2026'
       }
     });
+    console.log('order', order);
     return order;
   }
 
@@ -79,7 +83,7 @@ export async function createRazorpayOrder({ amountInPaise, currency = 'INR', rec
  */
 export function verifyRazorpaySignature({ order_id, payment_id, signature }) {
   const secret = config.RAZORPAY.KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
-  
+
   if (!secret || secret.includes('YourKeySecretHere')) {
     // In simulated dev mode, accept valid string signatures or test bypass
     return Boolean(order_id && payment_id);
@@ -98,7 +102,7 @@ export function verifyRazorpaySignature({ order_id, payment_id, signature }) {
  */
 export function verifyWebhookSignature({ rawBody, signature }) {
   const webhookSecret = config.RAZORPAY.WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET;
-  
+
   if (!webhookSecret || webhookSecret.includes('YourWebhookSecretHere')) {
     console.warn('⚠️ Webhook received without RAZORPAY_WEBHOOK_SECRET configured.');
     return true;

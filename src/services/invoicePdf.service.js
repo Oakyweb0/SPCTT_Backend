@@ -243,8 +243,8 @@ export const invoicePdfService = {
 
         // 5. Section 2: Payment Details
         drawSectionHeader('Payment Details', currentY);
-        let rawMethod = invoice.payment_method || 'Axis Razorpay (PAGE WORLDWIDE)';
-        rawMethod = rawMethod.replace(/Elisyan\s*India/gi, 'PAGE WORLDWIDE');
+        let rawMethod = invoice.payment_method || 'Razorpay (PAGE WORLDWIDE)';
+        rawMethod = rawMethod.replace(/Axis\s*Razorpay/gi, 'Razorpay').replace(/Elisyan\s*India/gi, 'PAGE WORLDWIDE');
         const paymentGateway = rawMethod.toUpperCase();
         const txnId = invoice.transaction_id || invoice.razorpay_payment_id || 'pay_TfyPpx6ytAA70R';
         const paymentDate = formatDate(invoice.paid_at || invoice.created_at);

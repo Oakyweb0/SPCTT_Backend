@@ -220,8 +220,12 @@ export const Registration = {
         const accT = parseFloat(item.accompanying_total || 0);
         const sub = catP + accT;
         const gst = (sub * 18) / 100;
-        item.grand_total = (sub + gst).toFixed(2);
+        gt = parseFloat((sub + gst).toFixed(2));
+        item.grand_total = gt.toFixed(2);
       }
+      const facilitation = parseFloat((gt * 0.045).toFixed(2));
+      item.facilitation_charge = facilitation;
+      item.total_payable = parseFloat((gt + facilitation).toFixed(2));
       return item;
     });
   },
@@ -283,8 +287,12 @@ export const Registration = {
         const accT = parseFloat(item.accompanying_total || 0);
         const sub = catP + accT;
         const gst = (sub * 18) / 100;
-        item.grand_total = (sub + gst).toFixed(2);
+        gt = parseFloat((sub + gst).toFixed(2));
+        item.grand_total = gt.toFixed(2);
       }
+      const facilitation = parseFloat((gt * 0.045).toFixed(2));
+      item.facilitation_charge = facilitation;
+      item.total_payable = parseFloat((gt + facilitation).toFixed(2));
       return item;
     });
   },
