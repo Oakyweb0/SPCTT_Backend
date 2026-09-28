@@ -116,8 +116,8 @@ export const invoicePdfService = {
             doc.save();
             const grad = doc.linearGradient(startX, currentY, endX, currentY);
             grad.stop(0, '#13254A', 0.95)
-                .stop(0.5, '#13254A', 0.75)
-                .stop(1, '#13254A', 0.40);
+              .stop(0.5, '#13254A', 0.75)
+              .stop(1, '#13254A', 0.40);
             doc.rect(startX, currentY, usableWidth, bannerHeight).fill(grad);
             doc.restore();
 
@@ -264,15 +264,13 @@ export const invoicePdfService = {
         const baseAmount = parseFloat(invoice.amount || invoice.rate || 0);
         const gstAmount = parseFloat(invoice.gst_amount || (baseAmount * 0.18).toFixed(2));
         const totalBasePlusGst = parseFloat((baseAmount + gstAmount).toFixed(2));
-        const razorpayCharge = parseFloat((totalBasePlusGst * 0.025).toFixed(2));
-        const razorpayTax = parseFloat((razorpayCharge * 0.18).toFixed(2));
-        const facilitationCharges = parseFloat((razorpayCharge + razorpayTax).toFixed(2));
+        const facilitationCharges = parseFloat((totalBasePlusGst * 0.045).toFixed(2));
         const totalPayable = parseFloat((totalBasePlusGst + facilitationCharges).toFixed(2));
 
         drawAmountRow('Base Amount', formatRs(baseAmount), currentY + 28);
         drawAmountRow('GST (18%)', formatRs(gstAmount), currentY + 47);
         drawAmountRow('Sub Total', formatRs(totalBasePlusGst), currentY + 66);
-        drawAmountRow('Facilitation Charges (2.5% Razorpay + 18% Tax on Razorpay)', formatRs(facilitationCharges), currentY + 85);
+        drawAmountRow('Facilitation Charges (4.5%)', formatRs(facilitationCharges), currentY + 85);
 
         // Highlight Total Payable Bar (Website Accent Red)
         const totalBoxY = currentY + 110;

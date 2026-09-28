@@ -1,12 +1,13 @@
 import { Payment } from '../models/Payment.js';
 import { Registration } from '../models/Registration.js';
 import { User } from '../models/User.js';
+import { createRazorpayOrder } from '../utils/razorpay.js';
 
 export const paymentService = {
   /**
    * Create / Prepare Payment Order (and record into payments table)
    */
-  async createPaymentOrder(userId, { registrationId } = {}) {
+  async createPaymentOrder(userId, { registrationId, amount: requestedAmount, amountInPaise: requestedPaise } = {}) {
     let reg;
     if (registrationId) {
       reg = await Registration.findById(registrationId);
@@ -27,7 +28,6 @@ export const paymentService = {
     }
 
     const user = await User.findById(userId);
-    const orderId = `ORDER_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
 
     let subtotal = parseFloat(reg.subtotal || 0);
     let gstRate = parseFloat(reg.gst_rate || 18.00);
@@ -49,7 +49,43 @@ export const paymentService = {
       });
     }
 
-    const amount = grandTotal;
+    // Facilitation charge (4.5%)
+    const facilitationCharge = parseFloat((grandTotal * 0.045).toFixed(2));
+    const totalWithFacilitation = parseFloat((grandTotal + facilitationCharge).toFixed(2));
+
+    // Determine final amount to charge (prefer frontend sent amount or fallback to calculated totalWithFacilitation)
+    let finalAmountInPaise = Math.round(totalWithFacilitation * 100);
+    if (requestedPaise && parseInt(requestedPaise, 10) > 0) {
+      finalAmountInPaise = Math.round(parseInt(requestedPaise, 10));
+    } else if (requestedAmount && parseFloat(requestedAmount) > 0) {
+      const parsed = parseFloat(requestedAmount);
+      if (parsed > 10000) {
+        finalAmountInPaise = Math.round(parsed);
+      } else {
+        finalAmountInPaise = Math.round(parsed * 100);
+      }
+    }
+
+    const finalAmountInRs = parseFloat((finalAmountInPaise / 100).toFixed(2));
+
+    // Create official Razorpay Order
+    let razorpayOrder = null;
+    try {
+      razorpayOrder = await createRazorpayOrder({
+        amountInPaise: finalAmountInPaise,
+        currency: 'INR',
+        receipt: reg.registration_code || `REG_${reg.id}`,
+        notes: {
+          registrationId: reg.id,
+          registrationCode: reg.registration_code || '',
+          categoryName: reg.category_name || ''
+        }
+      });
+    } catch (rzpErr) {
+      console.warn('⚠️ Razorpay order creation error:', rzpErr.message);
+    }
+
+    const orderId = razorpayOrder?.id || `ORDER_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
 
     // Record order in payments table
     let paymentRecord = null;
@@ -58,7 +94,7 @@ export const paymentService = {
         registration_id: reg.id,
         user_id: userId,
         razorpay_order_id: orderId,
-        amount,
+        amount: finalAmountInRs,
         currency: 'INR',
         status: 'created',
         payment_method: 'Axis Razorpay (PAGE WORLDWIDE)',
@@ -73,9 +109,9 @@ export const paymentService = {
       paymentId: paymentRecord?.id || null,
       registrationId: reg.id,
       registrationCode: reg.registration_code,
-      amount,
+      amount: finalAmountInRs,
       currency: 'INR',
-      amountInPaise: Math.round(amount * 100),
+      amountInPaise: finalAmountInPaise,
       categoryName: reg.category_name,
       accompanyingCount: reg.accompanying_count,
       customer: {
@@ -90,7 +126,9 @@ export const paymentService = {
         subtotal,
         gstRate,
         gstAmount,
-        grandTotal: amount
+        grandTotal,
+        facilitationCharge,
+        totalPayable: finalAmountInRs
       }
     };
   },
