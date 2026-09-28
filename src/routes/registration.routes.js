@@ -9,9 +9,7 @@ import {
   processPayment,
   getUserInvoices,
   getInvoiceById,
-  downloadInvoice,
-  viewInvoicePdf,
-  downloadInvoiceByNumber
+  downloadInvoice
 } from '../controllers/registration.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
@@ -46,9 +44,7 @@ router.post('/payment', authenticateToken, processPayment);
 
 // Invoices
 router.get('/invoices', authenticateToken, getUserInvoices);
-router.get('/invoices/download/:invoiceNumber', authenticateToken, downloadInvoiceByNumber);
 router.get('/invoices/:id/download', authenticateToken, downloadInvoice);
-router.get('/invoices/:id/pdf', authenticateToken, viewInvoicePdf);
 router.get('/invoices/:id', authenticateToken, getInvoiceById);
 
 export default router;

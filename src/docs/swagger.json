@@ -1071,64 +1071,6 @@
         }
       }
     },
-    "/api/registration/invoices/{id}/pdf": {
-      "get": {
-        "tags": [
-          "User Portal - Invoices & Receipts (Website)"
-        ],
-        "summary": "View Invoice / Receipt PDF inline",
-        "description": "Streams PDF directly to browser for preview without prompting download.",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "PDF stream"
-          }
-        }
-      }
-    },
-    "/api/registration/invoices/download/{invoiceNumber}": {
-      "get": {
-        "tags": [
-          "User Portal - Invoices & Receipts (Website)"
-        ],
-        "summary": "Download Invoice PDF by Invoice Number",
-        "description": "Download invoice PDF using invoice number string (e.g. RCPT-2026-00001 or Proforma Invoice 101).",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "invoiceNumber",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "PDF stream"
-          }
-        }
-      }
-    },
     "/api/abstracts": {
       "post": {
         "tags": [

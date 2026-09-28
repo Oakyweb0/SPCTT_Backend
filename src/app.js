@@ -568,9 +568,7 @@ app.get('/', (req, res) => {
         payment: `POST ${baseUrl}/api/registration/payment`,
         invoices: `GET ${baseUrl}/api/registration/invoices`,
         invoiceById: `GET ${baseUrl}/api/registration/invoices/:id`,
-        invoiceDownload: `GET ${baseUrl}/api/registration/invoices/:id/download`,
-        invoicePdf: `GET ${baseUrl}/api/registration/invoices/:id/pdf`,
-        invoiceDownloadByNumber: `GET ${baseUrl}/api/registration/invoices/download/:invoiceNumber`
+        invoiceDownload: `GET ${baseUrl}/api/registration/invoices/:id/download`
       },
       payments: {
         createOrder: `POST ${baseUrl}/api/payments/create-order`,
