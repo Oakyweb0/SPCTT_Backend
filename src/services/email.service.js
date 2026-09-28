@@ -44,13 +44,42 @@ function getTransporter() {
 function generateEmailHeaderHtml() {
   return `
       <!-- Brand Header Banner with Transparent Clickable Link Overlay (No Gmail Download Icon) -->
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; max-width: 650px; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #13254A; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
+      
+      
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; max-width: 650px; border-collapse: collapse; border-spacing: 0; margin: 0; padding: 0; background-color: #0d1b38; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;">
         <tr>
-          <td align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0; font-size: 0; background-color: #13254A; background-image: url('${BANNER_IMAGE_URL}'); background-size: 100% 100%; background-position: center top; background-repeat: no-repeat; text-align: center;">
-            <a href="https://2027.spctt.org/" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; max-width: 650px; text-decoration: none; border: 0; outline: none; cursor: pointer;">
-              <!-- Transparent 1x1 data spacer that makes entire banner clickable without displaying external img tag for Gmail download overlay -->
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="650" height="140" style="display: block; width: 100%; max-width: 650px; height: 140px; border: 0; outline: none; opacity: 0; margin: 0; padding: 0;" alt="SPCTT 2027 Annual Conference" />
-            </a>
+        <td align="center" valign="middle" style="padding: 34px 20px; margin: 0; background-color: #0d1b38; background-image: linear-gradient(rgba(13, 27, 56, 0.72), rgba(19, 37, 74, 0.78)), url('${BANNER_IMAGE_URL}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <!--[if gte mso 9]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:650px;height:160px;">
+              <v:fill type="frame" src="${BANNER_IMAGE_URL}" color="#0d1b38" />
+              <v:textbox inset="0,0,0,0">
+            <![endif]-->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; border-spacing: 0;">
+              <tr>
+                <td align="center" style="padding: 0 10px; text-align: center;">
+                  <!-- Conference Pill Badge -->
+                  <div style="display: inline-block; padding: 5px 18px; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 50px; background-color: rgba(255, 255, 255, 0.1); margin-bottom: 12px;">
+                    <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 1.5px; line-height: 1;">
+                      SPCTT 2027 ANNUAL CONFERENCE
+                    </span>
+                  </div>
+                  
+                  <!-- Main Title -->
+                  <h1 style="margin: 0 0 10px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.35; letter-spacing: -0.2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    Society of Pulmonary Care &amp; Thyroid Therapeutics
+                  </h1>
+                  
+                  <!-- Date & Location Subtitle -->
+                  <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13.5px; font-weight: 500; color: #e2e8f0; line-height: 1.4; letter-spacing: 0.2px; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">
+                    March 6-7, 2027 &bull; Taj Vivanta, Dwarka, New Delhi
+                  </p>
+                </td>
+              </tr>
+            </table>
+            <!--[if gte mso 9]>
+              </v:textbox>
+            </v:rect>
+            <![endif]-->
           </td>
         </tr>
       </table>
