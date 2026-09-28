@@ -112,41 +112,45 @@ export const invoicePdfService = {
           try {
             doc.image(headerBuffer, startX, currentY, { width: usableWidth, height: bannerHeight });
 
-            // Light translucent overlay so Red and Black text is crisp and high contrast
+            // Navy Gradient Overlay: from [#13254A]/95 via [#13254A]/75 to-[#13254A]/40
             doc.save();
-            doc.rect(startX, currentY, usableWidth, bannerHeight).fillOpacity(0.85).fill('#FFFFFF');
+            const grad = doc.linearGradient(startX, currentY, endX, currentY);
+            grad.stop(0, '#13254A', 0.95)
+                .stop(0.5, '#13254A', 0.75)
+                .stop(1, '#13254A', 0.40);
+            doc.rect(startX, currentY, usableWidth, bannerHeight).fill(grad);
             doc.restore();
 
             // Border around header banner
-            doc.rect(startX, currentY, usableWidth, bannerHeight).lineWidth(1).strokeColor('#C0192B').stroke();
+            doc.rect(startX, currentY, usableWidth, bannerHeight).lineWidth(1).strokeColor('#13254A').stroke();
 
-            // Left side text: Conference Title (Red) & Society (Black)
-            doc.fontSize(17).font('Helvetica-Bold').fillColor('#C0192B')
+            // Left side text: Conference Title (White) & Society (Light Gray/Slate)
+            doc.fontSize(17).font('Helvetica-Bold').fillColor('#FFFFFF')
               .text('4th SPCTT 2027', startX + 16, currentY + 12);
 
-            doc.fontSize(10).font('Helvetica-Bold').fillColor('#111827')
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#E2E8F0')
               .text('Annual Conference of Society for Pediatric Cellular Therapy and Transplant', startX + 16, currentY + 36, { width: 310 });
 
-            // Right side text: DATES (Red) & VENUE (Red) with Black values
+            // Right side text: DATES & VENUE (Red Labels #C0192B, White Values)
             const rightX = startX + 320;
             const rightWidth = 190;
 
             doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#C0192B')
               .text('DATES', rightX, currentY + 12, { width: rightWidth, align: 'right' });
-            doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#111827')
+            doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#FFFFFF')
               .text('March 06 & 07, 2027', rightX, currentY + 23, { width: rightWidth, align: 'right' });
 
             doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#C0192B')
               .text('VENUE', rightX, currentY + 41, { width: rightWidth, align: 'right' });
-            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#111827')
+            doc.fontSize(8.5).font('Helvetica').fillColor('#FFFFFF')
               .text('Taj Vivanta, Dwarka,\nNew Delhi (India)', rightX, currentY + 52, { width: rightWidth, align: 'right' });
 
-            // Bottom bar on Banner: GST Number (Red Label, Black Value)
-            doc.strokeColor('rgba(192, 25, 43, 0.25)').lineWidth(0.75).moveTo(startX + 16, currentY + 88).lineTo(endX - 16, currentY + 88).stroke();
+            // Bottom bar on Banner: GST Number (Red Label #C0192B, White Value)
+            doc.strokeColor('rgba(255, 255, 255, 0.25)').lineWidth(0.75).moveTo(startX + 16, currentY + 88).lineTo(endX - 16, currentY + 88).stroke();
 
             doc.fontSize(9).font('Helvetica-Bold').fillColor('#C0192B')
               .text('GST Number : ', startX + 16, currentY + 94, { continued: true })
-              .fillColor('#111827').text(gstNum);
+              .fillColor('#FFFFFF').text(gstNum);
 
             currentY += bannerHeight + 14;
           } catch (e) {

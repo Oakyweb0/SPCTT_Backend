@@ -58,7 +58,7 @@ function generateEmailHeaderHtml() {
               <tr>
                 <td align="center" style="padding: 0 10px; text-align: center;">
                   <!-- Conference Pill Badge -->
-                  <div style="display: inline-block; padding: 5px 18px; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 50px; background-color: rgba(255, 255, 255, 0.1); margin-bottom: 12px;">
+                  <div style="display: inline-block; padding: 5px 18px; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 50px; background-color: rgba(19, 37, 74, 1.0); margin-bottom: 12px;">
                     <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 1.5px; line-height: 1;">
                       SPCTT 2027 ANNUAL CONFERENCE
                     </span>
