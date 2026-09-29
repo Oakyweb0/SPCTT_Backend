@@ -702,14 +702,26 @@ app.use('/api/docs', swaggerUi.serve, (req, res, next) => {
   swaggerUi.setup(getSwaggerSpec(), swaggerUiOptions)(req, res, next);
 });
 
-// 4. API Routes
+// 4. API Routes (Mounted under /api and root aliases for universal client compatibility)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/user', userRoutes);
+app.use('/user', userRoutes);
+
 app.use('/api/registration', registrationRoutes);
+app.use('/registration', registrationRoutes);
 app.use('/api/registrations', registrationRoutes);
+app.use('/registrations', registrationRoutes);
+
 app.use('/api/payments', paymentRoutes);
+app.use('/payments', paymentRoutes);
+
 app.use('/api/admin', adminRoutes);
+app.use('/admin', adminRoutes);
+
 app.use('/api/abstracts', abstractRoutes);
+app.use('/abstracts', abstractRoutes);
 
 // 5. Dynamic Root Discovery Endpoint (No hardcoded localhost)
 app.get('/', (req, res) => {
