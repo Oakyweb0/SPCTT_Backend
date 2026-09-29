@@ -496,6 +496,54 @@ export const paymentService = {
         paymentMethod: method,
         rawResponse: body
       });
+    } else if (event === 'payment.refunded' || event === 'refund.processed' || event === 'refund.created') {
+      let existingPayment = null;
+      if (orderId) {
+        existingPayment = await Payment.findByOrderId(orderId);
+      }
+      if (!existingPayment && paymentId) {
+        existingPayment = await Payment.findByPaymentId(paymentId);
+      }
+
+      const regId = existingPayment?.registration_id || payload?.notes?.registrationId;
+      const userId = existingPayment?.user_id || payload?.notes?.userId;
+      const reg = regId ? await Registration.findById(regId) : (userId ? await Registration.findByUserId(userId) : null);
+      const user = userId ? await User.findById(userId) : (reg ? await User.findById(reg.user_id) : null);
+
+      if (reg) {
+        try {
+          await Registration.updateById(reg.id, {
+            payment_status: 'refunded'
+          });
+        } catch (rErr) {
+          console.warn('Could not update registration status to refunded:', rErr.message);
+        }
+      }
+
+      if (existingPayment) {
+        try {
+          await Payment.updateById(existingPayment.id, {
+            status: 'refunded',
+            notes: `Refund processed via Razorpay Webhook (${event})`
+          });
+        } catch (pErr) {
+          console.warn('Could not update payment status to refunded:', pErr.message);
+        }
+      }
+
+      try {
+        await emailService.sendPaymentRefundedEmails({
+          registration: reg,
+          payment: existingPayment,
+          user,
+          refundAmount: amount || (reg ? parseFloat(reg.grand_total || 0) : 0),
+          refundReason: `Refund processed by Payment Gateway (${event})`,
+          transactionId: paymentId,
+          orderId
+        });
+      } catch (emErr) {
+        console.error('Error dispatching webhook refund email:', emErr.message);
+      }
     }
 
     return { received: true, event };

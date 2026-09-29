@@ -12,6 +12,7 @@ router.get('/dashboard-stats', adminController.getDashboardStats);
 
 // 2. Registrations Management
 router.get('/registrations/export', adminController.exportRegistrations);
+router.get('/registrations/:id', adminController.getRegistrationById);
 router.get('/registrations', adminController.getRegistrations);
 router.put('/registrations/:id/status', adminController.updateRegistrationStatus);
 

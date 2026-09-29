@@ -820,12 +820,6 @@ function generatePaymentSuccessUserHtml({
           <li style="margin-bottom: 6px;"><strong>Updates:</strong> Detailed scientific program and session timings will be shared via email closer to the conference date.</li>
         </ul>
 
-        <!-- CTA Button -->
-        <div style="text-align: center; margin: 32px 0 24px 0;">
-          <a href="https://2027.spctt.org/user/invoices" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
-            View / Download Invoice & Receipt
-          </a>
-        </div>
 
         <!-- Signoff -->
         <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
@@ -1266,6 +1260,572 @@ function generatePaymentFailedAdminHtml({
           <div style="margin-top: 16px; padding: 12px 16px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px;">
             <strong style="color: #9f1239; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Error:</strong>
             <p style="margin: 0; color: #be123c; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Refunded (User Notification)
+ */
+function generatePaymentRefundedUserHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  refundAmount,
+  transactionId,
+  orderId,
+  paymentMethod,
+  refundReason,
+  refundedAt
+}) {
+  const safeName = name || 'Delegate';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Original Payment Source';
+  const safeReason = refundReason || 'Refund processed by conference administration / finance team';
+  const dateStr = refundedAt
+    ? new Date(refundedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Refund Processed - SPCTT 2027</title>
+    <style>
+      @media only screen and (max-width: 520px) {
+        .responsive-td {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding-bottom: 12px !important;
+          box-sizing: border-box !important;
+        }
+        .mobile-padding {
+          padding: 24px 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Refund Notification Banner -->
+      <div style="background-color: #f5f3ff; border-bottom: 1px solid #ddd6fe; padding: 22px 24px; text-align: center;">
+        <span style="background-color: #7c3aed; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Refund Processed</span>
+        <h2 style="margin: 0; color: #5b21b6; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Payment Refund Confirmation</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div class="mobile-padding" style="padding: 32px 24px;">
+        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Dear <strong>${safeName}</strong>,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          This email confirms that a refund has been initiated / processed for your registration for the <strong>SPCTT 2027 Annual Conference</strong>.
+        </p>
+
+        <!-- Refund Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
+          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #5b21b6; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Refund Details
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Registration Category:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Refunded Amount:</td>
+              <td style="padding: 8px 0; color: #7c3aed; font-weight: 800; font-size: 17px;">${formatRs(refundAmount)}</td>
+            </tr>
+            ${safeTxn !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Refund Ref:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+            </tr>` : ''}
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Method:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Processed On:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #ede9fe; color: #6d28d9; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #ddd6fe;">
+                  REFUNDED
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Reason Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px;">
+            <strong style="color: #5b21b6; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Note / Reason:</strong>
+            <p style="margin: 0; color: #4c1d95; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          </div>
+        </div>
+
+        <!-- Timeline Information -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 24px 0;">
+          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #13254A; font-weight: 700;">When will you receive the funds?</h4>
+          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">
+            The refund has been credited back to your original source account / payment card. Depending on your bank's settlement cycle, it typically takes <strong>5 to 7 business days</strong> to reflect on your account or card statement.
+          </p>
+        </div>
+
+        <!-- Signoff -->
+        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+                <p style="margin: 0 0 4px 0;">Warm regards,</p>
+                <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+              </td>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Need Assistance?</p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Refunded (Admin Alert)
+ */
+function generatePaymentRefundedAdminHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  refundAmount,
+  transactionId,
+  orderId,
+  paymentMethod,
+  refundReason,
+  refundedAt
+}) {
+  const safeName = name || 'N/A';
+  const safeEmail = email || 'N/A';
+  const safePhone = phone || 'N/A';
+  const safeOrg = organization || 'N/A';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Original Payment Source';
+  const safeReason = refundReason || 'Refund processed by Admin / Payment Gateway';
+  const dateStr = refundedAt
+    ? new Date(refundedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Refund Alert - SPCTT 2027</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Admin Alert Bar -->
+      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+        <span style="background-color: #7c3aed; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Refund Alert</span>
+        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #5b21b6;">Registration Payment Refunded</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 28px 24px;">
+        <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Hello Administrator,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          A payment refund has been recorded/processed for delegate <strong>${safeName}</strong> on <strong>${dateStr} (IST)</strong>.
+        </p>
+
+        <!-- Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
+              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
+              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Refunded Amount:</td>
+              <td style="padding: 8px 0; color: #7c3aed; font-weight: 800; font-size: 16px;">${formatRs(refundAmount)}</td>
+            </tr>
+            ${safeTxn !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Refund Ref:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+            </tr>` : ''}
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Method:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #ede9fe; color: #6d28d9; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #ddd6fe;">
+                  REFUNDED
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Reason Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px;">
+            <strong style="color: #5b21b6; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Refund Reason / Notes:</strong>
+            <p style="margin: 0; color: #4c1d95; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Pending (User Reminder / Notification)
+ */
+function generatePaymentPendingUserHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  pendingAmount,
+  paymentMethod,
+  notes,
+  updatedAt
+}) {
+  const safeName = name || 'Delegate';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeMethod = paymentMethod || 'Online Gateway';
+  const safeNotes = notes || 'Payment is pending. Please complete the transaction to confirm your registration seat.';
+  const dateStr = updatedAt
+    ? new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Payment Pending - SPCTT 2027</title>
+    <style>
+      @media only screen and (max-width: 520px) {
+        .responsive-td {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding-bottom: 12px !important;
+          box-sizing: border-box !important;
+        }
+        .mobile-padding {
+          padding: 24px 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Pending Notification Banner -->
+      <div style="background-color: #fffbeb; border-bottom: 1px solid #fde68a; padding: 22px 24px; text-align: center;">
+        <span style="background-color: #d97706; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Pending</span>
+        <h2 style="margin: 0; color: #92400e; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Complete Registration Payment</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div class="mobile-padding" style="padding: 32px 24px;">
+        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Dear <strong>${safeName}</strong>,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          Thank you for initiating your registration for the <strong>SPCTT 2027 Annual Conference</strong>. Your attendee details have been received, but your payment is currently <strong>PENDING</strong>.
+        </p>
+
+        <!-- Pending Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
+          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #92400e; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Registration Summary
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Total Payable Amount:</td>
+              <td style="padding: 8px 0; color: #d97706; font-weight: 800; font-size: 17px;">${formatRs(pendingAmount)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fde68a;">
+                  PENDING
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Last Updated:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+            </tr>
+          </table>
+
+          <!-- Note Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
+            <strong style="color: #92400e; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Notice:</strong>
+            <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">${safeNotes}</p>
+          </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 24px 0;">
+          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #166534; font-weight: 700;">How to complete your payment:</h4>
+          <p style="margin: 0; font-size: 14px; color: #15803d; line-height: 1.6;">
+            Please log in to your account at <strong>2027.spctt.org</strong> to complete your online payment securely via UPI, Credit/Debit Card, or Net Banking to confirm your delegate pass.
+          </p>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 32px 0 24px 0;">
+          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
+            Complete Payment Now
+          </a>
+        </div>
+
+        <!-- Signoff -->
+        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+                <p style="margin: 0 0 4px 0;">Warm regards,</p>
+                <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+              </td>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Registration Support:</p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Pending (Admin Alert)
+ */
+function generatePaymentPendingAdminHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  pendingAmount,
+  paymentMethod,
+  notes,
+  updatedAt
+}) {
+  const safeName = name || 'N/A';
+  const safeEmail = email || 'N/A';
+  const safePhone = phone || 'N/A';
+  const safeOrg = organization || 'N/A';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeNotes = notes || 'Registration status marked as Pending Payment';
+  const dateStr = updatedAt
+    ? new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Pending Alert - SPCTT 2027</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Admin Alert Bar -->
+      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+        <span style="background-color: #d97706; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Pending Alert</span>
+        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #92400e;">Registration Payment Pending</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 28px 24px;">
+        <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Hello Administrator,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          The payment status for delegate <strong>${safeName}</strong> has been set to <strong>PENDING</strong> on <strong>${dateStr} (IST)</strong>.
+        </p>
+
+        <!-- Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
+              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
+              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Amount Pending:</td>
+              <td style="padding: 8px 0; color: #d97706; font-weight: 800; font-size: 16px;">${formatRs(pendingAmount)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fde68a;">
+                  PENDING
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Reason Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
+            <strong style="color: #92400e; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Admin Notes:</strong>
+            <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">${safeNotes}</p>
           </div>
         </div>
       </div>
@@ -2115,6 +2675,376 @@ export const emailService = {
         fromEmail: fromAddress,
         subject: adminSubject,
         emailType: 'payment_failed_admin',
+        status: 'failed',
+        errorMessage: adminErr.message
+      });
+
+      results.adminEmail = {
+        success: false,
+        error: adminErr.message
+      };
+    }
+
+    return results;
+  },
+
+  /**
+   * Send Registration Payment Refunded Emails (To User & To Admin)
+   */
+  async sendPaymentRefundedEmails({
+    registration,
+    payment,
+    user,
+    refundReason,
+    refundAmount,
+    transactionId,
+    orderId
+  }) {
+    const regUser = user || {};
+    const recipientEmail = registration?.email || regUser?.email;
+    const recipientName = registration?.full_name || regUser?.name || 'Delegate';
+    const recipientPhone = registration?.phone || regUser?.phone || '';
+    const organization = registration?.organization || regUser?.organization || '';
+    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'N/A');
+    const categoryName = registration?.category_name || 'Conference Registration';
+
+    const grandTotal = registration ? parseFloat(registration.grand_total || 0) : 0;
+    const finalRefundAmount = refundAmount !== undefined ? parseFloat(refundAmount) : (payment?.amount ? parseFloat(payment.amount) : grandTotal);
+    const finalTxnId = transactionId || payment?.razorpay_payment_id || registration?.transaction_id || 'N/A';
+    const finalOrderId = orderId || payment?.razorpay_order_id || 'N/A';
+    const paymentMethod = payment?.payment_method || registration?.payment_method || 'Original Payment Source';
+    const refundedAt = payment?.updated_at || new Date();
+
+    const fromAddress = process.env.REGISTRATION_FROM || config.EMAIL.REGISTRATION_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
+    const adminEmail = process.env.REGISTRATION_ADMIN_EMAIL || config.EMAIL.REGISTRATION_ADMIN_EMAIL || 'submit@spctt.org';
+
+    const results = {
+      userEmail: null,
+      adminEmail: null
+    };
+
+    let activeTransporter;
+    try {
+      activeTransporter = getTransporter();
+    } catch (tErr) {
+      console.error('❌ Could not initialize SMTP transporter for payment refund emails:', tErr.message);
+      return { success: false, error: tErr.message };
+    }
+
+    // 1. Send Refund Notification to User
+    if (recipientEmail) {
+      const userSubject = `[SPCTT 2027] Payment Refund Notification - Registration ${registrationCode} (${recipientName})`;
+      const userHtml = generatePaymentRefundedUserHtml({
+        name: recipientName,
+        email: recipientEmail,
+        phone: recipientPhone,
+        organization,
+        registrationCode,
+        categoryName,
+        refundAmount: finalRefundAmount,
+        transactionId: finalTxnId,
+        orderId: finalOrderId,
+        paymentMethod,
+        refundReason,
+        refundedAt
+      });
+
+      const userMailOptions = {
+        from: fromAddress,
+        to: `"${recipientName}" <${recipientEmail}>`,
+        subject: userSubject,
+        html: userHtml
+      };
+
+      try {
+        console.log(`📧 Sending payment refund notification to User '${recipientEmail}'...`);
+        const userInfo = await activeTransporter.sendMail(userMailOptions);
+        console.log(`✅ User payment refund email sent! MessageId: ${userInfo.messageId}`);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_refunded_user',
+          status: 'sent',
+          errorMessage: null
+        });
+
+        results.userEmail = {
+          success: true,
+          messageId: userInfo.messageId,
+          recipient: recipientEmail
+        };
+      } catch (userErr) {
+        console.error(`❌ Failed to send payment refund email to User (${recipientEmail}):`, userErr.message);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_refunded_user',
+          status: 'failed',
+          errorMessage: userErr.message
+        });
+
+        results.userEmail = {
+          success: false,
+          error: userErr.message
+        };
+      }
+    }
+
+    // 2. Send Refund Alert to Admin (with CC)
+    const adminSubject = `[Payment Refund Alert] ${registrationCode} - ${recipientName} (${categoryName}) - ₹${finalRefundAmount}`;
+    const adminHtml = generatePaymentRefundedAdminHtml({
+      name: recipientName,
+      email: recipientEmail,
+      phone: recipientPhone,
+      organization,
+      registrationCode,
+      categoryName,
+      refundAmount: finalRefundAmount,
+      transactionId: finalTxnId,
+      orderId: finalOrderId,
+      paymentMethod,
+      refundReason,
+      refundedAt
+    });
+
+    const adminMailOptions = {
+      from: fromAddress,
+      to: `"SPCTT Admin" <${adminEmail}>`,
+      cc: ccAddress,
+      subject: adminSubject,
+      html: adminHtml
+    };
+
+    try {
+      console.log(`📧 Sending payment refund alert to Admin '${adminEmail}', CC: '${ccAddress}'...`);
+      const adminInfo = await activeTransporter.sendMail(adminMailOptions);
+      console.log(`✅ Admin payment refund alert sent! MessageId: ${adminInfo.messageId}`);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_refunded_admin',
+        status: 'sent',
+        errorMessage: null
+      });
+
+      results.adminEmail = {
+        success: true,
+        messageId: adminInfo.messageId,
+        recipient: adminEmail,
+        cc: ccAddress
+      };
+    } catch (adminErr) {
+      console.error(`❌ Failed to send payment refund alert to Admin (${adminEmail}):`, adminErr.message);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_refunded_admin',
+        status: 'failed',
+        errorMessage: adminErr.message
+      });
+
+      results.adminEmail = {
+        success: false,
+        error: adminErr.message
+      };
+    }
+
+    return results;
+  },
+
+  /**
+   * Send Registration Payment Pending Emails (To User & To Admin)
+   */
+  async sendPaymentPendingEmails({
+    registration,
+    payment,
+    user,
+    pendingAmount,
+    notes
+  }) {
+    const regUser = user || {};
+    const recipientEmail = registration?.email || regUser?.email;
+    const recipientName = registration?.full_name || regUser?.name || 'Delegate';
+    const recipientPhone = registration?.phone || regUser?.phone || '';
+    const organization = registration?.organization || regUser?.organization || '';
+    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'N/A');
+    const categoryName = registration?.category_name || 'Conference Registration';
+
+    const grandTotal = registration ? parseFloat(registration.grand_total || 0) : 0;
+    const finalPendingAmount = pendingAmount !== undefined ? parseFloat(pendingAmount) : grandTotal;
+    const paymentMethod = payment?.payment_method || registration?.payment_method || 'Online Payment';
+    const updatedAt = payment?.updated_at || new Date();
+
+    const fromAddress = process.env.REGISTRATION_FROM || config.EMAIL.REGISTRATION_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
+    const adminEmail = process.env.REGISTRATION_ADMIN_EMAIL || config.EMAIL.REGISTRATION_ADMIN_EMAIL || 'submit@spctt.org';
+
+    const results = {
+      userEmail: null,
+      adminEmail: null
+    };
+
+    let activeTransporter;
+    try {
+      activeTransporter = getTransporter();
+    } catch (tErr) {
+      console.error('❌ Could not initialize SMTP transporter for payment pending emails:', tErr.message);
+      return { success: false, error: tErr.message };
+    }
+
+    // 1. Send Pending Notification to User
+    if (recipientEmail) {
+      const userSubject = `[SPCTT 2027] Action Required: Payment Pending - Registration ${registrationCode} (${recipientName})`;
+      const userHtml = generatePaymentPendingUserHtml({
+        name: recipientName,
+        email: recipientEmail,
+        phone: recipientPhone,
+        organization,
+        registrationCode,
+        categoryName,
+        pendingAmount: finalPendingAmount,
+        paymentMethod,
+        notes,
+        updatedAt
+      });
+
+      const userMailOptions = {
+        from: fromAddress,
+        to: `"${recipientName}" <${recipientEmail}>`,
+        subject: userSubject,
+        html: userHtml
+      };
+
+      try {
+        console.log(`📧 Sending payment pending notification to User '${recipientEmail}'...`);
+        const userInfo = await activeTransporter.sendMail(userMailOptions);
+        console.log(`✅ User payment pending email sent! MessageId: ${userInfo.messageId}`);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_pending_user',
+          status: 'sent',
+          errorMessage: null
+        });
+
+        results.userEmail = {
+          success: true,
+          messageId: userInfo.messageId,
+          recipient: recipientEmail
+        };
+      } catch (userErr) {
+        console.error(`❌ Failed to send payment pending email to User (${recipientEmail}):`, userErr.message);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_pending_user',
+          status: 'failed',
+          errorMessage: userErr.message
+        });
+
+        results.userEmail = {
+          success: false,
+          error: userErr.message
+        };
+      }
+    }
+
+    // 2. Send Pending Alert to Admin (with CC)
+    const adminSubject = `[Payment Pending Alert] ${registrationCode} - ${recipientName} (${categoryName}) - ₹${finalPendingAmount}`;
+    const adminHtml = generatePaymentPendingAdminHtml({
+      name: recipientName,
+      email: recipientEmail,
+      phone: recipientPhone,
+      organization,
+      registrationCode,
+      categoryName,
+      pendingAmount: finalPendingAmount,
+      paymentMethod,
+      notes,
+      updatedAt
+    });
+
+    const adminMailOptions = {
+      from: fromAddress,
+      to: `"SPCTT Admin" <${adminEmail}>`,
+      cc: ccAddress,
+      subject: adminSubject,
+      html: adminHtml
+    };
+
+    try {
+      console.log(`📧 Sending payment pending alert to Admin '${adminEmail}', CC: '${ccAddress}'...`);
+      const adminInfo = await activeTransporter.sendMail(adminMailOptions);
+      console.log(`✅ Admin payment pending alert sent! MessageId: ${adminInfo.messageId}`);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_pending_admin',
+        status: 'sent',
+        errorMessage: null
+      });
+
+      results.adminEmail = {
+        success: true,
+        messageId: adminInfo.messageId,
+        recipient: adminEmail,
+        cc: ccAddress
+      };
+    } catch (adminErr) {
+      console.error(`❌ Failed to send payment pending alert to Admin (${adminEmail}):`, adminErr.message);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_pending_admin',
         status: 'failed',
         errorMessage: adminErr.message
       });

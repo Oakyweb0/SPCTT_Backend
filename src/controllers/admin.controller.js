@@ -74,6 +74,35 @@ export const adminController = {
   },
 
   /**
+   * Get Single Registration by ID with User, Invoices & Payments
+   * GET /api/admin/registrations/:id
+   */
+  async getRegistrationById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const reg = await Registration.findById(id);
+      if (!reg) {
+        return sendError(res, 'Registration not found.', 404);
+      }
+      const [regUser, invoices, payments] = await Promise.all([
+        reg.user_id ? User.findById(reg.user_id) : null,
+        Registration.getInvoicesByRegistrationId(id),
+        Payment.findAllByRegistrationId(id)
+      ]);
+
+      return sendSuccess(res, {
+        ...reg,
+        user: regUser,
+        invoices: invoices || [],
+        payments: payments || []
+      }, 'Registration details retrieved successfully.');
+    } catch (error) {
+      console.error('Error fetching admin registration by id:', error);
+      return sendError(res, 'Failed to fetch registration details.', 500, error);
+    }
+  },
+
+  /**
    * Update Registration Status
    * PUT /api/admin/registrations/:id/status
    */
@@ -127,11 +156,43 @@ export const adminController = {
               amount: reg.grand_total,
               currency: 'INR',
               status: 'failed',
-              payment_method: reg.payment_method || 'Manual Status Update',
+              payment_method: reg.payment_method || 'Manual Status Update (Admin)',
               notes: `Payment marked as failed by Admin for ${reg.registration_code}`
             });
           } catch (payErr) {
             console.warn('Could not record failed payment in payments table:', payErr.message);
+          }
+        } else if (paymentStatus === 'refunded') {
+          try {
+            await Payment.create({
+              registration_id: reg.id,
+              user_id: reg.user_id || 0,
+              razorpay_order_id: 'ADMIN_MANUAL',
+              razorpay_payment_id: reg.transaction_id || `REF_${Date.now()}`,
+              amount: reg.grand_total,
+              currency: 'INR',
+              status: 'refunded',
+              payment_method: reg.payment_method || 'Manual Status Update (Admin)',
+              notes: `Payment marked as Refunded by Admin for ${reg.registration_code}`
+            });
+          } catch (payErr) {
+            console.warn('Could not record refunded payment in payments table:', payErr.message);
+          }
+        } else if (paymentStatus === 'pending') {
+          try {
+            await Payment.create({
+              registration_id: reg.id,
+              user_id: reg.user_id || 0,
+              razorpay_order_id: 'ADMIN_MANUAL',
+              razorpay_payment_id: reg.transaction_id || 'PENDING',
+              amount: reg.grand_total,
+              currency: 'INR',
+              status: 'pending',
+              payment_method: reg.payment_method || 'Pending Payment',
+              notes: `Payment status set to Pending by Admin for ${reg.registration_code}`
+            });
+          } catch (payErr) {
+            console.warn('Could not record pending payment in payments table:', payErr.message);
           }
         }
       }
@@ -188,6 +249,40 @@ export const adminController = {
                 organization: reg.organization
               },
               failureReason: 'Payment marked as Failed by Conference Administrator'
+            });
+          } else if (paymentStatus === 'refunded') {
+            emailResult = await emailService.sendPaymentRefundedEmails({
+              registration: regDataForEmail,
+              payment: {
+                amount: regDataForEmail.grand_total,
+                razorpay_payment_id: regDataForEmail.transaction_id || 'N/A',
+                razorpay_order_id: 'ADMIN_MANUAL',
+                payment_method: regDataForEmail.payment_method || 'Manual Status Update (Admin)'
+              },
+              user: regUser || {
+                name: reg.full_name,
+                email: reg.email,
+                phone: reg.phone,
+                organization: reg.organization
+              },
+              refundReason: 'Payment marked as Refunded by Conference Administrator',
+              refundAmount: regDataForEmail.grand_total
+            });
+          } else if (paymentStatus === 'pending') {
+            emailResult = await emailService.sendPaymentPendingEmails({
+              registration: regDataForEmail,
+              payment: {
+                amount: regDataForEmail.grand_total,
+                payment_method: regDataForEmail.payment_method || 'Pending Payment'
+              },
+              user: regUser || {
+                name: reg.full_name,
+                email: reg.email,
+                phone: reg.phone,
+                organization: reg.organization
+              },
+              pendingAmount: regDataForEmail.grand_total,
+              notes: 'Registration payment status marked as Pending by Administrator'
             });
           }
         } catch (emailErr) {
