@@ -80,25 +80,128 @@ export const adminController = {
   async updateRegistrationStatus(req, res, next) {
     try {
       const { id } = req.params;
-      const { status, paymentStatus } = req.body;
+      const { status, paymentStatus, sendEmail = true } = req.body;
 
       const reg = await Registration.findById(id);
       if (!reg) {
         return sendError(res, 'Registration not found.', 404);
       }
 
+      const previousPaymentStatus = reg.payment_status;
       const updates = {};
       if (status) updates.status = status;
       if (paymentStatus) {
         updates.payment_status = paymentStatus;
         if (paymentStatus === 'paid') {
           updates.paid_at = new Date();
+          if (!reg.transaction_id) {
+            updates.transaction_id = `ADM_${Date.now()}`;
+          }
+          if (!reg.payment_method) {
+            updates.payment_method = 'Manual Verification (Admin)';
+          }
           await Registration.updateInvoicesToPaid(id);
+
+          try {
+            await Payment.create({
+              registration_id: reg.id,
+              user_id: reg.user_id || 0,
+              razorpay_order_id: 'ADMIN_MANUAL',
+              razorpay_payment_id: updates.transaction_id || reg.transaction_id || `ADM_${Date.now()}`,
+              amount: reg.grand_total,
+              currency: 'INR',
+              status: 'paid',
+              payment_method: updates.payment_method || 'Manual Verification (Admin)',
+              notes: `Payment marked as paid by Admin for ${reg.registration_code}`
+            });
+          } catch (payErr) {
+            console.warn('Could not record admin payment in payments table:', payErr.message);
+          }
+        } else if (paymentStatus === 'failed') {
+          try {
+            await Payment.create({
+              registration_id: reg.id,
+              user_id: reg.user_id || 0,
+              razorpay_order_id: 'ADMIN_MANUAL',
+              razorpay_payment_id: reg.transaction_id || 'N/A',
+              amount: reg.grand_total,
+              currency: 'INR',
+              status: 'failed',
+              payment_method: reg.payment_method || 'Manual Status Update',
+              notes: `Payment marked as failed by Admin for ${reg.registration_code}`
+            });
+          } catch (payErr) {
+            console.warn('Could not record failed payment in payments table:', payErr.message);
+          }
         }
       }
 
       const updated = await Registration.updateById(id, updates);
-      return sendSuccess(res, updated, 'Registration status updated successfully.');
+
+      // Trigger Email Notification if payment status changed and sendEmail is true
+      let emailResult = null;
+      if (sendEmail && paymentStatus && paymentStatus !== previousPaymentStatus) {
+        try {
+          const [regUser, allInvoices] = await Promise.all([
+            reg.user_id ? User.findById(reg.user_id) : null,
+            Registration.getInvoicesByRegistrationId(id)
+          ]);
+
+          const regDataForEmail = {
+            ...reg,
+            ...updates,
+            id: reg.id,
+            user_id: reg.user_id
+          };
+
+          if (paymentStatus === 'paid') {
+            emailResult = await emailService.sendPaymentSuccessEmails({
+              registration: regDataForEmail,
+              payment: {
+                amount: regDataForEmail.grand_total,
+                razorpay_payment_id: regDataForEmail.transaction_id || 'ADM_MANUAL',
+                razorpay_order_id: 'ADMIN_MANUAL',
+                payment_method: regDataForEmail.payment_method || 'Manual Verification (Admin)',
+                updated_at: regDataForEmail.paid_at || new Date()
+              },
+              user: regUser || {
+                name: reg.full_name,
+                email: reg.email,
+                phone: reg.phone,
+                organization: reg.organization
+              },
+              invoices: allInvoices || []
+            });
+          } else if (paymentStatus === 'failed') {
+            emailResult = await emailService.sendPaymentFailedEmails({
+              registration: regDataForEmail,
+              payment: {
+                amount: regDataForEmail.grand_total,
+                razorpay_payment_id: regDataForEmail.transaction_id || 'N/A',
+                razorpay_order_id: 'ADMIN_MANUAL',
+                payment_method: regDataForEmail.payment_method || 'Manual Verification (Admin)'
+              },
+              user: regUser || {
+                name: reg.full_name,
+                email: reg.email,
+                phone: reg.phone,
+                organization: reg.organization
+              },
+              failureReason: 'Payment marked as Failed by Conference Administrator'
+            });
+          }
+        } catch (emailErr) {
+          console.error('Error dispatching admin status update email:', emailErr);
+          emailResult = { success: false, error: emailErr.message };
+        }
+      }
+
+      let successMessage = 'Registration status updated successfully.';
+      if (emailResult && (emailResult.userEmail?.success || emailResult.adminEmail?.success)) {
+        successMessage = `Registration updated to '${paymentStatus || status}' & email notification sent to ${reg.email}.`;
+      }
+
+      return sendSuccess(res, { registration: updated, emailResult }, successMessage);
     } catch (error) {
       console.error('Error updating registration status:', error);
       return sendError(res, 'Failed to update registration status.', 500, error);
