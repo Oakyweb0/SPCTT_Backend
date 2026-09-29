@@ -1427,14 +1427,62 @@
           {
             "name": "search",
             "in": "query",
+            "description": "Search keyword (matches name, email, phone, organization, or user ID)",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "searchCategory",
+            "in": "query",
+            "description": "Optional search field scope",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "id",
+                "name",
+                "email",
+                "phone",
+                "organization"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "email",
+                "created_at",
+                "role",
+                "status"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort direction ('asc' for Ascending, 'desc' for Descending)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Users list retrieved"
+            "description": "Paginated users list retrieved successfully with pagination metadata (total, page, limit, totalPages)"
           }
         }
       },

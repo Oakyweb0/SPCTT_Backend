@@ -150,9 +150,9 @@ export const User = {
   },
 
   /**
-   * Find all users (Admin view)
+   * Find users with optional filtering, search, sorting and server pagination (Admin view)
    */
-  async findAll({ role, status, search } = {}) {
+  async findAll({ role, status, search, searchCategory, sortField = 'id', sortOrder = 'DESC', limit, offset } = {}) {
     const pool = getPool();
     let query = 'SELECT id, title, name, email, organization, phone, role, status, created_at FROM users WHERE 1=1';
     const params = [];
@@ -165,15 +165,95 @@ export const User = {
       query += ' AND status = ?';
       params.push(status);
     }
-    if (search) {
-      query += ' AND (name LIKE ? OR email LIKE ? OR organization LIKE ?)';
-      const s = `%${search}%`;
-      params.push(s, s, s);
+    if (search && search.trim()) {
+      const cleanSearch = search.trim().replace(/^#/, '');
+      const s = `%${cleanSearch}%`;
+      if (searchCategory === 'id') {
+        query += ' AND CAST(id AS CHAR) LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'name') {
+        query += ' AND name LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'email') {
+        query += ' AND email LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'phone') {
+        query += ' AND phone LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'organization') {
+        query += ' AND organization LIKE ?';
+        params.push(s);
+      } else {
+        query += ' AND (name LIKE ? OR email LIKE ? OR organization LIKE ? OR phone LIKE ? OR CAST(id AS CHAR) LIKE ?)';
+        params.push(s, s, s, s, s);
+      }
     }
 
-    query += ' ORDER BY id DESC';
+    const allowedSortFields = {
+      id: 'id',
+      name: 'name',
+      email: 'email',
+      created_at: 'created_at',
+      role: 'role',
+      status: 'status',
+      organization: 'organization'
+    };
+    const finalSort = allowedSortFields[sortField] || 'id';
+    const finalOrder = (sortOrder && sortOrder.toString().toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+
+    query += ` ORDER BY ${finalSort} ${finalOrder}`;
+
+    if (limit !== undefined && limit !== null) {
+      query += ' LIMIT ? OFFSET ?';
+      params.push(Number(limit), Number(offset || 0));
+    }
+
     const [rows] = await pool.query(query, params);
     return rows;
+  },
+
+  /**
+   * Count total users matching filters & search (for server-side pagination)
+   */
+  async countFiltered({ role, status, search, searchCategory } = {}) {
+    const pool = getPool();
+    let query = 'SELECT COUNT(*) as count FROM users WHERE 1=1';
+    const params = [];
+
+    if (role) {
+      query += ' AND role = ?';
+      params.push(role);
+    }
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    if (search && search.trim()) {
+      const cleanSearch = search.trim().replace(/^#/, '');
+      const s = `%${cleanSearch}%`;
+      if (searchCategory === 'id') {
+        query += ' AND CAST(id AS CHAR) LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'name') {
+        query += ' AND name LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'email') {
+        query += ' AND email LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'phone') {
+        query += ' AND phone LIKE ?';
+        params.push(s);
+      } else if (searchCategory === 'organization') {
+        query += ' AND organization LIKE ?';
+        params.push(s);
+      } else {
+        query += ' AND (name LIKE ? OR email LIKE ? OR organization LIKE ? OR phone LIKE ? OR CAST(id AS CHAR) LIKE ?)';
+        params.push(s, s, s, s, s);
+      }
+    }
+
+    const [rows] = await pool.query(query, params);
+    return rows[0]?.count || 0;
   },
 
   /**

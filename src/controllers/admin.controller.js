@@ -664,13 +664,66 @@ export const adminController = {
   },
 
   /**
-   * Get All Registered Users
+   * Get All Registered Users with Pagination, Filters, Search & Sorting
    * GET /api/admin/users
    */
   async getUsers(req, res, next) {
     try {
-      const { role, status, search } = req.query;
-      const users = await User.findAll({ role, status, search });
+      const { 
+        role, 
+        status, 
+        search, 
+        searchCategory,
+        sortField = 'id', 
+        sortOrder = 'asc',
+        page, 
+        limit 
+      } = req.query;
+
+      // When page or limit query parameters are provided (or when requested via Swagger / UI with pagination)
+      if (page !== undefined || limit !== undefined) {
+        const pageNum = Math.max(1, parseInt(page, 10) || 1);
+        const limitNum = Math.min(500, Math.max(1, parseInt(limit, 10) || 10));
+        const offset = (pageNum - 1) * limitNum;
+
+        const [users, total] = await Promise.all([
+          User.findAll({ 
+            role, 
+            status, 
+            search, 
+            searchCategory,
+            sortField, 
+            sortOrder, 
+            limit: limitNum, 
+            offset 
+          }),
+          User.countFiltered({ role, status, search, searchCategory })
+        ]);
+
+        const totalPages = Math.ceil(total / limitNum) || 1;
+
+        return res.status(200).json({
+          status: true,
+          message: 'Users retrieved successfully.',
+          data: users,
+          pagination: {
+            total,
+            page: pageNum,
+            limit: limitNum,
+            totalPages
+          }
+        });
+      }
+
+      // Backward compatibility if no page/limit passed
+      const users = await User.findAll({ 
+        role, 
+        status, 
+        search, 
+        searchCategory,
+        sortField, 
+        sortOrder 
+      });
       return sendSuccess(res, users, 'Users retrieved successfully.');
     } catch (error) {
       console.error('Error fetching admin users:', error);
