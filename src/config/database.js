@@ -204,7 +204,7 @@ export async function initDatabase() {
         await pool.query(`
           CREATE TABLE \`registrations\` (
             \`id\` INT AUTO_INCREMENT PRIMARY KEY,
-            \`registration_code\` VARCHAR(50) NOT NULL UNIQUE,
+            \`registration_code\` VARCHAR(50) DEFAULT NULL UNIQUE,
             \`user_id\` INT NOT NULL,
             \`category_id\` INT DEFAULT NULL,
             \`category_name\` VARCHAR(150) DEFAULT NULL,
@@ -251,6 +251,16 @@ export async function initDatabase() {
           if (!regColNames.includes('fee_type')) {
             await pool.query("ALTER TABLE `registrations` ADD COLUMN `fee_type` VARCHAR(50) DEFAULT 'regular' AFTER `category_price`");
           }
+
+          // Ensure registration_code column allows NULL
+          await pool.query("ALTER TABLE `registrations` MODIFY COLUMN `registration_code` VARCHAR(50) NULL DEFAULT NULL");
+
+          // Ensure only paid registrations have registration_code generated
+          // 1. Clear registration_code for non-paid records
+          await pool.query("UPDATE `registrations` SET `registration_code` = NULL WHERE `payment_status` != 'paid'");
+
+          // 2. Ensure all paid registrations have serial-wise SPCTT-XXX format
+          await pool.query("UPDATE `registrations` SET `registration_code` = CONCAT('SPCTT-', LPAD(id, 3, '0')) WHERE `payment_status` = 'paid' AND (`registration_code` IS NULL OR `registration_code` LIKE '#%' OR `registration_code` LIKE 'TEMP-%')");
         } catch (regColErr) {
           console.warn('Could not alter registrations table columns:', regColErr.message);
         }
@@ -385,6 +395,13 @@ export async function initDatabase() {
                 console.warn(`Could not drop column '${imgCol}' from abstracts:`, dropErr.message);
               }
             }
+          }
+
+          // Migrate legacy random abstract codes to serial-wise ABS-XXX format
+          try {
+            await pool.query("UPDATE `abstracts` SET `abstract_code` = CONCAT('ABS-', LPAD(id, 3, '0')) WHERE `abstract_code` LIKE 'ABS-%' OR `abstract_code` LIKE 'TEMP-%'");
+          } catch (migErr) {
+            console.warn('Could not migrate abstract codes:', migErr.message);
           }
         } catch (colCheckErr) {
           console.warn('Could not inspect abstracts columns:', colCheckErr.message);

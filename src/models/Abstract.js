@@ -126,8 +126,7 @@ export const Abstract = {
     pdfUrl = null,
     fileUrl = null
   }) {
-    const pool = getPool();
-    const abstractCode = `ABS-${Math.floor(100000 + Math.random() * 900000)}`;
+    const tempCode = `ABS-TEMP-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const finalName = (name || authors || '').trim();
     const finalInstitute = (instituteName || affiliation || '').trim();
@@ -152,7 +151,7 @@ export const Abstract = {
     const storedAbstractText = rawAbstractText ? `${rawAbstractText}${metaTag}` : metaTag;
 
     const insertData = {
-      abstract_code: abstractCode,
+      abstract_code: tempCode,
       user_id: userId,
       title: finalTopic,
       authors: finalName,
@@ -178,6 +177,9 @@ export const Abstract = {
       `INSERT INTO \`abstracts\` (\`${fields.join('`, `')}\`) VALUES (${placeholders})`,
       values
     );
+
+    const finalCode = `ABS-${String(result.insertId).padStart(3, '0')}`;
+    await pool.query('UPDATE `abstracts` SET `abstract_code` = ? WHERE `id` = ?', [finalCode, result.insertId]);
 
     return this.findById(result.insertId);
   },

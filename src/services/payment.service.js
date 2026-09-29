@@ -176,8 +176,12 @@ export const paymentService = {
     const txnId = razorpayPaymentId || transactionId || `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     const method = paymentMethod || paymentGateway || 'Razorpay (PAGE WORLDWIDE)';
 
+    // Generate Registration Code if not already assigned
+    const regCode = reg.registration_code || `SPCTT-${String(reg.id).padStart(3, '0')}`;
+
     // 1. Confirm registration in DB
     const updatedReg = await Registration.updateById(reg.id, {
+      registration_code: regCode,
       payment_method: method,
       payment_status: 'paid',
       transaction_id: txnId,
@@ -200,7 +204,7 @@ export const paymentService = {
       user_id: userId || reg.user_id,
       invoice_type: 'receipt',
       title: 'Official Receipt & Tax Invoice - SPCTT 2027',
-      description: `Payment confirmed for ${reg.registration_code} via ${method} (Txn: ${txnId})`,
+      description: `Payment confirmed for ${regCode} via ${method} (Txn: ${txnId})`,
       quantity: 1,
       rate: subtotal,
       amount: subtotal,
@@ -221,7 +225,7 @@ export const paymentService = {
           status: 'paid',
           amount: totalPayable,
           payment_method: method,
-          notes: `Payment completed for ${reg.registration_code}`
+          notes: `Payment completed for ${regCode}`
         });
       }
 
@@ -236,7 +240,7 @@ export const paymentService = {
           currency: 'INR',
           status: 'paid',
           payment_method: method,
-          notes: `Payment completed for ${reg.registration_code}`
+          notes: `Payment completed for ${regCode}`
         });
       }
     } catch (payDbErr) {

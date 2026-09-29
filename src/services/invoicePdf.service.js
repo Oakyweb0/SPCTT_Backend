@@ -194,7 +194,7 @@ export const invoicePdfService = {
         currentY += 26;
 
         // 3. Registration No Sub-bar (Primary Brand Blue theme)
-        const regCode = invoice.registration_code || `SPC-2027-${String(invoice.registration_id || invoice.id || '001').padStart(4, '0')}`;
+        const regCode = invoice.registration_code || `SPCTT-${String(invoice.registration_id || invoice.id || '1').padStart(3, '0')}`;
         doc.rect(startX, currentY, usableWidth, 24).fill(PRIMARY_BLUE);
         doc.fontSize(12).font('Helvetica-Bold').fillColor('#FFFFFF')
           .text(`Registration No : ${regCode}`, startX, currentY + 5, { width: usableWidth, align: 'center' });

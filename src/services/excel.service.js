@@ -127,7 +127,7 @@ export const excelService = {
     abstracts.forEach((item, index) => {
       worksheet.addRow({
         sno: index + 1,
-        abstract_code: item.abstract_code || `ABS-${item.id}`,
+        abstract_code: item.abstract_code || `ABS-${String(item.id || index + 1).padStart(3, '0')}`,
         category: (item.category || 'Poster').toUpperCase(),
         topic: item.topic || item.title || 'N/A',
         name: item.name || item.authors || item.display_name || 'N/A',
@@ -194,7 +194,7 @@ export const excelService = {
 
       worksheet.addRow({
         sno: index + 1,
-        registration_code: item.registration_code || `#${item.id}`,
+        registration_code: item.registration_code || (item.payment_status === 'paid' ? `SPCTT-${String(item.id || index + 1).padStart(3, '0')}` : '—'),
         full_name: `${item.title ? item.title + ' ' : ''}${item.full_name || item.name || 'N/A'}`.trim(),
         email: item.email || 'N/A',
         phone: item.phone || 'N/A',
@@ -297,7 +297,7 @@ export const excelService = {
       worksheet.addRow({
         sno: index + 1,
         id: item.id,
-        registration_code: item.registration_code || `REG-${item.registration_id || 'N/A'}`,
+        registration_code: item.registration_code || (item.status === 'paid' && item.registration_id ? `SPCTT-${String(item.registration_id).padStart(3, '0')}` : '—'),
         user_name: item.user_name || item.registration_name || 'N/A',
         user_email: item.user_email || 'N/A',
         amount: Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }),

@@ -100,6 +100,11 @@ export const config = {
     KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
     WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     CURRENCY: process.env.RAZORPAY_CURRENCY || 'INR'
+  },
+
+  RECAPTCHA: {
+    SITE_KEY: process.env.RECAPTCHA_SITE_KEY || '6LeyktUtAAAAADvLGtQlJzU5x6ZkmpxWfdvL6ci6',
+    SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY || '6LeyktUtAAAAAEozE7MNvqx3QHSAqJliFn1x_09'
   }
 };
 

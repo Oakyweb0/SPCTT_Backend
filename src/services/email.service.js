@@ -1855,7 +1855,7 @@ export const emailService = {
 
     const recipientEmail = abstract.email || abstract.submitter_email;
     const recipientName = abstract.name || abstract.display_name || abstract.authors || abstract.submitter_name || 'Author';
-    const abstractCode = abstract.abstract_code || `#${abstract.id}`;
+    const abstractCode = abstract.abstract_code || (abstract.id ? `ABS-${String(abstract.id).padStart(3, '0')}` : 'N/A');
     const topic = abstract.topic || abstract.title || 'Abstract Submission';
     const category = abstract.category || 'Poster';
     const instituteName = abstract.institute_name || abstract.affiliation || abstract.submitter_org || '';
@@ -2044,7 +2044,7 @@ export const emailService = {
     }
 
     const recipientName = abstract.name || abstract.display_name || abstract.authors || abstract.submitter_name || 'Author';
-    const abstractCode = abstract.abstract_code || `#${abstract.id}`;
+    const abstractCode = abstract.abstract_code || (abstract.id ? `ABS-${String(abstract.id).padStart(3, '0')}` : 'N/A');
     const topic = abstract.topic || abstract.title || 'Abstract Submission';
     const category = abstract.category || 'Poster';
     const instituteName = abstract.institute_name || abstract.affiliation || abstract.submitter_org || '';
@@ -2312,7 +2312,7 @@ export const emailService = {
     const recipientName = registration.full_name || regUser.name || 'Delegate';
     const recipientPhone = registration.phone || regUser.phone || '';
     const organization = registration.organization || regUser.organization || '';
-    const registrationCode = registration.registration_code || `#REG-${registration.id}`;
+    const registrationCode = registration.registration_code || (registration.id ? `SPCTT-${String(registration.id).padStart(3, '0')}` : 'PENDING');
     const categoryName = registration.category_name || 'Conference Delegate';
 
     const subtotal = parseFloat(registration.subtotal || 0);
@@ -2518,7 +2518,7 @@ export const emailService = {
     const recipientName = registration?.full_name || regUser.name || 'Delegate';
     const recipientPhone = registration?.phone || regUser.phone || '';
     const organization = registration?.organization || regUser.organization || '';
-    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'PENDING');
+    const registrationCode = registration?.registration_code || (registration?.id ? `SPCTT-${String(registration.id).padStart(3, '0')}` : 'PENDING');
     const categoryName = registration?.category_name || 'Conference Registration';
 
     const grandTotal = parseFloat(registration?.grand_total || 0);
@@ -2705,7 +2705,7 @@ export const emailService = {
     const recipientName = registration?.full_name || regUser?.name || 'Delegate';
     const recipientPhone = registration?.phone || regUser?.phone || '';
     const organization = registration?.organization || regUser?.organization || '';
-    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'N/A');
+    const registrationCode = registration?.registration_code || (registration?.id ? `SPCTT-${String(registration.id).padStart(3, '0')}` : 'N/A');
     const categoryName = registration?.category_name || 'Conference Registration';
 
     const grandTotal = registration ? parseFloat(registration.grand_total || 0) : 0;
@@ -2892,7 +2892,7 @@ export const emailService = {
     const recipientName = registration?.full_name || regUser?.name || 'Delegate';
     const recipientPhone = registration?.phone || regUser?.phone || '';
     const organization = registration?.organization || regUser?.organization || '';
-    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'N/A');
+    const registrationCode = registration?.registration_code || (registration?.id ? `SPCTT-${String(registration.id).padStart(3, '0')}` : 'N/A');
     const categoryName = registration?.category_name || 'Conference Registration';
 
     const grandTotal = registration ? parseFloat(registration.grand_total || 0) : 0;

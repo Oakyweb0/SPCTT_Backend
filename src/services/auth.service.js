@@ -3,8 +3,58 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { generateToken, verifyToken } from '../utils/jwt.js';
 import { emailService } from './email.service.js';
+import { config } from '../config/env.js';
 
 export const authService = {
+  /**
+   * Verify Google reCAPTCHA Token
+   */
+  async verifyRecaptcha(token) {
+    if (!token) {
+      const error = new Error('Please complete the CAPTCHA verification (I am not a robot).');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    try {
+      const secretKey = config.RECAPTCHA?.SECRET_KEY || '6LeyktUtAAAAAEozE7MNvqx3QHSAqJliFn1x_09';
+      const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+
+      const formData = new URLSearchParams();
+      formData.append('secret', secretKey);
+      formData.append('response', token);
+
+      const response = await fetch(verifyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.warn('reCAPTCHA verification rejected by Google:', data);
+        const error = new Error('CAPTCHA verification failed. Please try again.');
+        error.statusCode = 400;
+        throw error;
+      }
+
+      return true;
+    } catch (err) {
+      if (err.statusCode) throw err;
+      console.error('Error verifying reCAPTCHA with Google:', err);
+      // In development mode, fallback gracefully if google server is unreachable
+      if (config.IS_DEVELOPMENT) {
+        console.warn('Development mode: Continuing despite reCAPTCHA network issue.');
+        return true;
+      }
+      const error = new Error('CAPTCHA service verification failed. Please check your internet connection.');
+      error.statusCode = 400;
+      throw error;
+    }
+  },
   /**
    * Register a new user
    */
@@ -114,9 +164,18 @@ export const authService = {
   },
 
   /**
-   * Authenticate administrator login
+   * Authenticate administrator login with reCAPTCHA
    */
-  async adminLogin({ email, password }) {
+  async adminLogin({ email, password, captchaToken }) {
+    // 1. Verify Google reCAPTCHA Token
+    if (captchaToken) {
+      await this.verifyRecaptcha(captchaToken);
+    } else if (config.IS_PRODUCTION) {
+      const error = new Error('CAPTCHA verification is required for Admin Portal.');
+      error.statusCode = 400;
+      throw error;
+    }
+
     const user = await User.findByEmail(email);
     if (!user) {
       const error = new Error('Invalid administrator credentials.');

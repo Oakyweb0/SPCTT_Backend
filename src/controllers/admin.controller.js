@@ -123,6 +123,8 @@ export const adminController = {
         updates.payment_status = paymentStatus;
         if (paymentStatus === 'paid') {
           updates.paid_at = new Date();
+          const regCode = reg.registration_code || `SPCTT-${String(reg.id).padStart(3, '0')}`;
+          updates.registration_code = regCode;
           if (!reg.transaction_id) {
             updates.transaction_id = `ADM_${Date.now()}`;
           }
@@ -141,12 +143,13 @@ export const adminController = {
               currency: 'INR',
               status: 'paid',
               payment_method: updates.payment_method || 'Manual Verification (Admin)',
-              notes: `Payment marked as paid by Admin for ${reg.registration_code}`
+              notes: `Payment marked as paid by Admin for ${regCode}`
             });
           } catch (payErr) {
             console.warn('Could not record admin payment in payments table:', payErr.message);
           }
         } else if (paymentStatus === 'failed') {
+          updates.registration_code = null;
           try {
             await Payment.create({
               registration_id: reg.id,
@@ -157,7 +160,7 @@ export const adminController = {
               currency: 'INR',
               status: 'failed',
               payment_method: reg.payment_method || 'Manual Status Update (Admin)',
-              notes: `Payment marked as failed by Admin for ${reg.registration_code}`
+              notes: `Payment marked as failed by Admin for registration #${reg.id}`
             });
           } catch (payErr) {
             console.warn('Could not record failed payment in payments table:', payErr.message);
@@ -173,12 +176,13 @@ export const adminController = {
               currency: 'INR',
               status: 'refunded',
               payment_method: reg.payment_method || 'Manual Status Update (Admin)',
-              notes: `Payment marked as Refunded by Admin for ${reg.registration_code}`
+              notes: `Payment marked as Refunded by Admin for ${reg.registration_code || `#${reg.id}`}`
             });
           } catch (payErr) {
             console.warn('Could not record refunded payment in payments table:', payErr.message);
           }
         } else if (paymentStatus === 'pending') {
+          updates.registration_code = null;
           try {
             await Payment.create({
               registration_id: reg.id,
@@ -189,7 +193,7 @@ export const adminController = {
               currency: 'INR',
               status: 'pending',
               payment_method: reg.payment_method || 'Pending Payment',
-              notes: `Payment status set to Pending by Admin for ${reg.registration_code}`
+              notes: `Payment status set to Pending by Admin for registration #${reg.id}`
             });
           } catch (payErr) {
             console.warn('Could not record pending payment in payments table:', payErr.message);

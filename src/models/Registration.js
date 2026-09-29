@@ -1,5 +1,21 @@
 import { getPool } from '../config/database.js';
 
+function formatRegItem(reg) {
+  if (!reg) return null;
+  const copy = { ...reg };
+  if (copy.payment_status !== 'paid' || (copy.registration_code && (copy.registration_code.startsWith('UNPAID-') || copy.registration_code.startsWith('TEMP-')))) {
+    copy.registration_code = null;
+  }
+  if (typeof copy.accompanying_persons === 'string') {
+    try {
+      copy.accompanying_persons = JSON.parse(copy.accompanying_persons);
+    } catch (e) {
+      copy.accompanying_persons = [];
+    }
+  }
+  return copy;
+}
+
 export const Registration = {
   /**
    * Find latest registration by User ID
@@ -11,16 +27,7 @@ export const Registration = {
       [userId]
     );
     if (!rows[0]) return null;
-
-    const reg = { ...rows[0] };
-    if (typeof reg.accompanying_persons === 'string') {
-      try {
-        reg.accompanying_persons = JSON.parse(reg.accompanying_persons);
-      } catch (e) {
-        reg.accompanying_persons = [];
-      }
-    }
-    return reg;
+    return formatRegItem(rows[0]);
   },
 
   /**
@@ -30,16 +37,7 @@ export const Registration = {
     const pool = getPool();
     const [rows] = await pool.query('SELECT * FROM registrations WHERE id = ? LIMIT 1', [id]);
     if (!rows[0]) return null;
-
-    const reg = { ...rows[0] };
-    if (typeof reg.accompanying_persons === 'string') {
-      try {
-        reg.accompanying_persons = JSON.parse(reg.accompanying_persons);
-      } catch (e) {
-        reg.accompanying_persons = [];
-      }
-    }
-    return reg;
+    return formatRegItem(rows[0]);
   },
 
   /**
@@ -53,32 +51,45 @@ export const Registration = {
     );
 
     if (existing.length > 0) {
-      const reg = { ...existing[0] };
-      if (typeof reg.accompanying_persons === 'string') {
-        try {
-          reg.accompanying_persons = JSON.parse(reg.accompanying_persons);
-        } catch (e) {
-          reg.accompanying_persons = [];
-        }
-      }
-      return reg;
+      return formatRegItem(existing[0]);
     }
 
-    const regCode = `#${Math.floor(1000000 + Math.random() * 9000000)}`;
-    const [result] = await pool.query(
-      `INSERT INTO registrations 
-        (registration_code, user_id, title, full_name, email, organization, phone, status, step_completed) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', 1)`,
-      [
-        regCode,
-        userId,
-        user.title || 'Mr.',
-        user.name || '',
-        user.email || '',
-        user.organization || null,
-        user.phone || null
-      ]
-    );
+    let insertCode = null;
+    let result;
+    try {
+      [result] = await pool.query(
+        `INSERT INTO registrations 
+          (registration_code, user_id, title, full_name, email, organization, phone, status, step_completed) 
+          VALUES (NULL, ?, ?, ?, ?, ?, ?, 'draft', 1)`,
+        [
+          userId,
+          user.title || 'Mr.',
+          user.name || '',
+          user.email || '',
+          user.organization || null,
+          user.phone || null
+        ]
+      );
+    } catch (insertNullErr) {
+      insertCode = `UNPAID-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      [result] = await pool.query(
+        `INSERT INTO registrations 
+          (registration_code, user_id, title, full_name, email, organization, phone, status, step_completed) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', 1)`,
+        [
+          insertCode,
+          userId,
+          user.title || 'Mr.',
+          user.name || '',
+          user.email || '',
+          user.organization || null,
+          user.phone || null
+        ]
+      );
+      try {
+        await pool.query('UPDATE registrations SET registration_code = CONCAT("UNPAID-", id) WHERE id = ?', [result.insertId]);
+      } catch (e) {}
+    }
 
     return this.findById(result.insertId);
   },
@@ -206,6 +217,9 @@ export const Registration = {
 
     return rows.map((reg) => {
       const item = { ...reg };
+      if (item.payment_status !== 'paid' || (item.registration_code && (item.registration_code.startsWith('UNPAID-') || item.registration_code.startsWith('TEMP-')))) {
+        item.registration_code = null;
+      }
       if (typeof item.accompanying_persons === 'string') {
         try {
           item.accompanying_persons = JSON.parse(item.accompanying_persons);
