@@ -398,6 +398,7 @@ export async function initDatabase() {
           CREATE TABLE \`email_logs\` (
             \`id\` INT AUTO_INCREMENT PRIMARY KEY,
             \`abstract_id\` INT DEFAULT NULL,
+            \`registration_id\` INT DEFAULT NULL,
             \`user_id\` INT DEFAULT NULL,
             \`recipient_email\` VARCHAR(150) NOT NULL,
             \`recipient_name\` VARCHAR(150) DEFAULT NULL,
@@ -409,11 +410,23 @@ export async function initDatabase() {
             \`error_message\` TEXT DEFAULT NULL,
             \`sent_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             INDEX (\`abstract_id\`),
+            INDEX (\`registration_id\`),
             INDEX (\`user_id\`),
             INDEX (\`recipient_email\`)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
         console.log("Table 'email_logs' created.");
+      } else {
+        try {
+          const [emailLogCols] = await pool.query('SHOW COLUMNS FROM `email_logs`');
+          const emailLogColNames = emailLogCols.map((c) => c.Field);
+          if (!emailLogColNames.includes('registration_id')) {
+            await pool.query('ALTER TABLE `email_logs` ADD COLUMN `registration_id` INT DEFAULT NULL AFTER `abstract_id`');
+            await pool.query('ALTER TABLE `email_logs` ADD INDEX (`registration_id`)');
+          }
+        } catch (elErr) {
+          console.warn('Could not check/alter email_logs columns:', elErr.message);
+        }
       }
 
       // 10. Seed default super admin

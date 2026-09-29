@@ -2,6 +2,8 @@ import express from 'express';
 import {
   createOrder,
   verifyPayment,
+  processPayment,
+  recordFailure,
   handleWebhook,
   getPaymentHistory,
   getPaymentHistoryByRegistration,
@@ -28,9 +30,17 @@ router.post('/webhook', handleWebhook);
 // POST /api/payments/create-order
 router.post('/create-order', authenticateToken, createOrder);
 
-// 2. Verify Razorpay Payment Signature
+// 2. Verify Razorpay Payment Signature & Confirm
 // POST /api/payments/verify
 router.post('/verify', authenticateToken, verifyPayment);
+
+// 3. Process & Confirm Payment Directly
+// POST /api/payments/process
+router.post('/process', authenticateToken, processPayment);
+
+// 4. Record Payment Failure and Send Notifications
+// POST /api/payments/failure
+router.post('/failure', authenticateToken, recordFailure);
 
 // 3. Get User Payment History (Current authenticated user's transactions from DB)
 // GET /api/payments/history

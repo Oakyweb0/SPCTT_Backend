@@ -180,9 +180,45 @@ export async function getPaymentStatusByRegistrationId(req, res, next) {
   }
 }
 
+/**
+ * Record Payment Failure and Dispatch Notification Emails
+ * POST /api/payments/failure
+ */
+export async function recordFailure(req, res, next) {
+  try {
+    const userId = req.user?.user_id || req.body?.userId;
+    const result = await paymentService.recordPaymentFailure(userId, req.body);
+    return sendSuccess(res, result, 'Payment failure recorded and notifications sent to user and admin');
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
+/**
+ * Process / Confirm Payment Direct
+ * POST /api/payments/process
+ */
+export async function processPayment(req, res, next) {
+  try {
+    const userId = req.user.user_id;
+    const result = await paymentService.processPayment(userId, req.body);
+    return sendSuccess(res, result, 'Payment processed successfully and confirmation emails dispatched');
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
 export default {
   createOrder,
   verifyPayment,
+  processPayment,
+  recordFailure,
   handleWebhook,
   getPaymentHistory,
   getPaymentHistoryByRegistration,

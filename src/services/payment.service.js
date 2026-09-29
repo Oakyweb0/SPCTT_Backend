@@ -2,7 +2,8 @@ import { Payment } from '../models/Payment.js';
 import { Registration } from '../models/Registration.js';
 import { User } from '../models/User.js';
 import { config } from '../config/env.js';
-import { createRazorpayOrder } from '../utils/razorpay.js';
+import { createRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay.js';
+import { emailService } from './email.service.js';
 
 export const paymentService = {
   /**
@@ -137,7 +138,7 @@ export const paymentService = {
   },
 
   /**
-   * Process & Confirm Payment (updates Registration, Invoices & Payments DB)
+   * Process & Confirm Payment (updates Registration, Invoices & Payments DB, Sends Emails)
    */
   async processPayment(userId, { registrationId, paymentMethod, transactionId, paymentGateway, razorpayOrderId, razorpayPaymentId, razorpaySignature } = {}) {
     let reg;
@@ -154,6 +155,8 @@ export const paymentService = {
       throw error;
     }
 
+    const user = await User.findById(userId || reg.user_id);
+
     let subtotal = parseFloat(reg.subtotal || 0);
     let gstRate = parseFloat(reg.gst_rate || 18.00);
     let gstAmount = parseFloat(reg.gst_amount || 0);
@@ -166,6 +169,9 @@ export const paymentService = {
       gstAmount = parseFloat(((subtotal * gstRate) / 100).toFixed(2));
       grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
     }
+
+    const facilitationCharge = parseFloat((grandTotal * 0.045).toFixed(2));
+    const totalPayable = parseFloat((grandTotal + facilitationCharge).toFixed(2));
 
     const txnId = razorpayPaymentId || transactionId || `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
     const method = paymentMethod || paymentGateway || 'Razorpay (PAGE WORLDWIDE)';
@@ -191,9 +197,9 @@ export const paymentService = {
     await Registration.createInvoice({
       invoice_number: receiptNum,
       registration_id: reg.id,
-      user_id: userId,
+      user_id: userId || reg.user_id,
       invoice_type: 'receipt',
-      title: 'Official Receipt & Tax Invoice - SPCTT 2026',
+      title: 'Official Receipt & Tax Invoice - SPCTT 2027',
       description: `Payment confirmed for ${reg.registration_code} via ${method} (Txn: ${txnId})`,
       quantity: 1,
       rate: subtotal,
@@ -213,19 +219,20 @@ export const paymentService = {
           razorpay_payment_id: txnId,
           razorpay_signature: razorpaySignature || null,
           status: 'paid',
-          amount: grandTotal,
-          payment_method: method
+          amount: totalPayable,
+          payment_method: method,
+          notes: `Payment completed for ${reg.registration_code}`
         });
       }
 
       if (!paymentRecord) {
         paymentRecord = await Payment.create({
           registration_id: reg.id,
-          user_id: userId,
+          user_id: userId || reg.user_id,
           razorpay_order_id: razorpayOrderId || null,
           razorpay_payment_id: txnId,
           razorpay_signature: razorpaySignature || null,
-          amount: grandTotal,
+          amount: totalPayable,
           currency: 'INR',
           status: 'paid',
           payment_method: method,
@@ -238,6 +245,18 @@ export const paymentService = {
 
     const allInvoices = await Registration.getInvoicesByRegistrationId(reg.id);
 
+    // 5. Send Payment Success Emails to BOTH User & Admin in background
+    try {
+      await emailService.sendPaymentSuccessEmails({
+        registration: updatedReg || reg,
+        payment: paymentRecord,
+        user,
+        invoices: allInvoices
+      });
+    } catch (emailErr) {
+      console.error('⚠️ Could not dispatch payment success emails:', emailErr.message);
+    }
+
     return {
       registration: updatedReg,
       transactionId: txnId,
@@ -249,9 +268,9 @@ export const paymentService = {
   },
 
   /**
-   * Verify Payment Transaction
+   * Verify Payment Transaction Signature & Process
    */
-  async verifyPayment(userId, { registrationId, transactionId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = {}) {
+  async verifyPayment(userId, { registrationId, transactionId, razorpayPaymentId, razorpayOrderId, razorpaySignature, paymentMethod } = {}) {
     let reg;
     if (registrationId) {
       reg = await Registration.findById(registrationId);
@@ -266,32 +285,152 @@ export const paymentService = {
       throw error;
     }
 
-    const txnId = razorpayPaymentId || transactionId || `PAY_VERIFIED_${Date.now()}`;
+    const txnId = razorpayPaymentId || transactionId;
+    const orderId = razorpayOrderId;
 
-    // Update registration as paid if not already paid
-    if (reg.payment_status !== 'paid') {
-      await this.processPayment(userId, {
-        registrationId: reg.id,
-        paymentMethod: 'Razorpay (PAGE WORLDWIDE)',
-        transactionId: txnId,
-        razorpayOrderId,
-        razorpayPaymentId: txnId,
-        razorpaySignature
+    // Verify signature if signature & orderId & paymentId provided
+    if (orderId && txnId && razorpaySignature) {
+      const isValid = verifyRazorpaySignature({
+        order_id: orderId,
+        payment_id: txnId,
+        signature: razorpaySignature
       });
+
+      if (!isValid) {
+        console.warn(`❌ Razorpay signature verification failed for Order: ${orderId}, Payment: ${txnId}`);
+        // Record failure in DB and send failure notification
+        await this.recordPaymentFailure(userId, {
+          registrationId: reg.id,
+          orderId,
+          paymentId: txnId,
+          failureReason: 'Razorpay signature verification failed (Signature mismatch)',
+          paymentMethod: paymentMethod || 'Razorpay (PAGE WORLDWIDE)'
+        });
+
+        const error = new Error('Invalid payment signature verification failed.');
+        error.statusCode = 400;
+        throw error;
+      }
     }
 
-    const updatedReg = await Registration.findById(reg.id);
-    const invoices = await Registration.getInvoicesByRegistrationId(reg.id);
-    const payment = await Payment.findByPaymentId(txnId) || await Payment.findByRegistrationId(reg.id);
+    const finalTxnId = txnId || `PAY_VERIFIED_${Date.now()}`;
+
+    // Process payment and send confirmation emails
+    const result = await this.processPayment(userId, {
+      registrationId: reg.id,
+      paymentMethod: paymentMethod || 'Razorpay (PAGE WORLDWIDE)',
+      transactionId: finalTxnId,
+      razorpayOrderId: orderId,
+      razorpayPaymentId: finalTxnId,
+      razorpaySignature
+    });
 
     return {
       verified: true,
-      transactionId: txnId,
-      orderId: razorpayOrderId || null,
-      paymentStatus: updatedReg.payment_status,
-      registration: updatedReg,
-      payment,
-      invoices
+      transactionId: finalTxnId,
+      orderId: orderId || null,
+      paymentStatus: result.registration.payment_status,
+      registration: result.registration,
+      payment: result.paymentRecord,
+      invoices: result.invoices
+    };
+  },
+
+  /**
+   * Record Payment Failure in Database and Dispatch Notification Emails (To Admin & User)
+   */
+  async recordPaymentFailure(userId, {
+    registrationId,
+    orderId,
+    paymentId,
+    errorCode,
+    errorDescription,
+    errorReason,
+    amount,
+    paymentMethod,
+    rawResponse
+  } = {}) {
+    let reg = null;
+    if (registrationId) {
+      reg = await Registration.findById(registrationId);
+    }
+    if (!reg && userId) {
+      reg = await Registration.findByUserId(userId);
+    }
+
+    const user = userId ? await User.findById(userId) : (reg ? await User.findById(reg.user_id) : null);
+    const failureReason = errorReason || errorDescription || (errorCode ? `Gateway Error: ${errorCode}` : 'Payment transaction failed / user cancelled / declined by bank');
+    const method = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
+    const grandTotal = reg ? parseFloat(reg.grand_total || 0) : 0;
+    const finalAmount = amount ? parseFloat(amount) : (grandTotal > 0 ? parseFloat((grandTotal * 1.045).toFixed(2)) : 0);
+
+    console.log(`⚠️ Recording Payment Failure in DB: Reg #${reg?.id || 'N/A'}, Order: ${orderId || 'N/A'}, PaymentId: ${paymentId || 'N/A'}, Reason: ${failureReason}`);
+
+    // 1. Update or create record in payments table with status = 'failed'
+    let paymentRecord = null;
+    try {
+      if (orderId) {
+        paymentRecord = await Payment.updateByOrderId(orderId, {
+          registration_id: reg?.id || null,
+          razorpay_payment_id: paymentId || null,
+          status: 'failed',
+          amount: finalAmount,
+          payment_method: method,
+          notes: `Payment failed: ${failureReason}`,
+          raw_response: rawResponse || { errorCode, errorDescription, errorReason }
+        });
+      }
+
+      if (!paymentRecord) {
+        paymentRecord = await Payment.create({
+          registration_id: reg?.id || null,
+          user_id: userId || reg?.user_id || 0,
+          razorpay_order_id: orderId || null,
+          razorpay_payment_id: paymentId || null,
+          amount: finalAmount,
+          currency: 'INR',
+          status: 'failed',
+          payment_method: method,
+          notes: `Payment failed: ${failureReason}`,
+          raw_response: rawResponse || { errorCode, errorDescription, errorReason }
+        });
+      }
+    } catch (payDbErr) {
+      console.warn('Could not record failed payment in DB:', payDbErr.message);
+    }
+
+    // 2. Update Registration payment_status to 'failed' if not already paid
+    if (reg && reg.payment_status !== 'paid') {
+      try {
+        await Registration.updateById(reg.id, {
+          payment_status: 'failed',
+          payment_method: method
+        });
+      } catch (regDbErr) {
+        console.warn('Could not update registration status to failed:', regDbErr.message);
+      }
+    }
+
+    // 3. Dispatch Payment Failure Alert Emails to BOTH User & Admin
+    try {
+      await emailService.sendPaymentFailedEmails({
+        registration: reg,
+        payment: paymentRecord,
+        user,
+        failureReason,
+        orderId,
+        paymentId,
+        attemptedAmount: finalAmount
+      });
+    } catch (emailErr) {
+      console.error('⚠️ Could not dispatch payment failure emails:', emailErr.message);
+    }
+
+    return {
+      success: true,
+      status: 'failed',
+      failureReason,
+      paymentRecord
     };
   },
 
@@ -304,11 +443,32 @@ export const paymentService = {
     const orderId = payload?.order_id || payload?.id;
     const paymentId = payload?.id;
     const amount = payload?.amount ? parseFloat(payload.amount) / 100 : 0;
+    const method = payload?.method ? `Razorpay (${payload.method.toUpperCase()})` : 'Razorpay (PAGE WORLDWIDE)';
+    const errorDesc = payload?.error_description || payload?.error_reason || '';
 
-    console.log(`Webhook received: Event='${event}', OrderID='${orderId}', PaymentID='${paymentId}'`);
+    console.log(`🔔 Webhook received: Event='${event}', OrderID='${orderId}', PaymentID='${paymentId}'`);
 
     if (event === 'payment.captured' || event === 'order.paid') {
+      let existingPayment = null;
       if (orderId) {
+        existingPayment = await Payment.findByOrderId(orderId);
+      }
+      if (!existingPayment && paymentId) {
+        existingPayment = await Payment.findByPaymentId(paymentId);
+      }
+
+      if (existingPayment && existingPayment.registration_id) {
+        const reg = await Registration.findById(existingPayment.registration_id);
+        if (reg) {
+          await this.processPayment(existingPayment.user_id || reg.user_id, {
+            registrationId: reg.id,
+            paymentMethod: method,
+            transactionId: paymentId,
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId
+          });
+        }
+      } else if (orderId) {
         await Payment.updateByOrderId(orderId, {
           razorpay_payment_id: paymentId,
           status: 'paid',
@@ -317,14 +477,25 @@ export const paymentService = {
         });
       }
     } else if (event === 'payment.failed') {
+      let existingPayment = null;
       if (orderId) {
-        await Payment.updateByOrderId(orderId, {
-          razorpay_payment_id: paymentId,
-          status: 'failed',
-          webhook_event: event,
-          raw_response: body
-        });
+        existingPayment = await Payment.findByOrderId(orderId);
       }
+
+      const regId = existingPayment?.registration_id || payload?.notes?.registrationId;
+      const userId = existingPayment?.user_id || payload?.notes?.userId;
+
+      await this.recordPaymentFailure(userId, {
+        registrationId: regId,
+        orderId,
+        paymentId,
+        errorCode: payload?.error_code,
+        errorDescription: errorDesc,
+        errorReason: errorDesc || 'Payment failed on gateway webhook',
+        amount,
+        paymentMethod: method,
+        rawResponse: body
+      });
     }
 
     return { received: true, event };

@@ -3,6 +3,7 @@ import { Registration } from '../models/Registration.js';
 import { User } from '../models/User.js';
 import { Invoice } from '../models/Invoice.js';
 import { invoicePdfService } from './invoicePdf.service.js';
+import { paymentService } from './payment.service.js';
 
 const REGULAR_ACCOMPANYING_RATE = 3500.00;
 const ON_SPOT_ACCOMPANYING_RATE = 4000.00;
@@ -309,80 +310,10 @@ export const registrationService = {
   },
 
   /**
-   * Process and simulate payment
+   * Process payment and dispatch confirmation emails
    */
   async processPayment(userId, { registrationId, paymentMethod }) {
-    let reg;
-    if (registrationId) {
-      reg = await Registration.findById(registrationId);
-    } else {
-      reg = await Registration.findByUserId(userId);
-    }
-
-    if (!reg) {
-      const error = new Error('No registration record found to pay.');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    // Ensure grand_total and subtotal are calculated if somehow 0
-    let subtotal = parseFloat(reg.subtotal || 0);
-    let gstRate = parseFloat(reg.gst_rate || GST_PERCENT);
-    let gstAmount = parseFloat(reg.gst_amount || 0);
-    let grandTotal = parseFloat(reg.grand_total || 0);
-
-    if (grandTotal === 0 && (parseFloat(reg.category_price || 0) > 0 || parseFloat(reg.accompanying_total || 0) > 0)) {
-      const catPrice = parseFloat(reg.category_price || 0);
-      const accTotal = parseFloat(reg.accompanying_total || 0);
-      subtotal = catPrice + accTotal;
-      gstAmount = parseFloat(((subtotal * gstRate) / 100).toFixed(2));
-      grandTotal = parseFloat((subtotal + gstAmount).toFixed(2));
-    }
-
-    const txnId = `PAY_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const method = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
-
-    // Confirm registration
-    const updatedReg = await Registration.updateById(reg.id, {
-      payment_method: method,
-      payment_status: 'paid',
-      transaction_id: txnId,
-      paid_at: new Date(),
-      status: 'confirmed',
-      subtotal,
-      gst_rate: gstRate,
-      gst_amount: gstAmount,
-      grand_total: grandTotal
-    });
-
-    // Mark existing invoices paid
-    await Registration.updateInvoicesToPaid(reg.id);
-
-    // Create official tax receipt invoice
-    const receiptNum = `RCPT-${new Date().getFullYear()}-${String(reg.id).padStart(5, '0')}`;
-    await Registration.createInvoice({
-      invoice_number: receiptNum,
-      registration_id: reg.id,
-      user_id: userId,
-      invoice_type: 'receipt',
-      title: 'Official Receipt & Tax Invoice - SPCTT 2026',
-      description: `Payment confirmed for ${reg.registration_code} via ${method} (Txn: ${txnId})`,
-      quantity: 1,
-      rate: subtotal,
-      amount: subtotal,
-      gst_rate: gstRate,
-      gst_amount: gstAmount,
-      total_amount: grandTotal,
-      status: 'paid'
-    });
-
-    const allInvoices = await Registration.getInvoicesByRegistrationId(reg.id);
-
-    return {
-      registration: updatedReg,
-      transactionId: txnId,
-      invoices: allInvoices
-    };
+    return paymentService.processPayment(userId, { registrationId, paymentMethod });
   },
 
   /**

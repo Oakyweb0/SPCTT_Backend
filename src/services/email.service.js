@@ -647,6 +647,640 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
   `;
 }
 
+/**
+ * Generate HTML template for Payment Success (User Confirmation)
+ */
+function generatePaymentSuccessUserHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  subtotal,
+  gstAmount,
+  facilitationCharge,
+  grandTotal,
+  totalPaid,
+  transactionId,
+  orderId,
+  paymentMethod,
+  paidAt,
+  accompanyingCount = 0,
+  accompanyingPersons = []
+}) {
+  const safeName = name || 'Respected Delegate';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeOrg = organization || 'N/A';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
+  const dateStr = paidAt
+    ? new Date(paidAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  let accompanyingHtml = '';
+  if (accompanyingCount > 0) {
+    let namesList = '';
+    if (Array.isArray(accompanyingPersons) && accompanyingPersons.length > 0) {
+      namesList = accompanyingPersons.map((p, idx) => `${idx + 1}. ${p.title || ''} ${p.fullName || p.name || ''}`).filter(Boolean).join('<br>');
+    }
+    accompanyingHtml = `
+      <tr>
+        <td style="padding: 8px 0; color: #64748b; font-weight: 600; vertical-align: top;">Accompanying Persons (${accompanyingCount}):</td>
+        <td style="padding: 8px 0; color: #1e293b; line-height: 1.5;">${namesList || `${accompanyingCount} person(s)`}</td>
+      </tr>
+    `;
+  }
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration & Payment Confirmed - SPCTT 2027</title>
+    <style>
+      @media only screen and (max-width: 520px) {
+        .responsive-td {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding-bottom: 12px !important;
+          box-sizing: border-box !important;
+        }
+        .mobile-padding {
+          padding: 24px 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Success Notification Banner -->
+      <div style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 22px 24px; text-align: center;">
+        <span style="background-color: #16a34a; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Successful</span>
+        <h2 style="margin: 0; color: #166534; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Registration Confirmed & Paid</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div class="mobile-padding" style="padding: 32px 24px;">
+        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Dear <strong>${safeName}</strong>,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          Thank you for completing your registration for the <strong>SPCTT 2027 Annual Conference</strong>. We have successfully received your payment. Your conference seat has been officially <strong>CONFIRMED</strong>.
+        </p>
+
+        <!-- Registration & Payment Summary Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
+          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #13254A; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Registration & Payment Details
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Hospital:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+            </tr>
+            ${accompanyingHtml}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Payment ID:</td>
+              <td style="padding: 8px 0; color: #13254A; font-family: monospace; font-size: 14px; font-weight: 600;">${safeTxn}</td>
+            </tr>
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace; font-size: 13px;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Mode:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Date & Time:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #86efac;">
+                  PAID (SUCCESSFUL)
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Fee Breakdown Table -->
+          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #cbd5e1;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr>
+                <td style="padding: 4px 0; color: #64748b;">Subtotal (Registration Base):</td>
+                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(subtotal)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 0; color: #64748b;">GST (18%):</td>
+                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(gstAmount)}</td>
+              </tr>
+              ${facilitationCharge > 0 ? `
+              <tr>
+                <td style="padding: 4px 0; color: #64748b;">Facilitation Charges (4.5%):</td>
+                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(facilitationCharge)}</td>
+              </tr>` : ''}
+              <tr style="border-top: 1px solid #cbd5e1;">
+                <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-size: 16px;">Total Amount Paid:</td>
+                <td style="padding: 8px 0; text-align: right; color: #13254A; font-weight: 800; font-size: 17px;">${formatRs(totalPaid || grandTotal)}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Next Steps -->
+        <h3 style="font-size: 17px; color: #13254A; margin: 26px 0 12px 0;">Important Attendee Information:</h3>
+        <ul style="padding-left: 20px; font-size: 15px; line-height: 1.7; color: #334155; margin-bottom: 26px;">
+          <li style="margin-bottom: 6px;"><strong>Tax Invoice & Receipt:</strong> You can download your official tax invoice and payment receipt anytime from the conference portal.</li>
+          <li style="margin-bottom: 6px;"><strong>Conference Badge:</strong> Please present your Registration Code <code>${safeCode}</code> at the on-site registration desk on March 6-7, 2027 at Taj Vivanta, Dwarka, New Delhi.</li>
+          <li style="margin-bottom: 6px;"><strong>Updates:</strong> Detailed scientific program and session timings will be shared via email closer to the conference date.</li>
+        </ul>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 32px 0 24px 0;">
+          <a href="https://2027.spctt.org/user/invoices" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
+            View / Download Invoice & Receipt
+          </a>
+        </div>
+
+        <!-- Signoff -->
+        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+                <p style="margin: 0 0 4px 0;">Warm regards,</p>
+                <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+              </td>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Registration Support:</p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Success (Admin Notification)
+ */
+function generatePaymentSuccessAdminHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  subtotal,
+  gstAmount,
+  facilitationCharge,
+  grandTotal,
+  totalPaid,
+  transactionId,
+  orderId,
+  paymentMethod,
+  paidAt,
+  accompanyingCount = 0,
+  accompanyingPersons = []
+}) {
+  const safeName = name || 'N/A';
+  const safeEmail = email || 'N/A';
+  const safePhone = phone || 'N/A';
+  const safeOrg = organization || 'N/A';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
+  const dateStr = paidAt
+    ? new Date(paidAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Received Alert - SPCTT 2027</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Admin Alert Bar -->
+      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+        <span style="background-color: #16a34a; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Received Alert</span>
+        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #13254A;">Registration Payment Confirmed</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 28px 24px;">
+        <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Hello Administrator,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          A new delegate registration payment has been successfully completed for <strong>SPCTT 2027</strong> on <strong>${dateStr} (IST)</strong>.
+        </p>
+
+        <!-- Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
+              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
+              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Accompanying Count:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${accompanyingCount}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction ID:</td>
+              <td style="padding: 8px 0; color: #13254A; font-family: monospace; font-weight: 700;">${safeTxn}</td>
+            </tr>
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+            <tr style="border-top: 1px solid #cbd5e1;">
+              <td style="padding: 10px 0 4px 0; color: #13254A; font-weight: 800; font-size: 16px;">Total Amount Received:</td>
+              <td style="padding: 10px 0 4px 0; color: #16a34a; font-weight: 800; font-size: 18px;">${formatRs(totalPaid || grandTotal)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">Automated Payment Notification &bull; SPCTT 2027 &bull; submit@spctt.org</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Failure (User Alert)
+ */
+function generatePaymentFailedUserHtml({
+  name,
+  email,
+  registrationCode,
+  categoryName,
+  attemptedAmount,
+  transactionId,
+  orderId,
+  paymentMethod,
+  failureReason,
+  attemptedAt
+}) {
+  const safeName = name || 'Respected Delegate';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
+  const safeReason = failureReason || 'Transaction could not be completed / payment was declined or cancelled.';
+  const dateStr = attemptedAt
+    ? new Date(attemptedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Attempt Failed - SPCTT 2027</title>
+    <style>
+      @media only screen and (max-width: 520px) {
+        .responsive-td {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding-bottom: 12px !important;
+          box-sizing: border-box !important;
+        }
+        .mobile-padding {
+          padding: 24px 16px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Failure Notification Banner -->
+      <div style="background-color: #fef2f2; border-bottom: 1px solid #fecaca; padding: 22px 24px; text-align: center;">
+        <span style="background-color: #dc2626; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Unsuccessful</span>
+        <h2 style="margin: 0; color: #991b1b; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Payment Not Completed</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div class="mobile-padding" style="padding: 32px 24px;">
+        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Dear <strong>${safeName}</strong>,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          We noticed that your recent payment attempt for the <strong>SPCTT 2027 Annual Conference</strong> could not be processed successfully.
+        </p>
+
+        <!-- Transaction Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
+          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #991b1b; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Transaction Details
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Attempted Amount:</td>
+              <td style="padding: 8px 0; color: #dc2626; font-weight: 700; font-size: 16px;">${formatRs(attemptedAmount)}</td>
+            </tr>
+            ${safeTxn !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction Reference:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+            </tr>` : ''}
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Date & Time:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #fee2e2; color: #b91c1c; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fca5a5;">
+                  PAYMENT FAILED
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Reason Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px;">
+            <strong style="color: #9f1239; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Note:</strong>
+            <p style="margin: 0; color: #be123c; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          </div>
+        </div>
+
+        <!-- Reassurance & Instructions -->
+        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 24px 0;">
+          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #92400e; font-weight: 700;">Important Information:</h4>
+          <ul style="margin: 0; padding-left: 18px; font-size: 14px; color: #78350f; line-height: 1.6;">
+            <li><strong>Was your bank account debited?</strong> If any amount was deducted from your account/card, it will be automatically refunded by your issuing bank within 3 to 5 business days.</li>
+            <li><strong>Your Registration details are safe:</strong> You do not need to fill out your details again. Simply click below to retry the payment.</li>
+          </ul>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 32px 0 24px 0;">
+          <a href="https://2027.spctt.org/registration/register" style="background-color: #9e1c2b; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(158, 28, 43, 0.3);">
+            Retry Registration Payment
+          </a>
+        </div>
+
+        <!-- Signoff -->
+        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+                <p style="margin: 0 0 4px 0;">Warm regards,</p>
+                <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+              </td>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Need Payment Help?</p>
+                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
+ * Generate HTML template for Payment Failure (Admin Alert)
+ */
+function generatePaymentFailedAdminHtml({
+  name,
+  email,
+  phone,
+  organization,
+  registrationCode,
+  categoryName,
+  attemptedAmount,
+  transactionId,
+  orderId,
+  paymentMethod,
+  failureReason,
+  attemptedAt
+}) {
+  const safeName = name || 'N/A';
+  const safeEmail = email || 'N/A';
+  const safePhone = phone || 'N/A';
+  const safeOrg = organization || 'N/A';
+  const safeCode = registrationCode || 'N/A';
+  const safeCat = categoryName || 'Conference Registration';
+  const safeTxn = transactionId || 'N/A';
+  const safeOrder = orderId || 'N/A';
+  const safeMethod = paymentMethod || 'Razorpay (PAGE WORLDWIDE)';
+  const safeReason = failureReason || 'Payment declined, cancelled by user, or gateway error';
+  const dateStr = attemptedAt
+    ? new Date(attemptedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+  const formatRs = (num) => `₹${parseFloat(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed Alert - SPCTT 2027</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Admin Alert Bar -->
+      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+        <span style="background-color: #dc2626; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Failed Alert</span>
+        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #991b1b;">Registration Payment Failed</h2>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 28px 24px;">
+        <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Hello Administrator,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          A delegate attempted to make a payment for <strong>SPCTT 2027</strong> on <strong>${dateStr} (IST)</strong>, but the transaction failed.
+        </p>
+
+        <!-- Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
+              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
+              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Attempted Amount:</td>
+              <td style="padding: 8px 0; color: #dc2626; font-weight: 700; font-size: 16px;">${formatRs(attemptedAmount)}</td>
+            </tr>
+            ${safeTxn !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction Ref:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+            </tr>` : ''}
+            ${safeOrder !== 'N/A' ? `
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
+              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+            </tr>
+          </table>
+
+          <!-- Reason Callout -->
+          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px;">
+            <strong style="color: #9f1239; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Error:</strong>
+            <p style="margin: 0; color: #be123c; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
 export const emailService = {
   /**
    * Send Abstract Submission Confirmation to User and Notification to Admin
@@ -1102,6 +1736,396 @@ export const emailService = {
         message: `Failed to dispatch OTP email: ${sendError.message}`
       };
     }
+  },
+
+  /**
+   * Send Registration Payment Success Emails (To User & To Admin)
+   */
+  async sendPaymentSuccessEmails({ registration, payment, user, invoices = [] }) {
+    if (!registration) {
+      console.warn('⚠️ No registration provided to sendPaymentSuccessEmails.');
+      return { success: false, error: 'Registration is required.' };
+    }
+
+    const regUser = user || {};
+    const recipientEmail = registration.email || regUser.email;
+    const recipientName = registration.full_name || regUser.name || 'Delegate';
+    const recipientPhone = registration.phone || regUser.phone || '';
+    const organization = registration.organization || regUser.organization || '';
+    const registrationCode = registration.registration_code || `#REG-${registration.id}`;
+    const categoryName = registration.category_name || 'Conference Delegate';
+
+    const subtotal = parseFloat(registration.subtotal || 0);
+    const gstAmount = parseFloat(registration.gst_amount || 0);
+    const grandTotal = parseFloat(registration.grand_total || 0);
+    const facilitationCharge = parseFloat((grandTotal * 0.045).toFixed(2));
+    const totalPaid = payment?.amount ? parseFloat(payment.amount) : parseFloat((grandTotal + facilitationCharge).toFixed(2));
+
+    const transactionId = payment?.razorpay_payment_id || registration.transaction_id || `PAY_${Date.now()}`;
+    const orderId = payment?.razorpay_order_id || 'N/A';
+    const paymentMethod = payment?.payment_method || registration.payment_method || 'Razorpay (PAGE WORLDWIDE)';
+    const paidAt = payment?.updated_at || registration.paid_at || new Date();
+
+    let accompanyingPersons = [];
+    try {
+      if (typeof registration.accompanying_persons === 'string') {
+        accompanyingPersons = JSON.parse(registration.accompanying_persons);
+      } else if (Array.isArray(registration.accompanying_persons)) {
+        accompanyingPersons = registration.accompanying_persons;
+      }
+    } catch (e) {
+      accompanyingPersons = [];
+    }
+
+    const fromAddress = process.env.REGISTRATION_FROM || config.EMAIL.REGISTRATION_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
+    const adminEmail = process.env.REGISTRATION_ADMIN_EMAIL || config.EMAIL.REGISTRATION_ADMIN_EMAIL || 'submit@spctt.org';
+
+    const results = {
+      userEmail: null,
+      adminEmail: null
+    };
+
+    let activeTransporter;
+    try {
+      activeTransporter = getTransporter();
+    } catch (tErr) {
+      console.error('❌ Could not initialize SMTP transporter for payment success emails:', tErr.message);
+      return { success: false, error: tErr.message };
+    }
+
+    // 1. Send Success Email to User
+    if (recipientEmail) {
+      const userSubject = `[SPCTT 2027] Payment Confirmed - Registration ${registrationCode} (${recipientName})`;
+      const userHtml = generatePaymentSuccessUserHtml({
+        name: recipientName,
+        email: recipientEmail,
+        phone: recipientPhone,
+        organization,
+        registrationCode,
+        categoryName,
+        subtotal,
+        gstAmount,
+        facilitationCharge,
+        grandTotal,
+        totalPaid,
+        transactionId,
+        orderId,
+        paymentMethod,
+        paidAt,
+        accompanyingCount: registration.accompanying_count || 0,
+        accompanyingPersons
+      });
+
+      const userMailOptions = {
+        from: fromAddress,
+        to: `"${recipientName}" <${recipientEmail}>`,
+        subject: userSubject,
+        html: userHtml
+      };
+
+      try {
+        console.log(`📧 Sending payment success confirmation email to User '${recipientEmail}'...`);
+        const userInfo = await activeTransporter.sendMail(userMailOptions);
+        console.log(`✅ User payment confirmation sent! MessageId: ${userInfo.messageId}`);
+
+        await EmailLog.create({
+          registrationId: registration.id,
+          userId: registration.user_id || regUser.id,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_success_user',
+          status: 'sent',
+          errorMessage: null
+        });
+
+        results.userEmail = {
+          success: true,
+          messageId: userInfo.messageId,
+          recipient: recipientEmail
+        };
+      } catch (userErr) {
+        console.error(`❌ Failed to send payment confirmation to User (${recipientEmail}):`, userErr.message);
+
+        await EmailLog.create({
+          registrationId: registration.id,
+          userId: registration.user_id || regUser.id,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_success_user',
+          status: 'failed',
+          errorMessage: userErr.message
+        });
+
+        results.userEmail = {
+          success: false,
+          error: userErr.message
+        };
+      }
+    }
+
+    // 2. Send Success Notification to Admin (with CC)
+    const adminSubject = `[Payment Received] ${registrationCode} - ${recipientName} (${categoryName}) - ₹${totalPaid}`;
+    const adminHtml = generatePaymentSuccessAdminHtml({
+      name: recipientName,
+      email: recipientEmail,
+      phone: recipientPhone,
+      organization,
+      registrationCode,
+      categoryName,
+      subtotal,
+      gstAmount,
+      facilitationCharge,
+      grandTotal,
+      totalPaid,
+      transactionId,
+      orderId,
+      paymentMethod,
+      paidAt,
+      accompanyingCount: registration.accompanying_count || 0,
+      accompanyingPersons
+    });
+
+    const adminMailOptions = {
+      from: fromAddress,
+      to: `"SPCTT Admin" <${adminEmail}>`,
+      cc: ccAddress,
+      subject: adminSubject,
+      html: adminHtml
+    };
+
+    try {
+      console.log(`📧 Sending payment success alert to Admin '${adminEmail}', CC: '${ccAddress}'...`);
+      const adminInfo = await activeTransporter.sendMail(adminMailOptions);
+      console.log(`✅ Admin payment notification sent! MessageId: ${adminInfo.messageId}`);
+
+      await EmailLog.create({
+        registrationId: registration.id,
+        userId: registration.user_id || regUser.id,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_success_admin',
+        status: 'sent',
+        errorMessage: null
+      });
+
+      results.adminEmail = {
+        success: true,
+        messageId: adminInfo.messageId,
+        recipient: adminEmail,
+        cc: ccAddress
+      };
+    } catch (adminErr) {
+      console.error(`❌ Failed to send payment notification to Admin (${adminEmail}):`, adminErr.message);
+
+      await EmailLog.create({
+        registrationId: registration.id,
+        userId: registration.user_id || regUser.id,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_success_admin',
+        status: 'failed',
+        errorMessage: adminErr.message
+      });
+
+      results.adminEmail = {
+        success: false,
+        error: adminErr.message
+      };
+    }
+
+    return results;
+  },
+
+  /**
+   * Send Registration Payment Failed Emails (To User & To Admin)
+   */
+  async sendPaymentFailedEmails({ registration, payment, user, failureReason, orderId, paymentId, attemptedAmount }) {
+    const regUser = user || {};
+    const recipientEmail = registration?.email || regUser.email;
+    const recipientName = registration?.full_name || regUser.name || 'Delegate';
+    const recipientPhone = registration?.phone || regUser.phone || '';
+    const organization = registration?.organization || regUser.organization || '';
+    const registrationCode = registration?.registration_code || (registration?.id ? `#REG-${registration.id}` : 'PENDING');
+    const categoryName = registration?.category_name || 'Conference Registration';
+
+    const grandTotal = parseFloat(registration?.grand_total || 0);
+    const finalAttemptedAmount = attemptedAmount || payment?.amount || grandTotal || 0;
+    const transactionId = paymentId || payment?.razorpay_payment_id || 'N/A';
+    const finalOrderId = orderId || payment?.razorpay_order_id || 'N/A';
+    const paymentMethod = payment?.payment_method || registration?.payment_method || 'Razorpay (PAGE WORLDWIDE)';
+    const attemptedAt = new Date();
+
+    const fromAddress = process.env.REGISTRATION_FROM || config.EMAIL.REGISTRATION_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
+    const adminEmail = process.env.REGISTRATION_ADMIN_EMAIL || config.EMAIL.REGISTRATION_ADMIN_EMAIL || 'submit@spctt.org';
+
+    const results = {
+      userEmail: null,
+      adminEmail: null
+    };
+
+    let activeTransporter;
+    try {
+      activeTransporter = getTransporter();
+    } catch (tErr) {
+      console.error('❌ Could not initialize SMTP transporter for payment failed emails:', tErr.message);
+      return { success: false, error: tErr.message };
+    }
+
+    // 1. Send Failure Alert to User
+    if (recipientEmail) {
+      const userSubject = `[SPCTT 2027] Payment Unsuccessful - Action Required for Registration (${registrationCode})`;
+      const userHtml = generatePaymentFailedUserHtml({
+        name: recipientName,
+        email: recipientEmail,
+        registrationCode,
+        categoryName,
+        attemptedAmount: finalAttemptedAmount,
+        transactionId,
+        orderId: finalOrderId,
+        paymentMethod,
+        failureReason,
+        attemptedAt
+      });
+
+      const userMailOptions = {
+        from: fromAddress,
+        to: `"${recipientName}" <${recipientEmail}>`,
+        subject: userSubject,
+        html: userHtml
+      };
+
+      try {
+        console.log(`📧 Sending payment failure alert email to User '${recipientEmail}'...`);
+        const userInfo = await activeTransporter.sendMail(userMailOptions);
+        console.log(`✅ User payment failure alert sent! MessageId: ${userInfo.messageId}`);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_failed_user',
+          status: 'sent',
+          errorMessage: null
+        });
+
+        results.userEmail = {
+          success: true,
+          messageId: userInfo.messageId,
+          recipient: recipientEmail
+        };
+      } catch (userErr) {
+        console.error(`❌ Failed to send payment failure alert to User (${recipientEmail}):`, userErr.message);
+
+        await EmailLog.create({
+          registrationId: registration?.id || null,
+          userId: registration?.user_id || regUser.id || null,
+          recipientEmail,
+          recipientName,
+          ccEmail: null,
+          fromEmail: fromAddress,
+          subject: userSubject,
+          emailType: 'payment_failed_user',
+          status: 'failed',
+          errorMessage: userErr.message
+        });
+
+        results.userEmail = {
+          success: false,
+          error: userErr.message
+        };
+      }
+    }
+
+    // 2. Send Failure Alert to Admin (with CC)
+    const adminSubject = `[Payment Failed Alert] ${registrationCode} - ${recipientName} (${categoryName}) - ₹${finalAttemptedAmount}`;
+    const adminHtml = generatePaymentFailedAdminHtml({
+      name: recipientName,
+      email: recipientEmail,
+      phone: recipientPhone,
+      organization,
+      registrationCode,
+      categoryName,
+      attemptedAmount: finalAttemptedAmount,
+      transactionId,
+      orderId: finalOrderId,
+      paymentMethod,
+      failureReason,
+      attemptedAt
+    });
+
+    const adminMailOptions = {
+      from: fromAddress,
+      to: `"SPCTT Admin" <${adminEmail}>`,
+      cc: ccAddress,
+      subject: adminSubject,
+      html: adminHtml
+    };
+
+    try {
+      console.log(`📧 Sending payment failure alert to Admin '${adminEmail}', CC: '${ccAddress}'...`);
+      const adminInfo = await activeTransporter.sendMail(adminMailOptions);
+      console.log(`✅ Admin payment failure alert sent! MessageId: ${adminInfo.messageId}`);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_failed_admin',
+        status: 'sent',
+        errorMessage: null
+      });
+
+      results.adminEmail = {
+        success: true,
+        messageId: adminInfo.messageId,
+        recipient: adminEmail,
+        cc: ccAddress
+      };
+    } catch (adminErr) {
+      console.error(`❌ Failed to send payment failure alert to Admin (${adminEmail}):`, adminErr.message);
+
+      await EmailLog.create({
+        registrationId: registration?.id || null,
+        userId: registration?.user_id || regUser.id || null,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: 'payment_failed_admin',
+        status: 'failed',
+        errorMessage: adminErr.message
+      });
+
+      results.adminEmail = {
+        success: false,
+        error: adminErr.message
+      };
+    }
+
+    return results;
   }
 };
 

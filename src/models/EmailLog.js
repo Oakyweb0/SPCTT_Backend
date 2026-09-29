@@ -6,6 +6,7 @@ export const EmailLog = {
    */
   async create({
     abstractId = null,
+    registrationId = null,
     userId = null,
     recipientEmail,
     recipientName = null,
@@ -18,12 +19,14 @@ export const EmailLog = {
   }) {
     const pool = getPool();
     try {
+      // Try insert with registration_id
       const [result] = await pool.query(
         `INSERT INTO \`email_logs\` 
-          (\`abstract_id\`, \`user_id\`, \`recipient_email\`, \`recipient_name\`, \`cc_email\`, \`from_email\`, \`subject\`, \`email_type\`, \`status\`, \`error_message\`)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (\`abstract_id\`, \`registration_id\`, \`user_id\`, \`recipient_email\`, \`recipient_name\`, \`cc_email\`, \`from_email\`, \`subject\`, \`email_type\`, \`status\`, \`error_message\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           abstractId,
+          registrationId,
           userId,
           recipientEmail,
           recipientName,
@@ -37,6 +40,32 @@ export const EmailLog = {
       );
       return { id: result.insertId, status, recipientEmail, subject };
     } catch (err) {
+      // If registration_id column does not exist yet on remote DB, fallback to legacy schema insert
+      if (err.message && err.message.includes('registration_id')) {
+        try {
+          const [fallbackResult] = await pool.query(
+            `INSERT INTO \`email_logs\` 
+              (\`abstract_id\`, \`user_id\`, \`recipient_email\`, \`recipient_name\`, \`cc_email\`, \`from_email\`, \`subject\`, \`email_type\`, \`status\`, \`error_message\`)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              abstractId,
+              userId,
+              recipientEmail,
+              recipientName,
+              ccEmail,
+              fromEmail,
+              subject,
+              emailType,
+              status,
+              errorMessage
+            ]
+          );
+          return { id: fallbackResult.insertId, status, recipientEmail, subject };
+        } catch (fbErr) {
+          console.warn('⚠️ Could not insert email log in fallback:', fbErr.message);
+          return null;
+        }
+      }
       console.warn('⚠️ Could not insert email log into database:', err.message);
       return null;
     }
