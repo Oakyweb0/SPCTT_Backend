@@ -66,7 +66,7 @@ function generateEmailHeaderHtml() {
                   
                   <!-- Main Title -->
                   <h1 style="margin: 0 0 10px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.35; letter-spacing: -0.2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                    Society of Pulmonary Care &amp; Thyroid Therapeutics
+                    Society for Pediatric Cellular Therapy and Transplant
                   </h1>
                   
                   <!-- Date & Location Subtitle -->
