@@ -17,7 +17,7 @@ export const authService = {
     }
 
     try {
-      const secretKey = config.RECAPTCHA?.SECRET_KEY || '6LeyktUtAAAAAEozE7MNvqx3QHSAqJliFn1x_09';
+      const secretKey = config.RECAPTCHA?.SECRET_KEY || process.env.RECAPTCHA_SECRET_KEY || '6Ld-idUtAAAAAEwZZEBAjVpikFVTJ054rVLUamQe';
       const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
 
       const formData = new URLSearchParams();

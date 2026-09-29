@@ -103,8 +103,8 @@ export const config = {
   },
 
   RECAPTCHA: {
-    SITE_KEY: process.env.RECAPTCHA_SITE_KEY || '6LeyktUtAAAAADvLGtQlJzU5x6ZkmpxWfdvL6ci6',
-    SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY || '6LeyktUtAAAAAEozE7MNvqx3QHSAqJliFn1x_09'
+    SITE_KEY: process.env.RECAPTCHA_SITE_KEY || '6Ld-idUtAAAAABluEAC-E_PzMoGS8MNfEB20Lzm2',
+    SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY || '6Ld-idUtAAAAAEwZZEBAjVpikFVTJ054rVLUamQe'
   }
 };
 
