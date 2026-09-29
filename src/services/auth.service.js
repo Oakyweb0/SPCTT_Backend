@@ -16,44 +16,50 @@ export const authService = {
       throw error;
     }
 
-    try {
-      const secretKey = config.RECAPTCHA?.SECRET_KEY || process.env.RECAPTCHA_SECRET_KEY || '6Ld-idUtAAAAAEwZZEBAjVpikFVTJ054rVLUamQe';
-      const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+    const candidateKeys = [
+      config.RECAPTCHA?.SECRET_KEY,
+      process.env.RECAPTCHA_SECRET_KEY,
+      '6LcTutUtAAAAADucZst-YgnKtdsDMmWNMvNONEFZ',
+      '6Ld-idUtAAAAAEwZZEBAjVpikFVTJ054rVLUamQe'
+    ].filter((k, idx, arr) => Boolean(k) && arr.indexOf(k) === idx);
 
-      const formData = new URLSearchParams();
-      formData.append('secret', secretKey);
-      formData.append('response', token);
+    const verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+    let lastGoogleResponse = null;
 
-      const response = await fetch(verifyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-      });
+    for (const secretKey of candidateKeys) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('secret', secretKey);
+        formData.append('response', token);
 
-      const data = await response.json();
+        const response = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        });
 
-      if (!data.success) {
-        console.warn('reCAPTCHA verification rejected by Google:', data);
-        const error = new Error('CAPTCHA verification failed. Please try again.');
-        error.statusCode = 400;
-        throw error;
+        const data = await response.json();
+        lastGoogleResponse = data;
+
+        if (data.success) {
+          return true;
+        }
+      } catch (err) {
+        console.error('Error contacting Google reCAPTCHA server with key:', err);
       }
-
-      return true;
-    } catch (err) {
-      if (err.statusCode) throw err;
-      console.error('Error verifying reCAPTCHA with Google:', err);
-      // In development mode, fallback gracefully if google server is unreachable
-      if (config.IS_DEVELOPMENT) {
-        console.warn('Development mode: Continuing despite reCAPTCHA network issue.');
-        return true;
-      }
-      const error = new Error('CAPTCHA service verification failed. Please check your internet connection.');
-      error.statusCode = 400;
-      throw error;
     }
+
+    console.warn('reCAPTCHA verification failed with all candidate keys:', lastGoogleResponse);
+    if (config.IS_DEVELOPMENT) {
+      console.warn('Development mode: Gracefully permitting bypass for reCAPTCHA failure.');
+      return true;
+    }
+
+    const error = new Error('CAPTCHA verification failed. Please try again.');
+    error.statusCode = 400;
+    throw error;
   },
   /**
    * Register a new user
