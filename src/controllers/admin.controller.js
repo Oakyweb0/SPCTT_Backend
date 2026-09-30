@@ -424,39 +424,6 @@ export const adminController = {
   },
 
   /**
-   * Delete an Abstract by ID
-   * DELETE /api/admin/abstracts/:id
-   */
-  async deleteAbstract(req, res, next) {
-    try {
-      const { id } = req.params;
-      const targetId = parseInt(id, 10);
-      if (isNaN(targetId)) {
-        return sendError(res, 'Invalid abstract ID.', 400);
-      }
-
-      const existing = await Abstract.findById(targetId);
-      if (!existing) {
-        return sendError(res, 'Abstract not found.', 404);
-      }
-
-      const deleted = await Abstract.deleteById(targetId);
-      if (!deleted) {
-        return sendError(res, 'Failed to delete abstract.', 500);
-      }
-
-      return sendSuccess(
-        res,
-        { id: targetId, abstract_code: existing.abstract_code },
-        `Abstract '${existing.abstract_code}' deleted successfully.`
-      );
-    } catch (error) {
-      console.error('Error deleting abstract:', error);
-      return sendError(res, error.message || 'Failed to delete abstract.', 500, error);
-    }
-  },
-
-  /**
    * Get All Invoices
    * GET /api/admin/invoices
    */
@@ -852,42 +819,6 @@ export const adminController = {
     } catch (error) {
       console.error('Error updating user:', error);
       return sendError(res, error.message || 'Failed to update user.', 500, error);
-    }
-  },
-
-  /**
-   * Delete a User by ID
-   * DELETE /api/admin/users/:id
-   */
-  async deleteUser(req, res, next) {
-    try {
-      const { id } = req.params;
-      const targetUserId = parseInt(id, 10);
-
-      if (isNaN(targetUserId)) {
-        return sendError(res, 'Invalid user ID.', 400);
-      }
-
-      const user = await User.findById(targetUserId);
-      if (!user) {
-        return sendError(res, 'User not found.', 404);
-      }
-
-      const deleted = await User.deleteById(targetUserId);
-      if (!deleted) {
-        return sendError(res, 'Failed to delete user.', 500);
-      }
-
-      const isSelf = req.user && req.user.user_id === targetUserId;
-
-      return sendSuccess(
-        res,
-        { id: targetUserId, isSelf },
-        `User '${user.name}' (ID: #${targetUserId}) and all associated records deleted successfully from database.`
-      );
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      return sendError(res, error.message || 'Failed to delete user.', 500, error);
     }
   },
 

@@ -1575,32 +1575,6 @@
             "description": "User updated successfully"
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "Admin Management"
-        ],
-        "summary": "Delete User Account & Linked Records",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User deleted successfully"
-          }
-        }
       }
     },
     "/api/admin/registrations/export": {
@@ -1878,34 +1852,6 @@
         "responses": {
           "200": {
             "description": "Email logs retrieved successfully"
-          }
-        }
-      }
-    },
-    "/api/admin/abstracts/{id}": {
-      "delete": {
-        "tags": [
-          "Admin Management"
-        ],
-        "summary": "Delete Abstract & Cloudflare R2 File",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Abstract deleted successfully"
           }
         }
       }

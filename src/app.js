@@ -775,8 +775,7 @@ app.get('/', (req, res) => {
         exportPayments: `GET ${baseUrl}/api/admin/payments/export`,
         users: `GET ${baseUrl}/api/admin/users`,
         userById: `GET ${baseUrl}/api/admin/users/:id`,
-        updateUser: `PUT ${baseUrl}/api/admin/users/:id`,
-        deleteUser: `DELETE ${baseUrl}/api/admin/users/:id`
+        updateUser: `PUT ${baseUrl}/api/admin/users/:id`
       },
       abstracts: {
         submit: `POST ${baseUrl}/api/abstracts`,

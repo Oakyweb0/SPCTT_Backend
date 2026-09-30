@@ -306,15 +306,6 @@ export const Abstract = {
   },
 
   /**
-   * Delete abstract by ID
-   */
-  async deleteById(id) {
-    const pool = getPool();
-    const [result] = await pool.query('DELETE FROM abstracts WHERE id = ?', [id]);
-    return result.affectedRows > 0;
-  },
-
-  /**
    * Count total abstracts
    */
   async count() {
