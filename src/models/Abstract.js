@@ -137,6 +137,7 @@ export const Abstract = {
     const rawAbstractText = (abstractText || '').trim();
     const finalPdfUrl = pdfUrl || fileUrl || null;
 
+    const pool = getPool();
     const cols = await getAbstractColumns();
 
     // Embed contact metadata into abstract_text so it's always preserved across DB schemas
