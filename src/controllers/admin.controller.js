@@ -356,7 +356,7 @@ export const adminController = {
       }
 
       const message = emailResult && emailResult.success
-        ? `Abstract status updated to '${status}' and notification email sent to ${emailResult.recipientEmail} (CC: ${emailResult.ccEmail}).`
+        ? `Abstract status updated to '${status}' and notification email sent to ${emailResult.recipientEmail}.`
         : `Abstract status updated to '${status}' successfully.`;
 
       return sendSuccess(

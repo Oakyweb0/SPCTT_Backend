@@ -648,6 +648,156 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
 }
 
 /**
+ * Generate HTML template for Admin Notification on Abstract Decision (Accepted / Rejected)
+ */
+function generateAdminDecisionNotificationHtml({
+  name,
+  abstractCode,
+  topic,
+  category,
+  instituteName,
+  phone,
+  email,
+  status,
+  reviewComments,
+  pdfUrl,
+  updatedAt
+}) {
+  const safeName = name || 'N/A';
+  const safeCode = abstractCode || 'N/A';
+  const safeTopic = topic || 'Abstract Submission';
+  const safeCategory = category || 'Poster';
+  const safeInstitute = instituteName || 'N/A';
+  const safePhone = phone || 'N/A';
+  const safeEmail = email || 'N/A';
+  const isAccepted = status === 'accepted';
+  const dateStr = updatedAt
+    ? new Date(updatedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+  const statusBadge = isAccepted
+    ? `<span style="background-color: #dcfce7; color: #166534; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #86efac;">ACCEPTED</span>`
+    : `<span style="background-color: #fee2e2; color: #991b1b; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fca5a5;">REJECTED</span>`;
+
+  const bannerColor = isAccepted ? '#166534' : '#991b1b';
+  const bannerBg = isAccepted ? '#f0fdf4' : '#fef2f2';
+  const bannerBorder = isAccepted ? '#bbf7d0' : '#fecaca';
+
+  const commentsSection = reviewComments
+    ? `
+      <div style="margin-top: 16px; padding: 14px; background-color: #ffffff; border-left: 4px solid ${isAccepted ? '#22c55e' : '#ef4444'}; border-radius: 6px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+        <strong style="color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
+        <p style="margin: 0; color: #1e293b; font-size: 14px; line-height: 1.5;">${reviewComments}</p>
+      </div>
+    `
+    : '';
+
+  const attachmentSnippet = pdfUrl
+    ? `
+      <tr>
+        <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Uploaded Document:</td>
+        <td style="padding: 8px 0;">
+          <a href="${pdfUrl}" target="_blank" style="display: inline-block; background-color: #13254A; color: #ffffff; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600;">View Attachment</a>
+        </td>
+      </tr>
+    `
+    : '';
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstract Decision Alert - SPCTT 2027</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
+    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+      
+      ${generateEmailHeaderHtml()}
+
+      <!-- Admin Notification Bar -->
+      <div style="background-color: ${bannerBg}; border-bottom: 1px solid ${bannerBorder}; padding: 18px 24px; text-align: center;">
+        <span style="background-color: ${isAccepted ? '#22c55e' : '#ef4444'}; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px;">Admin Alert</span>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 700; color: ${bannerColor};">
+          Abstract ${isAccepted ? 'Accepted' : 'Rejected'} — ${safeCode}
+        </h2>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 28px 24px;">
+        <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
+          Hello Administrator,
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          The review decision for abstract <strong>${safeCode}</strong> (${safeTopic}) has been recorded as <strong>${isAccepted ? 'ACCEPTED' : 'REJECTED'}</strong> on <strong>${dateStr} (IST)</strong>.
+        </p>
+
+        <!-- Details Card -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Decision Summary
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Decision Status:</td>
+              <td style="padding: 8px 0;">${statusBadge}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Abstract Code:</td>
+              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px;">${safeCode}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
+              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeTopic}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author / Presenter:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Email:</td>
+              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63;">${safeEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Phone:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Institution / Org:</td>
+              <td style="padding: 8px 0; color: #1e293b;">${safeInstitute}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
+              <td style="padding: 8px 0;">
+                <span style="background-color: #e0e7ff; color: #3730a3; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
+                  ${safeCategory}
+                </span>
+              </td>
+            </tr>
+            ${attachmentSnippet}
+          </table>
+
+          ${commentsSection}
+        </div>
+
+        <p style="font-size: 13px; color: #64748b; margin-top: 15px;">
+          The official decision notification email has already been dispatched to the author (<strong>${safeEmail}</strong>).
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
+      </div>
+
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+/**
  * Generate HTML template for Payment Success (User Confirmation)
  */
 function generatePaymentSuccessUserHtml({
@@ -2024,6 +2174,7 @@ export const emailService = {
 
   /**
    * Send Abstract Decision Email (Accepted / Rejected)
+   * Sends standard decision email to the Author, and a dedicated internal summary alert to Admin.
    */
   async sendAbstractDecisionEmail({
     abstract,
@@ -2048,7 +2199,9 @@ export const emailService = {
     const topic = abstract.topic || abstract.title || 'Abstract Submission';
     const category = abstract.category || 'Poster';
     const instituteName = abstract.institute_name || abstract.affiliation || abstract.submitter_org || '';
+    const phone = abstract.phone || abstract.submitter_phone || '';
     const comments = reviewComments || abstract.review_comments || '';
+    const pdfUrl = abstract.pdf_url || abstract.file_url || null;
 
     const isAccepted = status === 'accepted';
     const isRejected = status === 'rejected';
@@ -2060,12 +2213,28 @@ export const emailService = {
       };
     }
 
-    const emailType = isAccepted ? 'abstract_accepted' : 'abstract_rejected';
-    const subject = isAccepted
+    let activeTransporter;
+    try {
+      activeTransporter = getTransporter();
+    } catch (transporterErr) {
+      console.error('❌ Could not initialize SMTP transporter:', transporterErr.message);
+      return { success: false, error: transporterErr.message };
+    }
+
+    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
+    const adminEmail = process.env.ABSTRACT_ADMIN_EMAIL || config.EMAIL.ABSTRACT_ADMIN_EMAIL || 'submit@spctt.org';
+    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
+
+    let authorResult = { success: false };
+    let adminResult = { success: false };
+
+    // 1. Send official decision email to Author (WITHOUT CC)
+    const authorEmailType = isAccepted ? 'abstract_accepted' : 'abstract_rejected';
+    const authorSubject = isAccepted
       ? `[SPCTT 2027] Abstract Received: ${abstractCode} - ${topic}`
       : `[SPCTT 2027] Abstract Review Decision: ${abstractCode} - ${topic}`;
 
-    const htmlContent = isAccepted
+    const authorHtml = isAccepted
       ? generateAcceptedHtml({
         name: recipientName,
         abstractCode,
@@ -2083,72 +2252,141 @@ export const emailService = {
         reviewComments: comments
       });
 
-    const fromAddress = process.env.ABSTRACT_FROM || config.EMAIL.ABSTRACT_FROM || config.EMAIL.DEFAULT_FROM || '"SPCTT 2027" <submit@spctt.org>';
-    const ccAddress = process.env.EMAIL_CC_DEFAULT || config.EMAIL.CC_DEFAULT || 'tvivek2021@gmail.com';
-
-    const mailOptions = {
+    const authorMailOptions = {
       from: fromAddress,
       to: `"${recipientName}" <${recipientEmail}>`,
-      cc: ccAddress,
-      subject: subject,
-      html: htmlContent
+      subject: authorSubject,
+      html: authorHtml
     };
 
     try {
-      const activeTransporter = getTransporter();
-      console.log(`📧 Attempting to send ${emailType} email to '${recipientEmail}', CC: '${ccAddress}', From: '${fromAddress}'...`);
+      console.log(`📧 Sending ${authorEmailType} email to Author '${recipientEmail}', From: '${fromAddress}'...`);
+      const infoAuthor = await activeTransporter.sendMail(authorMailOptions);
+      console.log(`✅ Author decision email sent! MessageId: ${infoAuthor.messageId}`);
 
-      const info = await activeTransporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully! MessageId: ${info.messageId}`);
-
-      // Record in database log
       await EmailLog.create({
         abstractId: abstract.id,
         userId: abstract.user_id,
         recipientEmail,
         recipientName,
-        ccEmail: ccAddress,
+        ccEmail: null,
         fromEmail: fromAddress,
-        subject,
-        emailType,
+        subject: authorSubject,
+        emailType: authorEmailType,
         status: 'sent',
         errorMessage: null
       });
 
-      return {
+      authorResult = {
         success: true,
-        messageId: info.messageId,
-        recipientEmail,
-        ccEmail: ccAddress,
-        status: 'sent',
-        message: `Decision notification email successfully sent to ${recipientEmail} (CC: ${ccAddress}).`
+        messageId: infoAuthor.messageId,
+        recipient: recipientEmail
       };
     } catch (sendError) {
-      console.error(`❌ Failed to send email via SMTP to ${recipientEmail}:`, sendError.message);
+      console.error(`❌ Failed to send decision email to Author (${recipientEmail}):`, sendError.message);
 
-      // Record failure in database log
       await EmailLog.create({
         abstractId: abstract.id,
         userId: abstract.user_id,
         recipientEmail,
         recipientName,
-        ccEmail: ccAddress,
+        ccEmail: null,
         fromEmail: fromAddress,
-        subject,
-        emailType,
+        subject: authorSubject,
+        emailType: authorEmailType,
         status: 'failed',
         errorMessage: sendError.message
       });
 
-      return {
+      authorResult = {
         success: false,
-        recipientEmail,
-        ccEmail: ccAddress,
-        status: 'failed',
-        error: sendError.message,
-        message: `Failed to dispatch email to ${recipientEmail}: ${sendError.message}`
+        error: sendError.message
       };
     }
+
+    // 2. Send dedicated internal alert to Admin (with CC to ccAddress)
+    const adminEmailType = isAccepted ? 'abstract_accepted_admin_alert' : 'abstract_rejected_admin_alert';
+    const adminSubject = `[Admin Alert] Abstract ${abstractCode} ${isAccepted ? 'Accepted' : 'Rejected'}: ${topic} (${recipientName})`;
+    const adminHtml = generateAdminDecisionNotificationHtml({
+      name: recipientName,
+      abstractCode,
+      topic,
+      category,
+      instituteName,
+      phone,
+      email: recipientEmail,
+      status,
+      reviewComments: comments,
+      pdfUrl,
+      updatedAt: new Date()
+    });
+
+    const adminMailOptions = {
+      from: fromAddress,
+      to: `"SPCTT Abstract" <${adminEmail}>`,
+      cc: ccAddress,
+      subject: adminSubject,
+      html: adminHtml
+    };
+
+    try {
+      console.log(`📧 Sending abstract decision alert to Admin '${adminEmail}', CC: '${ccAddress}', From: '${fromAddress}'...`);
+      const infoAdmin = await activeTransporter.sendMail(adminMailOptions);
+      console.log(`✅ Admin decision alert email sent! MessageId: ${infoAdmin.messageId}`);
+
+      await EmailLog.create({
+        abstractId: abstract.id,
+        userId: abstract.user_id,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: adminEmailType,
+        status: 'sent',
+        errorMessage: null
+      });
+
+      adminResult = {
+        success: true,
+        messageId: infoAdmin.messageId,
+        recipient: adminEmail,
+        cc: ccAddress
+      };
+    } catch (errAdmin) {
+      console.error(`❌ Failed to send decision alert to Admin (${adminEmail}):`, errAdmin.message);
+
+      await EmailLog.create({
+        abstractId: abstract.id,
+        userId: abstract.user_id,
+        recipientEmail: adminEmail,
+        recipientName: 'SPCTT Admin',
+        ccEmail: ccAddress,
+        fromEmail: fromAddress,
+        subject: adminSubject,
+        emailType: adminEmailType,
+        status: 'failed',
+        errorMessage: errAdmin.message
+      });
+
+      adminResult = {
+        success: false,
+        error: errAdmin.message
+      };
+    }
+
+    const overallSuccess = authorResult.success;
+    return {
+      success: overallSuccess,
+      recipientEmail,
+      adminEmail,
+      status: overallSuccess ? 'sent' : 'failed',
+      authorResult,
+      adminResult,
+      message: overallSuccess
+        ? `Decision notification email sent to Author (${recipientEmail}) and internal alert dispatched to Admin (${adminEmail}).`
+        : `Failed to send decision notification to Author: ${authorResult.error}`
+    };
   },
 
   /**
