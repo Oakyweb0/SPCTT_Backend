@@ -365,6 +365,46 @@ export const registrationService = {
       pdfBuffer,
       filename: `Invoice_${invoice.invoice_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
     };
+  },
+
+  /**
+   * Verify Registration by Code (Public Verification Endpoint)
+   */
+  async verifyRegistrationCode(code) {
+    if (!code || !code.trim()) {
+      const error = new Error('Registration code is required.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const reg = await Registration.findByRegistrationCode(code.trim());
+    if (!reg) {
+      return {
+        verified: false,
+        message: `No registration found matching code '${code.trim()}'.`
+      };
+    }
+
+    const isPaid = reg.payment_status === 'paid';
+
+    return {
+      verified: isPaid,
+      registrationCode: reg.registration_code,
+      title: reg.title || 'Mr.',
+      fullName: reg.full_name || 'N/A',
+      categoryName: reg.category_name || 'Conference Delegate',
+      organization: reg.organization || 'N/A',
+      city: reg.city || '',
+      state: reg.state || '',
+      country: reg.country || 'India',
+      accompanyingCount: reg.accompanying_count || 0,
+      paymentStatus: reg.payment_status,
+      status: reg.status,
+      paidAt: reg.paid_at || null,
+      conference: 'SPCTT 2027 Annual Conference',
+      eventDates: 'March 6-7, 2027',
+      venue: 'Taj Vivanta, Dwarka, New Delhi'
+    };
   }
 };
 

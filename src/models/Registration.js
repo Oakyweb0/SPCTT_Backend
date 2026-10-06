@@ -41,6 +41,17 @@ export const Registration = {
   },
 
   /**
+   * Find registration by Registration Code
+   */
+  async findByRegistrationCode(code) {
+    if (!code) return null;
+    const pool = getPool();
+    const [rows] = await pool.query('SELECT * FROM registrations WHERE registration_code = ? LIMIT 1', [code.trim()]);
+    if (!rows[0]) return null;
+    return formatRegItem(rows[0]);
+  },
+
+  /**
    * Find active draft or create a new one
    */
   async findOrCreateDraft(userId, user) {

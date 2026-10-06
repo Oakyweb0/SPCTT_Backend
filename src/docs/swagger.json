@@ -797,6 +797,32 @@
         }
       }
     },
+    "/api/registration/verify/{code}": {
+      "get": {
+        "tags": [
+          "User Portal - Registration Flow (Website)"
+        ],
+        "summary": "Verify Registration by Code (QR Code Scan)",
+        "description": "Public verification endpoint to verify delegate registration status and details when scanning QR code or entering registration code (e.g. SPCTT-001).",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "description": "Registration code to verify (e.g. SPCTT-001)",
+            "schema": {
+              "type": "string",
+              "example": "SPCTT-001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification status and delegate details"
+          }
+        }
+      }
+    },
     "/api/registration/categories": {
       "get": {
         "tags": [

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import QRCode from 'qrcode';
 import { config } from '../config/env.js';
 import { EmailLog } from '../models/EmailLog.js';
 
@@ -97,9 +98,9 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
   const safeInstitute = instituteName || 'Affiliated Institution';
   const commentsSection = reviewComments
     ? `
-      <div style="margin-top: 16px; padding: 14px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 6px;">
-        <strong style="color: #166534; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
-        <p style="margin: 0; color: #15803d; font-size: 16px; line-height: 1.5;">${reviewComments}</p>
+      <div style="margin-top: 14px; padding: 12px 14px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 6px; box-sizing: border-box;">
+        <strong style="color: #166534; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
+        <p style="margin: 0; color: #15803d; font-size: 14px; line-height: 1.5; word-break: break-word;">${reviewComments}</p>
       </div>
     `
     : '';
@@ -112,7 +113,47 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abstract Received - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 40% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 60% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
+        .cta-btn {
+          display: block !important;
+          width: 100% !important;
+          padding: 12px 10px !important;
+          box-sizing: border-box !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -120,65 +161,62 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Notification Banner -->
-      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
-        <strong style="color: #000000; font-size: 19px; letter-spacing: 0.2px;">Congratulations! Your Abstract Has Been Received</strong>
+      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 20px; text-align: center;">
+        <strong style="color: #000000; font-size: 18px; letter-spacing: 0.2px;">Congratulations! Your Abstract Has Been Received</strong>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 18px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 17px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           We are pleased to inform you that your abstract submission has been officially <strong>RECEIVED</strong> and is <strong>pending for review</strong> for the upcoming <strong>SPCTT 2027 Annual Conference</strong>.
         </p>
 
         <!-- Abstract Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 22px; margin: 26px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Submission Summary
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Abstract Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 17px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 40%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Abstract Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeTopic}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Topic / Title:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeTopic}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Presenter / Author:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Presenter / Author:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Affiliation:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeInstitute}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Affiliation:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeInstitute}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #1e293b;">
-                <span style="background-color: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 13px; text-transform: uppercase;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 11.5px; text-transform: uppercase; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   ${safeCategory}
                 </span>
               </td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #f1f5f9; color: #000000; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #cbd5e1;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #f1f5f9; color: #000000; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #cbd5e1; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   RECEIVED
                 </span>
               </td>
@@ -189,32 +227,32 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
         </div>
 
         <!-- Next Steps -->
-        <h3 style="font-size: 18px; color: #13254A; margin: 26px 0 14px 0;">Important Next Steps:</h3>
-        <ol style="padding-left: 22px; font-size: 16px; line-height: 1.7; color: #334155; margin-bottom: 26px;">
-          <li style="margin-bottom: 8px;"><strong>Delegate Registration:</strong> As per conference regulations, all presenting authors must complete their delegate registration for SPCTT 2027.</li>
-          <li style="margin-bottom: 8px;"><strong>Presentation Preparation:</strong> Please prepare your presentation (Poster / Oral slides) in accordance with the official SPCTT guidelines.</li>
-          <li style="margin-bottom: 8px;"><strong>Schedule Notification:</strong> Detailed session allocation, presentation date, and time slot will be shared shortly via email.</li>
+        <h3 style="font-size: 16px; color: #13254A; margin: 22px 0 10px 0;">Important Next Steps:</h3>
+        <ol style="padding-left: 18px; font-size: 14px; line-height: 1.65; color: #334155; margin-bottom: 22px;">
+          <li style="margin-bottom: 6px;"><strong>Delegate Registration:</strong> As per conference regulations, all presenting authors must complete their delegate registration for SPCTT 2027.</li>
+          <li style="margin-bottom: 6px;"><strong>Presentation Preparation:</strong> Please prepare your presentation (Poster / Oral slides) in accordance with the official SPCTT guidelines.</li>
+          <li style="margin-bottom: 6px;"><strong>Schedule Notification:</strong> Detailed session allocation, presentation date, and time slot will be shared shortly via email.</li>
         </ol>
 
         <!-- CTA Button -->
-        <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
+        <div style="text-align: center; margin: 26px 0 20px 0;">
+          <a href="https://2027.spctt.org/registration/register" class="cta-btn" style="background-color: #13254A; color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
             Visit Conference Portal
           </a>
         </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 15px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">For Abstract Query:</p>
-                <p style="margin: 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600; word-break: break-all;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">For Abstract Query:</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600; word-break: break-all;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -223,7 +261,7 @@ function generateAcceptedHtml({ name, abstractCode, topic, category, instituteNa
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 20px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -244,9 +282,9 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
   const safeInstitute = instituteName || 'Affiliated Institution';
   const commentsSection = reviewComments
     ? `
-      <div style="margin-top: 16px; padding: 14px; background-color: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px;">
-        <strong style="color: #991b1b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
-        <p style="margin: 0; color: #b91c1c; font-size: 16px; line-height: 1.5;">${reviewComments}</p>
+      <div style="margin-top: 14px; padding: 12px 14px; background-color: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px; box-sizing: border-box;">
+        <strong style="color: #991b1b; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
+        <p style="margin: 0; color: #b91c1c; font-size: 14px; line-height: 1.5; word-break: break-word;">${reviewComments}</p>
       </div>
     `
     : '';
@@ -259,7 +297,47 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abstract Review Decision - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 40% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 60% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
+        .cta-btn {
+          display: block !important;
+          width: 100% !important;
+          padding: 12px 10px !important;
+          box-sizing: border-box !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -267,57 +345,58 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Notification Banner -->
-      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
+      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 20px; text-align: center;">
         <strong style="color: #000000; font-size: 18px; letter-spacing: 0.2px;">Your Abstract Has Been Rejected</strong>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 18px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 16px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           Thank you for submitting your abstract to <strong>SPCTT 2027</strong>. Due to high submission volume and limited session capacity, we regret to inform you that your abstract could not be Received for presentation.
         </p>
 
         <!-- Abstract Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 22px; margin: 26px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Submission Details
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Abstract Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 17px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 40%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Abstract Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeTopic}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Topic / Title:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeTopic}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Presenter / Author:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Presenter / Author:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeCategory}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 11.5px; text-transform: uppercase; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
+                  ${safeCategory}
+                </span>
+              </td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-              <span style="background-color: #f1f5f9; color: #000000; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #cbd5e1;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #f1f5f9; color: #000000; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #cbd5e1; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   REJECTED
                 </span>
               </td>
@@ -328,30 +407,30 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
         </div>
 
         <!-- Encouragement & Conference Invitation -->
-        <p style="font-size: 16px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           We warmly invite you to join <strong>SPCTT 2027</strong> as a conference delegate to participate in keynote lectures, workshops, and networking sessions.
         </p>
 
         <!-- CTA Button -->
-        <div style="text-align: center; margin: 34px 0 24px 0;">
-          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 17px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.25);">
+        <div style="text-align: center; margin: 26px 0 20px 0;">
+          <a href="https://2027.spctt.org/registration/register" class="cta-btn" style="background-color: #13254A; color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.25);">
             Register as Conference Delegate
           </a>
         </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 15px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Sincerely,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
-                <p style="margin: 0; color: #64748b; font-size: 14px;">SPCTT 2027 Annual Conference</p>
-                <p style="margin: 4px 0 0 0; font-size: 14px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
+                <p style="margin: 0; color: #64748b; font-size: 12.5px;">SPCTT 2027 Annual Conference</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 15px;">For Abstract Query:</p>
-                <p style="margin: 0; font-size: 15px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600; word-break: break-all;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">For Abstract Query:</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600; word-break: break-all;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -360,7 +439,7 @@ function generateRejectedHtml({ name, abstractCode, topic, category, instituteNa
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 20px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0 0 4px 0;">This is an automated notification sent from SPCTT 2027 from team SPCTT.</p>
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
@@ -384,8 +463,8 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
   const textSnippet = abstractText
     ? `
       <tr>
-        <td style="padding: 8px 0; color: #64748b; font-weight: 600; vertical-align: top;">Summary Text:</td>
-        <td style="padding: 8px 0; color: #334155; line-height: 1.5; font-size: 14px;">${abstractText.length > 250 ? abstractText.slice(0, 250) + '...' : abstractText}</td>
+        <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Summary Text:</td>
+        <td class="col-value" style="padding: 7px 0 7px 6px; color: #334155; line-height: 1.5; font-size: 13px; word-break: break-word;">${abstractText.length > 250 ? abstractText.slice(0, 250) + '...' : abstractText}</td>
       </tr>
     `
     : '';
@@ -393,9 +472,9 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
   const attachmentSnippet = pdfUrl
     ? `
       <tr>
-        <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Uploaded Document:</td>
-        <td style="padding: 8px 0;">
-          <a href="${pdfUrl}" target="_blank" style="color: #004b63; font-weight: 600; text-decoration: underline;">View / Download Attached Document</a>
+        <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Uploaded Document:</td>
+        <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top; word-break: break-word;">
+          <a href="${pdfUrl}" target="_blank" style="color: #004b63; font-weight: 600; text-decoration: underline; font-size: 13px;">View / Download Attached Document</a>
         </td>
       </tr>
     `
@@ -409,7 +488,41 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abstract Submission Received - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 40% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 60% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -417,68 +530,65 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Notification Banner -->
-      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
-        <strong style="color: #004b63; font-size: 19px; letter-spacing: 0.2px;">Thank You! Your Abstract Has Been Received</strong>
+      <div style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 20px; text-align: center;">
+        <strong style="color: #004b63; font-size: 18px; letter-spacing: 0.2px;">Thank You! Your Abstract Has Been Received</strong>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 18px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 16px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           We have successfully received your research abstract submission for the upcoming <strong>SPCTT 2027 Annual Conference</strong>.
         </p>
-        <p style="font-size: 16px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           Your submission has been assigned reference code <strong style="color: #13254A; font-family: monospace;">${safeCode}</strong> and is currently under review by the Scientific Review Committee.
         </p>
 
         <!-- Abstract Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 22px; margin: 26px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Submission Summary
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Abstract Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 40%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Abstract Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeTopic}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Topic / Title:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeTopic}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Presenter / Author:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Presenter / Author:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Affiliation:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeInstitute}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Affiliation:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeInstitute}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #1e293b;">
-                <span style="background-color: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 13px; text-transform: uppercase;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 11.5px; text-transform: uppercase; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   ${safeCategory}
                 </span>
               </td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fde68a;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #fde68a; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   PENDING REVIEW
                 </span>
               </td>
@@ -489,27 +599,26 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
         </div>
 
         <!-- Next Steps -->
-        <h3 style="font-size: 17px; color: #13254A; margin: 26px 0 14px 0;">Next Steps:</h3>
-        <ol style="padding-left: 22px; font-size: 15px; line-height: 1.7; color: #334155; margin-bottom: 26px;">
-          <li style="margin-bottom: 8px;"><strong>Scientific Review:</strong> The review committee will evaluate your abstract against conference criteria.</li>
-          <li style="margin-bottom: 8px;"><strong>Decision Notification:</strong> You will be notified of the review decision and comments via email.</li>
-          <li style="margin-bottom: 8px;"><strong>Delegate Registration:</strong> As per conference guidelines, all accepted presenters must register at <a href="https://2027.spctt.org/registration/register" style="color: #004b63; font-weight: 600; text-decoration: underline;">SPCTT Portal</a>.</li>
+        <h3 style="font-size: 16px; color: #13254A; margin: 22px 0 10px 0;">Next Steps:</h3>
+        <ol style="padding-left: 18px; font-size: 14px; line-height: 1.65; color: #334155; margin-bottom: 22px;">
+          <li style="margin-bottom: 6px;"><strong>Scientific Review:</strong> The review committee will evaluate your abstract against conference criteria.</li>
+          <li style="margin-bottom: 6px;"><strong>Decision Notification:</strong> You will be notified of the review decision and comments via email.</li>
+          <li style="margin-bottom: 6px;"><strong>Delegate Registration:</strong> As per conference guidelines, all accepted presenters must register at <a href="https://2027.spctt.org/registration/register" style="color: #004b63; font-weight: 600; text-decoration: underline;">SPCTT Portal</a>.</li>
         </ol>
 
-
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">Scientific Review Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">SPCTT 2027 Annual Conference</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">SPCTT 2027 Annual Conference</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:submit@spctt.org" style="color: #13254A; text-decoration: none;">submit@spctt.org</a></p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">For Abstract Queries:</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">For Abstract Queries:</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -518,7 +627,7 @@ function generateSubmissionConfirmationHtml({ name, abstractCode, topic, categor
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -544,24 +653,24 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
   const attachmentSnippet = pdfUrl
     ? `
       <tr>
-        <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Uploaded Document:</td>
-        <td style="padding: 10px 0;">
-          <a href="${pdfUrl}" target="_blank" style="display: inline-block; background-color: #9e1c2b; color: #ffffff; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600;">Download / View File</a>
+        <td class="col-label" style="padding: 8px 6px 8px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Uploaded Document:</td>
+        <td class="col-value" style="padding: 8px 0 8px 6px; vertical-align: top;">
+          <a href="${pdfUrl}" target="_blank" style="display: inline-block; background-color: #9e1c2b; color: #ffffff; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 12.5px; font-weight: 600; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word;">Download / View File</a>
         </td>
       </tr>
     `
     : `
       <tr>
-        <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Uploaded Document:</td>
-        <td style="padding: 10px 0; color: #94a3b8; font-style: italic;">No file attached</td>
+        <td class="col-label" style="padding: 8px 6px 8px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Uploaded Document:</td>
+        <td class="col-value" style="padding: 8px 0 8px 6px; color: #94a3b8; font-style: italic; vertical-align: top;">No file attached</td>
       </tr>
     `;
 
   const abstractContentSnippet = abstractText
     ? `
-      <div style="margin-top: 20px; padding: 16px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <strong style="color: #334155; font-size: 14px; display: block; margin-bottom: 8px;">Abstract Text Summary:</strong>
-        <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${abstractText}</p>
+      <div style="margin-top: 16px; padding: 14px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+        <strong style="color: #334155; font-size: 13px; display: block; margin-bottom: 6px;">Abstract Text Summary:</strong>
+        <p style="margin: 0; color: #475569; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${abstractText}</p>
       </div>
     `
     : '';
@@ -573,61 +682,99 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Abstract Submission Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 40% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 60% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Notification Bar -->
-      <div style="color: #13254A; padding: 18px 24px; text-align: center;">
+      <div style="color: #13254A; padding: 18px 20px; text-align: center; border-bottom: 1px solid #e2e8f0;">
         <span style="background-color: #22c55e; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px;">New Abstract Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 700; color: #13254A;">New Abstract Submitted for SPCTT 2027</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 700; color: #13254A;">New Abstract Submitted for SPCTT 2027</h2>
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator / Review Committee,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           A new research abstract has been submitted by <strong>${safeName}</strong> on <strong>${dateStr} (IST)</strong>.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Abstract Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 40%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Abstract Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeTopic}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Topic / Title:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeTopic}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author / Presenter:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author / Presenter:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Institution / Org:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeInstitute}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Institution / Org:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeInstitute}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #e0e7ff; color: #3730a3; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #e0e7ff; color: #3730a3; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11.5px; text-transform: uppercase; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   ${safeCategory}
                 </span>
               </td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             ${attachmentSnippet}
           </table>
@@ -637,7 +784,7 @@ function generateAdminSubmissionNotificationHtml({ name, abstractCode, topic, ca
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -676,8 +823,8 @@ function generateAdminDecisionNotificationHtml({
     : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
   const statusBadge = isAccepted
-    ? `<span style="background-color: #dcfce7; color: #166534; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #86efac;">ACCEPTED</span>`
-    : `<span style="background-color: #fee2e2; color: #991b1b; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fca5a5;">REJECTED</span>`;
+    ? `<span class="badge-pill" style="display: inline-block; background-color: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #86efac; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">ACCEPTED</span>`
+    : `<span class="badge-pill" style="display: inline-block; background-color: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #fca5a5; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">REJECTED</span>`;
 
   const bannerColor = isAccepted ? '#166534' : '#991b1b';
   const bannerBg = isAccepted ? '#f0fdf4' : '#fef2f2';
@@ -685,9 +832,9 @@ function generateAdminDecisionNotificationHtml({
 
   const commentsSection = reviewComments
     ? `
-      <div style="margin-top: 16px; padding: 14px; background-color: #ffffff; border-left: 4px solid ${isAccepted ? '#22c55e' : '#ef4444'}; border-radius: 6px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-        <strong style="color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
-        <p style="margin: 0; color: #1e293b; font-size: 14px; line-height: 1.5;">${reviewComments}</p>
+      <div style="margin-top: 14px; padding: 12px 14px; background-color: #ffffff; border-left: 4px solid ${isAccepted ? '#22c55e' : '#ef4444'}; border-radius: 6px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; box-sizing: border-box;">
+        <strong style="color: #475569; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Reviewer Feedback / Comments:</strong>
+        <p style="margin: 0; color: #1e293b; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${reviewComments}</p>
       </div>
     `
     : '';
@@ -695,9 +842,9 @@ function generateAdminDecisionNotificationHtml({
   const attachmentSnippet = pdfUrl
     ? `
       <tr>
-        <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Uploaded Document:</td>
-        <td style="padding: 8px 0;">
-          <a href="${pdfUrl}" target="_blank" style="display: inline-block; background-color: #13254A; color: #ffffff; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600;">View Attachment</a>
+        <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Uploaded Document:</td>
+        <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+          <a href="${pdfUrl}" target="_blank" style="display: inline-block; background-color: #13254A; color: #ffffff; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word;">View Attachment</a>
         </td>
       </tr>
     `
@@ -710,14 +857,52 @@ function generateAdminDecisionNotificationHtml({
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abstract Decision Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 40% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 60% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Notification Bar -->
-      <div style="background-color: ${bannerBg}; border-bottom: 1px solid ${bannerBorder}; padding: 18px 24px; text-align: center;">
+      <div style="background-color: ${bannerBg}; border-bottom: 1px solid ${bannerBorder}; padding: 18px 20px; text-align: center;">
         <span style="background-color: ${isAccepted ? '#22c55e' : '#ef4444'}; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px;">Admin Alert</span>
         <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 700; color: ${bannerColor};">
           Abstract ${isAccepted ? 'Accepted' : 'Rejected'} — ${safeCode}
@@ -725,52 +910,52 @@ function generateAdminDecisionNotificationHtml({
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           The review decision for abstract <strong>${safeCode}</strong> (${safeTopic}) has been recorded as <strong>${isAccepted ? 'ACCEPTED' : 'REJECTED'}</strong> on <strong>${dateStr} (IST)</strong>.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
           <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Decision Summary
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 35%; font-weight: 600;">Decision Status:</td>
-              <td style="padding: 8px 0;">${statusBadge}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 40%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Decision Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">${statusBadge}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Abstract Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Abstract Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 700; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Topic / Title:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeTopic}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Topic / Title:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeTopic}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author / Presenter:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author / Presenter:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Author Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Author Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Institution / Org:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeInstitute}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Institution / Org:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeInstitute}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #e0e7ff; color: #3730a3; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #e0e7ff; color: #3730a3; padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 11.5px; text-transform: uppercase; word-break: break-word; max-width: 100%; box-sizing: border-box; text-align: center;">
                   ${safeCategory}
                 </span>
               </td>
@@ -787,7 +972,7 @@ function generateAdminDecisionNotificationHtml({
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -795,6 +980,30 @@ function generateAdminDecisionNotificationHtml({
   </body>
   </html>
   `;
+}
+
+/**
+ * Helper to generate QR Code Buffer containing only Registration ID
+ */
+async function generateRegistrationQrCode({ registrationCode }) {
+  const safeCode = String(registrationCode || '').trim() || 'N/A';
+
+  try {
+    const buffer = await QRCode.toBuffer(safeCode, {
+      type: 'png',
+      width: 320,
+      margin: 2,
+      color: {
+        dark: '#0d1b38',
+        light: '#ffffff'
+      },
+      errorCorrectionLevel: 'H'
+    });
+    return { buffer, qrText: safeCode };
+  } catch (err) {
+    console.error('⚠️ Could not generate QR Code buffer for registration:', err.message);
+    return null;
+  }
 }
 
 /**
@@ -840,8 +1049,8 @@ function generatePaymentSuccessUserHtml({
     }
     accompanyingHtml = `
       <tr>
-        <td style="padding: 8px 0; color: #64748b; font-weight: 600; vertical-align: top;">Accompanying Persons (${accompanyingCount}):</td>
-        <td style="padding: 8px 0; color: #1e293b; line-height: 1.5;">${namesList || `${accompanyingCount} person(s)`}</td>
+        <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Accompanying (${accompanyingCount}):</td>
+        <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${namesList || `${accompanyingCount} person(s)`}</td>
       </tr>
     `;
   }
@@ -854,7 +1063,41 @@ function generatePaymentSuccessUserHtml({
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration & Payment Confirmed - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -862,76 +1105,73 @@ function generatePaymentSuccessUserHtml({
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Success Notification Banner -->
-      <div style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 22px 24px; text-align: center;">
+      <div style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; padding: 20px 18px; text-align: center;">
         <span style="background-color: #16a34a; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Successful</span>
-        <h2 style="margin: 0; color: #166534; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Registration Confirmed & Paid</h2>
+        <h2 style="margin: 0; color: #166534; font-size: 19px; font-weight: 800; letter-spacing: -0.2px;">Registration Confirmed & Paid</h2>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           Thank you for completing your registration for the <strong>SPCTT 2027 Annual Conference</strong>. We have successfully received your payment. Your conference seat has been officially <strong>CONFIRMED</strong>.
         </p>
 
         <!-- Registration & Payment Summary Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #13254A; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #13254A; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Registration & Payment Details
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Name:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #004b63; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Hospital:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Organization:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeOrg}</td>
             </tr>
             ${accompanyingHtml}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Payment ID:</td>
-              <td style="padding: 8px 0; color: #13254A; font-family: monospace; font-size: 14px; font-weight: 600;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction / Payment ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-family: monospace; font-size: 13px; font-weight: 700; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace; font-size: 13px;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Razorpay Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Mode:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Mode:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Date & Time:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Date & Time:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${dateStr} (IST)</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #86efac;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #86efac; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   PAID (SUCCESSFUL)
                 </span>
               </td>
@@ -939,50 +1179,60 @@ function generatePaymentSuccessUserHtml({
           </table>
 
           <!-- Fee Breakdown Table -->
-          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #cbd5e1;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #cbd5e1;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; box-sizing: border-box;">
               <tr>
-                <td style="padding: 4px 0; color: #64748b;">Subtotal (Registration Base):</td>
-                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(subtotal)}</td>
+                <td style="padding: 4px 6px 4px 0; color: #64748b; word-break: break-word;">Subtotal (Registration Base):</td>
+                <td style="padding: 4px 0 4px 6px; text-align: right; color: #1e293b; font-weight: 500; white-space: nowrap;">${formatRs(subtotal)}</td>
               </tr>
               <tr>
-                <td style="padding: 4px 0; color: #64748b;">GST (18%):</td>
-                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(gstAmount)}</td>
+                <td style="padding: 4px 6px 4px 0; color: #64748b; word-break: break-word;">GST (18%):</td>
+                <td style="padding: 4px 0 4px 6px; text-align: right; color: #1e293b; font-weight: 500; white-space: nowrap;">${formatRs(gstAmount)}</td>
               </tr>
               ${facilitationCharge > 0 ? `
               <tr>
-                <td style="padding: 4px 0; color: #64748b;">Facilitation Charges (4.5%):</td>
-                <td style="padding: 4px 0; text-align: right; color: #1e293b; font-weight: 500;">${formatRs(facilitationCharge)}</td>
+                <td style="padding: 4px 6px 4px 0; color: #64748b; word-break: break-word;">Facilitation Charges (4.5%):</td>
+                <td style="padding: 4px 0 4px 6px; text-align: right; color: #1e293b; font-weight: 500; white-space: nowrap;">${formatRs(facilitationCharge)}</td>
               </tr>` : ''}
               <tr style="border-top: 1px solid #cbd5e1;">
-                <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-size: 16px;">Total Amount Paid:</td>
-                <td style="padding: 8px 0; text-align: right; color: #13254A; font-weight: 800; font-size: 17px;">${formatRs(totalPaid || grandTotal)}</td>
+                <td style="padding: 8px 6px 4px 0; color: #13254A; font-weight: 800; font-size: 15px; word-break: break-word;">Total Amount Paid:</td>
+                <td style="padding: 8px 0 4px 6px; text-align: right; color: #13254A; font-weight: 800; font-size: 16px; white-space: nowrap;">${formatRs(totalPaid || grandTotal)}</td>
               </tr>
             </table>
           </div>
         </div>
 
         <!-- Next Steps -->
-        <h3 style="font-size: 17px; color: #13254A; margin: 26px 0 12px 0;">Important Attendee Information:</h3>
-        <ul style="padding-left: 20px; font-size: 15px; line-height: 1.7; color: #334155; margin-bottom: 26px;">
+        <h3 style="font-size: 16px; color: #13254A; margin: 22px 0 10px 0;">Important Attendee Information:</h3>
+        <ul style="padding-left: 18px; font-size: 14px; line-height: 1.65; color: #334155; margin-bottom: 22px;">
+          <li style="margin-bottom: 6px;"><strong>Verification QR Code:</strong> Your delegate verification QR code is displayed below and attached to this email. Keep it handy for check-in.</li>
           <li style="margin-bottom: 6px;"><strong>Tax Invoice & Receipt:</strong> You can download your official tax invoice and payment receipt anytime from the conference portal.</li>
-          <li style="margin-bottom: 6px;"><strong>Conference Badge:</strong> Please present your Registration Code <code>${safeCode}</code> at the on-site registration desk on March 6-7, 2027 at Taj Vivanta, Dwarka, New Delhi.</li>
+          <li style="margin-bottom: 6px;"><strong>Conference Badge:</strong> Please present your Registration Code <code>${safeCode}</code> or QR Pass at the on-site registration desk on March 6-7, 2027 at Taj Vivanta, Dwarka, New Delhi.</li>
           <li style="margin-bottom: 6px;"><strong>Updates:</strong> Detailed scientific program and session timings will be shared via email closer to the conference date.</li>
         </ul>
 
+        <!-- Delegate QR Code (At Email Bottom) -->
+        <div style="text-align: center; margin: 24px 0 18px 0; padding: 18px 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+          <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #13254A;">
+            Delegate Check-in QR Code
+          </p>
+          <div style="display: inline-block; background-color: #ffffff; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+            <img src="cid:registration_qr_code" alt="Registration QR Code - ${safeCode}" width="150" height="150" style="display: block; width: 150px; height: 150px; max-width: 100%; margin: 0 auto; border: 0;" />
+          </div>
+        </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Registration Support:</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">Registration Support:</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -991,7 +1241,7 @@ function generatePaymentSuccessUserHtml({
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -1045,81 +1295,129 @@ function generatePaymentSuccessAdminHtml({
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Received Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Alert Bar -->
-      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+      <div style="padding: 18px 20px; text-align: center; border-bottom: 1px solid #e2e8f0;">
         <span style="background-color: #16a34a; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Received Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #13254A;">Registration Payment Confirmed</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 800; color: #13254A;">Registration Payment Confirmed</h2>
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           A new delegate registration payment has been successfully completed for <strong>SPCTT 2027</strong> on <strong>${dateStr} (IST)</strong>.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Name:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #004b63; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Organization / Inst:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safeOrg}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Accompanying Count:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${accompanyingCount}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Accompanying Count:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${accompanyingCount}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction ID:</td>
-              <td style="padding: 8px 0; color: #13254A; font-family: monospace; font-weight: 700;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-family: monospace; font-weight: 700; font-size: 13px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Razorpay Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Gateway:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
             <tr style="border-top: 1px solid #cbd5e1;">
-              <td style="padding: 10px 0 4px 0; color: #13254A; font-weight: 800; font-size: 16px;">Total Amount Received:</td>
-              <td style="padding: 10px 0 4px 0; color: #16a34a; font-weight: 800; font-size: 18px;">${formatRs(totalPaid || grandTotal)}</td>
+              <td class="col-label" style="padding: 10px 6px 4px 0; color: #13254A; font-weight: 800; font-size: 15px; vertical-align: top; word-break: break-word;">Total Received:</td>
+              <td class="col-value" style="padding: 10px 0 4px 6px; color: #16a34a; font-weight: 800; font-size: 16px; vertical-align: top; white-space: nowrap;">${formatRs(totalPaid || grandTotal)}</td>
             </tr>
           </table>
+        </div>
+
+        <!-- Delegate QR Code for Admin Reference (Bottom) -->
+        <div style="text-align: center; margin: 20px 0 10px 0; padding: 16px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #13254A;">
+            Delegate Check-in QR Code
+          </p>
+          <div style="display: inline-block; background-color: #ffffff; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+            <img src="cid:registration_qr_code" alt="QR Pass - ${safeCode}" width="130" height="130" style="display: block; width: 130px; height: 130px; max-width: 100%; margin: 0 auto; border: 0;" />
+          </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated Payment Notification &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -1165,7 +1463,47 @@ function generatePaymentFailedUserHtml({
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Attempt Failed - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
+        .cta-btn {
+          display: block !important;
+          width: 100% !important;
+          padding: 12px 10px !important;
+          box-sizing: border-box !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -1173,72 +1511,69 @@ function generatePaymentFailedUserHtml({
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Failure Notification Banner -->
-      <div style="background-color: #fef2f2; border-bottom: 1px solid #fecaca; padding: 22px 24px; text-align: center;">
+      <div style="background-color: #fef2f2; border-bottom: 1px solid #fecaca; padding: 20px 18px; text-align: center;">
         <span style="background-color: #dc2626; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Unsuccessful</span>
-        <h2 style="margin: 0; color: #991b1b; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Payment Not Completed</h2>
+        <h2 style="margin: 0; color: #991b1b; font-size: 19px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Payment Not Completed</h2>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           We noticed that your recent payment attempt for the <strong>SPCTT 2027 Annual Conference</strong> could not be processed successfully.
         </p>
 
         <!-- Transaction Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #991b1b; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #991b1b; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Transaction Details
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Attempted Amount:</td>
-              <td style="padding: 8px 0; color: #dc2626; font-weight: 700; font-size: 16px;">${formatRs(attemptedAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Attempted Amount:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #dc2626; font-weight: 800; font-size: 15px; vertical-align: top; white-space: nowrap;">${formatRs(attemptedAmount)}</td>
             </tr>
             ${safeTxn !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction Reference:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction Reference:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>` : ''}
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Gateway:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Date & Time:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Date & Time:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${dateStr} (IST)</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #fee2e2; color: #b91c1c; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fca5a5;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #fca5a5; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   PAYMENT FAILED
                 </span>
               </td>
@@ -1246,40 +1581,40 @@ function generatePaymentFailedUserHtml({
           </table>
 
           <!-- Reason Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px;">
-            <strong style="color: #9f1239; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Note:</strong>
-            <p style="margin: 0; color: #be123c; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #9f1239; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Note:</strong>
+            <p style="margin: 0; color: #be123c; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeReason}</p>
           </div>
         </div>
 
         <!-- Reassurance & Instructions -->
-        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 24px 0;">
-          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #92400e; font-weight: 700;">Important Information:</h4>
-          <ul style="margin: 0; padding-left: 18px; font-size: 14px; color: #78350f; line-height: 1.6;">
-            <li><strong>Was your bank account debited?</strong> If any amount was deducted from your account/card, it will be automatically refunded by your issuing bank within 3 to 5 business days.</li>
+        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 16px; margin: 20px 0; box-sizing: border-box;">
+          <h4 style="margin: 0 0 6px 0; font-size: 14.5px; color: #92400e; font-weight: 700;">Important Information:</h4>
+          <ul style="margin: 0; padding-left: 18px; font-size: 13.5px; color: #78350f; line-height: 1.6;">
+            <li><strong>Was your bank account debited?</strong> If any amount was deducted, it will be automatically refunded by your issuing bank within 3 to 5 business days.</li>
             <li><strong>Your Registration details are safe:</strong> You do not need to fill out your details again. Simply click below to retry the payment.</li>
           </ul>
         </div>
 
         <!-- CTA Button -->
-        <div style="text-align: center; margin: 32px 0 24px 0;">
-          <a href="https://2027.spctt.org/registration/register" style="background-color: #9e1c2b; color: #ffffff; padding: 15px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(158, 28, 43, 0.3);">
+        <div style="text-align: center; margin: 26px 0 20px 0;">
+          <a href="https://2027.spctt.org/registration/register" class="cta-btn" style="background-color: #9e1c2b; color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word; box-shadow: 0 4px 12px rgba(158, 28, 43, 0.3);">
             Retry Registration Payment
           </a>
         </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Need Payment Help?</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">Need Payment Help?</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -1288,7 +1623,7 @@ function generatePaymentFailedUserHtml({
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -1338,84 +1673,122 @@ function generatePaymentFailedAdminHtml({
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Failed Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Alert Bar -->
-      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+      <div style="padding: 18px 20px; text-align: center; border-bottom: 1px solid #e2e8f0;">
         <span style="background-color: #dc2626; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Failed Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #991b1b;">Registration Payment Failed</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 800; color: #991b1b;">Registration Payment Failed</h2>
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           A delegate attempted to make a payment for <strong>SPCTT 2027</strong> on <strong>${dateStr} (IST)</strong>, but the transaction failed.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Name:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #004b63; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Organization / Inst:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safeOrg}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Attempted Amount:</td>
-              <td style="padding: 8px 0; color: #dc2626; font-weight: 700; font-size: 16px;">${formatRs(attemptedAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Attempted Amount:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #dc2626; font-weight: 800; font-size: 15px; vertical-align: top; white-space: nowrap;">${formatRs(attemptedAmount)}</td>
             </tr>
             ${safeTxn !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction Ref:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction Ref:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>` : ''}
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Razorpay Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Gateway:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Gateway:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
           </table>
 
           <!-- Reason Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px;">
-            <strong style="color: #9f1239; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Error:</strong>
-            <p style="margin: 0; color: #be123c; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #fff1f2; border-left: 4px solid #e11d48; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #9f1239; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Failure Reason / Error:</strong>
+            <p style="margin: 0; color: #be123c; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeReason}</p>
           </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -1463,7 +1836,41 @@ function generatePaymentRefundedUserHtml({
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Refund Processed - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -1471,72 +1878,69 @@ function generatePaymentRefundedUserHtml({
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Refund Notification Banner -->
-      <div style="background-color: #f5f3ff; border-bottom: 1px solid #ddd6fe; padding: 22px 24px; text-align: center;">
+      <div style="background-color: #f5f3ff; border-bottom: 1px solid #ddd6fe; padding: 20px 18px; text-align: center;">
         <span style="background-color: #7c3aed; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Refund Processed</span>
-        <h2 style="margin: 0; color: #5b21b6; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Payment Refund Confirmation</h2>
+        <h2 style="margin: 0; color: #5b21b6; font-size: 19px; font-weight: 800; letter-spacing: -0.2px;">Payment Refund Confirmation</h2>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           This email confirms that a refund has been initiated / processed for your registration for the <strong>SPCTT 2027 Annual Conference</strong>.
         </p>
 
         <!-- Refund Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #5b21b6; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #5b21b6; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Refund Details
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Registration Category:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Refunded Amount:</td>
-              <td style="padding: 8px 0; color: #7c3aed; font-weight: 800; font-size: 17px;">${formatRs(refundAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Refunded Amount:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #7c3aed; font-weight: 800; font-size: 16px; vertical-align: top; white-space: nowrap;">${formatRs(refundAmount)}</td>
             </tr>
             ${safeTxn !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Refund Ref:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction / Refund Ref:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>` : ''}
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Method:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Method:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Processed On:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Processed On:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${dateStr} (IST)</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #ede9fe; color: #6d28d9; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #ddd6fe;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #ede9fe; color: #6d28d9; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #ddd6fe; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   REFUNDED
                 </span>
               </td>
@@ -1544,32 +1948,32 @@ function generatePaymentRefundedUserHtml({
           </table>
 
           <!-- Reason Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px;">
-            <strong style="color: #5b21b6; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Note / Reason:</strong>
-            <p style="margin: 0; color: #4c1d95; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #5b21b6; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Note / Reason:</strong>
+            <p style="margin: 0; color: #4c1d95; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeReason}</p>
           </div>
         </div>
 
         <!-- Timeline Information -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 24px 0;">
-          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #13254A; font-weight: 700;">When will you receive the funds?</h4>
-          <p style="margin: 0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin: 20px 0; box-sizing: border-box;">
+          <h4 style="margin: 0 0 6px 0; font-size: 14.5px; color: #13254A; font-weight: 700;">When will you receive the funds?</h4>
+          <p style="margin: 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
             The refund has been credited back to your original source account / payment card. Depending on your bank's settlement cycle, it typically takes <strong>5 to 7 business days</strong> to reflect on your account or card statement.
           </p>
         </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Need Assistance?</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">Need Assistance?</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -1578,7 +1982,7 @@ function generatePaymentRefundedUserHtml({
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -1628,76 +2032,114 @@ function generatePaymentRefundedAdminHtml({
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Refund Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Alert Bar -->
-      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+      <div style="padding: 18px 20px; text-align: center; border-bottom: 1px solid #e2e8f0;">
         <span style="background-color: #7c3aed; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Refund Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #5b21b6;">Registration Payment Refunded</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 800; color: #5b21b6;">Registration Payment Refunded</h2>
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           A payment refund has been recorded/processed for delegate <strong>${safeName}</strong> on <strong>${dateStr} (IST)</strong>.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Name:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #004b63; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Organization / Inst:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safeOrg}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Refunded Amount:</td>
-              <td style="padding: 8px 0; color: #7c3aed; font-weight: 800; font-size: 16px;">${formatRs(refundAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Refunded Amount:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #7c3aed; font-weight: 800; font-size: 16px; vertical-align: top; white-space: nowrap;">${formatRs(refundAmount)}</td>
             </tr>
             ${safeTxn !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Transaction / Refund Ref:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeTxn}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Transaction / Refund Ref:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeTxn}</td>
             </tr>` : ''}
             ${safeOrder !== 'N/A' ? `
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Razorpay Order ID:</td>
-              <td style="padding: 8px 0; color: #475569; font-family: monospace;">${safeOrder}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Razorpay Order ID:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #475569; font-family: monospace; font-size: 12.5px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeOrder}</td>
             </tr>` : ''}
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Method:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeMethod}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Method:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeMethod}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #ede9fe; color: #6d28d9; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #ddd6fe;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #ede9fe; color: #6d28d9; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #ddd6fe; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   REFUNDED
                 </span>
               </td>
@@ -1705,15 +2147,15 @@ function generatePaymentRefundedAdminHtml({
           </table>
 
           <!-- Reason Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px;">
-            <strong style="color: #5b21b6; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Refund Reason / Notes:</strong>
-            <p style="margin: 0; color: #4c1d95; font-size: 14px; line-height: 1.5;">${safeReason}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #5b21b6; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Refund Reason / Notes:</strong>
+            <p style="margin: 0; color: #4c1d95; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeReason}</p>
           </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -1757,7 +2199,47 @@ function generatePaymentPendingUserHtml({
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Payment Pending - SPCTT 2027</title>
     <style>
-      @media only screen and (max-width: 520px) {
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11px !important;
+          padding: 3px 6px !important;
+        }
+        .cta-btn {
+          display: block !important;
+          width: 100% !important;
+          padding: 12px 10px !important;
+          box-sizing: border-box !important;
+        }
         .responsive-td {
           display: block !important;
           width: 100% !important;
@@ -1765,98 +2247,95 @@ function generatePaymentPendingUserHtml({
           padding-bottom: 12px !important;
           box-sizing: border-box !important;
         }
-        .mobile-padding {
-          padding: 24px 16px !important;
-        }
       }
     </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Pending Notification Banner -->
-      <div style="background-color: #fffbeb; border-bottom: 1px solid #fde68a; padding: 22px 24px; text-align: center;">
+      <div style="background-color: #fffbeb; border-bottom: 1px solid #fde68a; padding: 20px 18px; text-align: center;">
         <span style="background-color: #d97706; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.8px; display: inline-block; margin-bottom: 8px;">Payment Pending</span>
-        <h2 style="margin: 0; color: #92400e; font-size: 20px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Complete Registration Payment</h2>
+        <h2 style="margin: 0; color: #92400e; font-size: 19px; font-weight: 800; letter-spacing: -0.2px;">Action Required: Complete Registration Payment</h2>
       </div>
 
       <!-- Main Body -->
-      <div class="mobile-padding" style="padding: 32px 24px;">
-        <p style="font-size: 17px; line-height: 1.6; margin-top: 0; color: #334155;">
+      <div class="mobile-padding" style="padding: 26px 20px; box-sizing: border-box;">
+        <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #334155;">
           Dear <strong>${safeName}</strong>,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           Thank you for initiating your registration for the <strong>SPCTT 2027 Annual Conference</strong>. Your attendee details have been received, but your payment is currently <strong>PENDING</strong>.
         </p>
 
         <!-- Pending Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; margin: 24px 0;">
-          <h3 style="margin: 0 0 14px 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; color: #92400e; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 14px; margin: 20px 0; box-sizing: border-box;">
+          <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #92400e; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
             Registration Summary
           </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 40%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Total Payable Amount:</td>
-              <td style="padding: 8px 0; color: #d97706; font-weight: 800; font-size: 17px;">${formatRs(pendingAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Total Payable:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #d97706; font-weight: 800; font-size: 15px; vertical-align: top; white-space: nowrap;">${formatRs(pendingAmount)}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Payment Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fde68a;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Payment Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #fde68a; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   PENDING
                 </span>
               </td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Last Updated:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${dateStr} (IST)</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Last Updated:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word; overflow-wrap: break-word; line-height: 1.4;">${dateStr} (IST)</td>
             </tr>
           </table>
 
           <!-- Note Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
-            <strong style="color: #92400e; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Notice:</strong>
-            <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">${safeNotes}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #92400e; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Notice:</strong>
+            <p style="margin: 0; color: #78350f; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeNotes}</p>
           </div>
         </div>
 
         <!-- Next Steps -->
-        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 24px 0;">
-          <h4 style="margin: 0 0 6px 0; font-size: 15px; color: #166534; font-weight: 700;">How to complete your payment:</h4>
-          <p style="margin: 0; font-size: 14px; color: #15803d; line-height: 1.6;">
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px; margin: 20px 0; box-sizing: border-box;">
+          <h4 style="margin: 0 0 6px 0; font-size: 14.5px; color: #166534; font-weight: 700;">How to complete your payment:</h4>
+          <p style="margin: 0; font-size: 13.5px; color: #15803d; line-height: 1.6;">
             Please log in to your account at <strong>2027.spctt.org</strong> to complete your online payment securely via UPI, Credit/Debit Card, or Net Banking to confirm your delegate pass.
           </p>
         </div>
 
         <!-- CTA Button -->
-        <div style="text-align: center; margin: 32px 0 24px 0;">
-          <a href="https://2027.spctt.org/registration/register" style="background-color: #13254A; color: #ffffff; padding: 14px 34px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
+        <div style="text-align: center; margin: 26px 0 20px 0;">
+          <a href="https://2027.spctt.org/registration/register" class="cta-btn" style="background-color: #13254A; color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; max-width: 100%; box-sizing: border-box; text-align: center; word-break: break-word; box-shadow: 0 4px 12px rgba(19, 37, 74, 0.3);">
             Complete Payment Now
           </a>
         </div>
 
         <!-- Signoff -->
-        <div style="margin-top: 34px; padding-top: 22px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #475569; line-height: 1.6;">
+        <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #e2e8f0; font-size: 13.5px; color: #475569; line-height: 1.6;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td class="responsive-td" style="vertical-align: top; padding: 0 8px 12px 0; word-break: break-word;">
+              <td class="responsive-td" style="vertical-align: top; padding: 0 6px 10px 0; word-break: break-word;">
                 <p style="margin: 0 0 4px 0;">Warm regards,</p>
                 <p style="margin: 0; font-weight: 700; color: #13254A;">SPCTT 2027 Organizing Committee</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">Society for Pediatric Cellular Therapy and Transplant</p>
               </td>
-              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 12px 8px; word-break: break-word;">
-                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 14px;">Registration Support:</p>
-                <p style="margin: 0; font-size: 13px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
+              <td class="responsive-td" style="vertical-align: top; text-align: right; padding: 0 0 10px 6px; word-break: break-word;">
+                <p style="margin: 0 0 4px 0; font-weight: 600; color: #13254A; font-size: 13.5px;">Registration Support:</p>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b; word-break: break-all;">Email: <a href="mailto:Support@pageworldwide.com" style="color: #13254A; text-decoration: none; font-weight: 600;">Support@pageworldwide.com</a></p>
               </td>
             </tr>
           </table>
@@ -1865,7 +2344,7 @@ function generatePaymentPendingUserHtml({
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 16px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">&copy; 2026-2027 Society for Pediatric Cellular Therapy and Transplant. All rights reserved.</p>
       </div>
 
@@ -1910,62 +2389,100 @@ function generatePaymentPendingAdminHtml({
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Pending Alert - SPCTT 2027</title>
+    <style>
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0 auto !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+        }
+        .mobile-padding {
+          padding: 20px 14px !important;
+        }
+        .mobile-card {
+          padding: 14px 10px !important;
+          margin: 16px 0 !important;
+        }
+        .mobile-table td {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          font-size: 13.5px !important;
+        }
+        .col-label {
+          width: 42% !important;
+          font-size: 13px !important;
+        }
+        .col-value {
+          width: 58% !important;
+          font-size: 13.5px !important;
+        }
+        .badge-pill {
+          font-size: 11.5px !important;
+          padding: 3px 8px !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #1e293b;">
-    <div style="max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div class="email-container" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
       
       ${generateEmailHeaderHtml()}
 
       <!-- Admin Alert Bar -->
-      <div style="padding: 18px 24px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+      <div style="padding: 18px 20px; text-align: center; border-bottom: 1px solid #e2e8f0;">
         <span style="background-color: #d97706; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; letter-spacing: 0.8px;">Payment Pending Alert</span>
-        <h2 style="margin: 8px 0 0 0; font-size: 19px; font-weight: 800; color: #92400e;">Registration Payment Pending</h2>
+        <h2 style="margin: 8px 0 0 0; font-size: 18px; font-weight: 800; color: #92400e;">Registration Payment Pending</h2>
       </div>
 
       <!-- Main Body -->
-      <div style="padding: 28px 24px;">
+      <div class="mobile-padding" style="padding: 24px 20px; box-sizing: border-box;">
         <p style="font-size: 15px; line-height: 1.6; margin-top: 0; color: #334155;">
           Hello Administrator,
         </p>
-        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: #334155;">
           The payment status for delegate <strong>${safeName}</strong> has been set to <strong>PENDING</strong> on <strong>${dateStr} (IST)</strong>.
         </p>
 
         <!-- Details Card -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <div class="mobile-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 14px; margin: 18px 0; box-sizing: border-box;">
+          <table class="mobile-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; box-sizing: border-box;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; width: 38%; font-weight: 600;">Registration Code:</td>
-              <td style="padding: 8px 0; color: #13254A; font-weight: 800; font-family: monospace; font-size: 16px;">${safeCode}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; width: 42%; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Registration Code:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #13254A; font-weight: 800; font-family: monospace; font-size: 15px; vertical-align: top; word-break: break-all; overflow-wrap: anywhere; line-height: 1.4;">${safeCode}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Name:</td>
-              <td style="padding: 8px 0; color: #0f172a; font-weight: 700;">${safeName}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Name:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #0f172a; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Category:</td>
-              <td style="padding: 8px 0; color: #004b63; font-weight: 700;">${safeCat}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Category:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #004b63; font-weight: 700; vertical-align: top; word-break: break-word; line-height: 1.4;">${safeCat}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Email:</td>
-              <td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Email:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-all;"><a href="mailto:${safeEmail}" style="color: #004b63; text-decoration: none; font-weight: 600;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Delegate Phone:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safePhone}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Delegate Phone:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safePhone}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Organization / Inst:</td>
-              <td style="padding: 8px 0; color: #1e293b;">${safeOrg}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Organization / Inst:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #1e293b; vertical-align: top; word-break: break-word;">${safeOrg}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Amount Pending:</td>
-              <td style="padding: 8px 0; color: #d97706; font-weight: 800; font-size: 16px;">${formatRs(pendingAmount)}</td>
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Amount Pending:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; color: #d97706; font-weight: 800; font-size: 15px; vertical-align: top; white-space: nowrap;">${formatRs(pendingAmount)}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Status:</td>
-              <td style="padding: 8px 0;">
-                <span style="background-color: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; border: 1px solid #fde68a;">
+              <td class="col-label" style="padding: 7px 6px 7px 0; color: #64748b; font-weight: 600; vertical-align: top; word-break: break-word; line-height: 1.4;">Status:</td>
+              <td class="col-value" style="padding: 7px 0 7px 6px; vertical-align: top;">
+                <span class="badge-pill" style="display: inline-block; background-color: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11.5px; text-transform: uppercase; border: 1px solid #fde68a; line-height: 1.3; max-width: 100%; box-sizing: border-box; word-break: break-word; text-align: center;">
                   PENDING
                 </span>
               </td>
@@ -1973,15 +2490,15 @@ function generatePaymentPendingAdminHtml({
           </table>
 
           <!-- Reason Callout -->
-          <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
-            <strong style="color: #92400e; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 2px;">Admin Notes:</strong>
-            <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">${safeNotes}</p>
+          <div style="margin-top: 14px; padding: 12px 14px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; box-sizing: border-box;">
+            <strong style="color: #92400e; font-size: 12.5px; text-transform: uppercase; display: block; margin-bottom: 2px;">Admin Notes:</strong>
+            <p style="margin: 0; color: #78350f; font-size: 13.5px; line-height: 1.5; word-break: break-word;">${safeNotes}</p>
           </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      <div style="background-color: #f1f5f9; padding: 14px 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; word-break: break-word;">
         <p style="margin: 0;">Automated System Alert &bull; SPCTT 2027 &bull; submit@spctt.org</p>
       </div>
 
@@ -2592,6 +3109,16 @@ export const emailService = {
       return { success: false, error: tErr.message };
     }
 
+    // Generate QR Code Pass for Registration (contains only Registration ID)
+    let qrData = null;
+    try {
+      qrData = await generateRegistrationQrCode({
+        registrationCode
+      });
+    } catch (qrErr) {
+      console.warn('⚠️ Could not generate QR code for email:', qrErr.message);
+    }
+
     // 1. Send Success Email to User
     if (recipientEmail) {
       const userSubject = `[SPCTT 2027] Payment Confirmed - Registration ${registrationCode} (${recipientName})`;
@@ -2615,11 +3142,22 @@ export const emailService = {
         accompanyingPersons
       });
 
+      const userAttachments = [];
+      if (qrData?.buffer) {
+        userAttachments.push({
+          filename: `${registrationCode || 'SPCTT_Registration'}_QR_Pass.png`,
+          content: qrData.buffer,
+          cid: 'registration_qr_code',
+          contentType: 'image/png'
+        });
+      }
+
       const userMailOptions = {
         from: fromAddress,
         to: `"${recipientName}" <${recipientEmail}>`,
         subject: userSubject,
-        html: userHtml
+        html: userHtml,
+        attachments: userAttachments
       };
 
       try {
@@ -2690,12 +3228,23 @@ export const emailService = {
       accompanyingPersons
     });
 
+    const adminAttachments = [];
+    if (qrData?.buffer) {
+      adminAttachments.push({
+        filename: `${registrationCode || 'SPCTT_Registration'}_QR_Pass.png`,
+        content: qrData.buffer,
+        cid: 'registration_qr_code',
+        contentType: 'image/png'
+      });
+    }
+
     const adminMailOptions = {
       from: fromAddress,
       to: `"SPCTT Admin" <${adminEmail}>`,
       cc: ccAddress,
       subject: adminSubject,
-      html: adminHtml
+      html: adminHtml,
+      attachments: adminAttachments
     };
 
     try {

@@ -9,7 +9,8 @@ import {
   processPayment,
   getUserInvoices,
   getInvoiceById,
-  downloadInvoice
+  downloadInvoice,
+  verifyRegistration
 } from '../controllers/registration.controller.js';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
@@ -26,6 +27,9 @@ const router = express.Router();
  */
 // GET /api/registration/categories
 router.get('/categories', getCategories);
+
+// GET /api/registration/verify/:code
+router.get('/verify/:code', verifyRegistration);
 
 /**
  * Protected Routes (Requires Bearer JWT)

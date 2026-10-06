@@ -177,6 +177,23 @@ export async function downloadInvoice(req, res, next) {
   }
 }
 
+/**
+ * Public Route: Verify Registration by Code
+ * GET /api/registration/verify/:code
+ */
+export async function verifyRegistration(req, res, next) {
+  try {
+    const code = req.params.code || req.query.code;
+    const result = await registrationService.verifyRegistrationCode(code);
+    return sendSuccess(res, result, result.verified ? 'Registration verified successfully' : 'Registration verification notice');
+  } catch (error) {
+    if (error.statusCode) {
+      return sendError(res, error.message, error.statusCode);
+    }
+    next(error);
+  }
+}
+
 export default {
   getCategories,
   getUserRegistration,
@@ -187,5 +204,6 @@ export default {
   processPayment,
   getUserInvoices,
   getInvoiceById,
-  downloadInvoice
+  downloadInvoice,
+  verifyRegistration
 };
